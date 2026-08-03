@@ -11,15 +11,15 @@ export default function Navbar() {
         <>
             <div className="h-16" />
 
-            <nav className="fixed top-0 bg-card/75 backdrop-blur-sm w-full h-16 p-5 flex items-center justify-center border-b z-999">
-                <div className="flex items-center justify-between max-w-7xl w-full">
+            <nav className="fixed top-0 bg-card/75 backdrop-blur-sm w-full h-16 flex items-center justify-center border-b z-999">
+                <div className="flex items-center justify-between max-w-7xl w-full p-5">
                     <span className="flex-1 text-xl font-bold font-heading">Perfu.me</span>
 
                     <div className="relative flex-1 flex items-center justify-center gap-4 text-lg font-medium w-full">
-                        <Link href="" className="text-muted-foreground hover:text-foreground">Home</Link>
-                        <Link href="" className="text-muted-foreground hover:text-foreground">Products</Link>
-                        <Link href="" className="text-muted-foreground hover:text-foreground">About Us</Link>
-                        <Link href="" className="text-muted-foreground hover:text-foreground">Contact</Link>
+                        <Link href="/" className="text-muted-foreground hover:text-foreground">Home</Link>
+                        <Link href="/products" className="text-muted-foreground hover:text-foreground">Products</Link>
+                        <Link href="/about" className="text-muted-foreground hover:text-foreground">About Us</Link>
+                        <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
                     </div>
 
                     <div className="flex-1 flex items-center justify-end">
