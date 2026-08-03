@@ -9,7 +9,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="fixed top-0 w-full h-16 p-5 flex items-center justify-between z-999">
+            <nav className="fixed top-0 bg-card w-full h-16 p-5 flex items-center justify-between z-999">
                 <span className="flex-1 text-xl font-bold font-heading">Perfu.me</span>
 
                 <div className="relative flex-1 flex items-center justify-center gap-4 text-lg font-medium w-full mix-blend-difference">
