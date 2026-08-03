@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProductsController extends Controller
 {
@@ -12,9 +13,8 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $products = Product::latest()->get();
-
-        return view('products.index', compact('products'));
+        return Inertia::render('products/index', [
+        ]);
     }
 
     /**
@@ -22,7 +22,7 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+       
     }
 
     /**
@@ -68,9 +68,9 @@ class ProductsController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::findOrFail($id);
+        // $product = Product::findOrFail($id);
 
-        return view('products.show', compact('product'));
+        // return view('products.show', compact('product'));
     }
 
     /**
@@ -78,9 +78,9 @@ class ProductsController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::findOrFail($id);
+        // $product = Product::findOrFail($id);
 
-        return view('products.edit', compact('product'));
+        // return view('products.edit', compact('product'));
     }
 
     /**
