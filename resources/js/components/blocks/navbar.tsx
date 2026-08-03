@@ -9,21 +9,25 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="fixed top-0 bg-card w-full h-16 p-5 flex items-center justify-between z-999">
-                <span className="flex-1 text-xl font-bold font-heading">Perfu.me</span>
+            <div className="h-16" />
 
-                <div className="relative flex-1 flex items-center justify-center gap-4 text-lg font-medium w-full mix-blend-difference">
-                    <Link href="" className="text-muted-foreground hover:text-foreground">Home</Link>
-                    <Link href="" className="text-muted-foreground hover:text-foreground">Products</Link>
-                    <Link href="" className="text-muted-foreground hover:text-foreground">About Us</Link>
-                    <Link href="" className="text-muted-foreground hover:text-foreground">Contact</Link>
-                </div>
+            <nav className="fixed top-0 bg-card/75 backdrop-blur-sm w-full h-16 p-5 flex items-center justify-center border-b z-999">
+                <div className="flex items-center justify-between max-w-7xl w-full">
+                    <span className="flex-1 text-xl font-bold font-heading">Perfu.me</span>
 
-                <div className="flex-1 flex items-center justify-end">
-                    <Button onClick={() => window.open('https://wa.me/6281234567890', '_blank')}>
-                        <Icon />
-                        Pesan Sekarang!
-                    </Button>
+                    <div className="relative flex-1 flex items-center justify-center gap-4 text-lg font-medium w-full">
+                        <Link href="" className="text-muted-foreground hover:text-foreground">Home</Link>
+                        <Link href="" className="text-muted-foreground hover:text-foreground">Products</Link>
+                        <Link href="" className="text-muted-foreground hover:text-foreground">About Us</Link>
+                        <Link href="" className="text-muted-foreground hover:text-foreground">Contact</Link>
+                    </div>
+
+                    <div className="flex-1 flex items-center justify-end">
+                        <Button onClick={() => window.open('https://wa.me/6281234567890', '_blank')}>
+                            <Icon />
+                            Pesan Sekarang!
+                        </Button>
+                    </div>
                 </div>
             </nav>
         </>
