@@ -11,7 +11,7 @@ export default function Navbar() {
         <>
             <div className="h-16" />
 
-            <nav className="fixed top-0 bg-card/75 backdrop-blur-sm w-full h-16 flex items-center justify-center border-b z-999">
+            <nav className="fixed top-0 bg-card w-full h-16 flex items-center justify-center border-b z-999">
                 <div className="flex items-center justify-between max-w-7xl w-full p-5">
                     <span className="flex-1 text-xl font-bold font-heading">Perfu.me</span>
 
