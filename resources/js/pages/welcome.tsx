@@ -1,10 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/blocks/navbar';
-import { Star, CheckCircle2, Recycle, ArrowRight, BadgeCheck, Truck, Sparkles, Leaf } from 'lucide-react';
+import { Star, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/ui/marquee"
-import { StickyFooter } from '@/components/footer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const reviews = [
     {
@@ -83,7 +82,6 @@ export default function Welcome() {
     return (
         <>
             <Head title="Welcome" />
-            <Navbar />
 
             <main className="min-h-screen w-full bg-background text-foreground pb-24 space-y-16">
                 <section className="flex flex-col gap-16 w-full max-w-7xl mx-auto px-5 py-16">
@@ -91,7 +89,7 @@ export default function Welcome() {
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
                                 <h1 className="text-5xl leading-none tracking-tight text-balance text-foreground md:text-7xl font-semibold">
-                                    Smell <span className="font-heading italic">Good</span>, Feel <span className="font-heading italic">Confident</span>.
+                                    Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
                                 </h1>
                                 <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
                                     Temukan parfum-mu, formula bersih, dan paduan aroma khas yang dirancang untukmu, tahan dari pagi hingga malam.
@@ -99,134 +97,47 @@ export default function Welcome() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3">
-                                <Button asChild size="lg" className="gap-2 rounded-full px-5">
+                                <Button asChild size="lg">
                                     <Link href="/products">
                                         Eksplor Katalog Kami
                                         <ArrowRight className="size-4" />
                                     </Link>
                                 </Button>
-                                <Button asChild variant="outline" size="lg" className="rounded-full px-5">
-                                    <Link href="/contact">
-                                        Hubungi WhatsApp Owner
-                                        <WhatsAppIcon />
-                                    </Link>
+                                <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')} variant="outline" size="lg">
+                                    Hubungi WhatsApp Owner
+                                    <WhatsAppIcon />
                                 </Button>
                             </div>
                         </div>
 
                         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-2">
-                            <div className="relative aspect-square w-full rounded-t-[2rem] overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-tl-[2rem] overflow-hidden">
                                 <img
                                     src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                     alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-red-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
                             </div>
-                            <div className="relative aspect-square w-full rounded-r-[2rem] overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-tr-[2rem] overflow-hidden">
                                 <img
                                     src="https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                     alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-green-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
                             </div>
-                            <div className="relative aspect-square w-full rounded-l-[2rem] overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-bl-[2rem] overflow-hidden">
                                 <img
                                     src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                     alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-indigo-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
                             </div>
-                            <div className="relative aspect-square w-full rounded-b-[2rem] overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-br-[2rem] overflow-hidden">
                                 <img
                                     src="https://images.unsplash.com/photo-1595425959632-34f2822322ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGZyYWdyYW5jZXxlbnwwfHwwfHx8MA%3D%3D"
                                     alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-yellow-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="space-y-6">
-                        {/* Header */}
-                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                            <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.1]">
-                                Wangi Khas yang <span className="font-heading italic">Berkarakter</span>
-                            </h2>
-
-                            {/* Rating Summary */}
-                            <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-1">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                                    ))}
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-sm font-medium">4.9 (100 reviews)</span>
-                                    <div className="flex -space-x-2">
-                                        <img src="https://i.pravatar.cc/100?img=1" alt="user" className="w-7 h-7 rounded-full border-2 border-background" />
-                                        <img src="https://i.pravatar.cc/100?img=5" alt="user" className="w-7 h-7 rounded-full border-2 border-background" />
-                                        <img src="https://i.pravatar.cc/100?img=9" alt="user" className="w-7 h-7 rounded-full border-2 border-background" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Grid Layout */}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-
-                            {/* Left Large Card */}
-                            <div className="lg:col-span-7 relative h-[450px] sm:h-[600px] rounded-3xl overflow-hidden group">
-                                <img
-                                    src="https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?auto=format&fit=crop&q=80&w=1000"
-                                    alt="Elegance"
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                                />
-                                {/* Floating Badge */}
-                                <div className="absolute bottom-6 left-6 right-6 sm:right-auto bg-background/95 backdrop-blur-md p-5 rounded-2xl shadow-lg max-w-xs">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <CheckCircle2 className="w-5 h-5 text-primary" />
-                                        <span className="font-semibold text-sm">Tahan lama pagi sampai malam</span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">
-                                        Setiap aroma diracik dengan cermat menggunakan bahan-bahan premium dengan kualitas tertinggi.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Right Stacked Cards */}
-                            <div className="lg:col-span-5 flex flex-col gap-3">
-
-                                {/* Top Small Card - Light */}
-                                <div className="flex-1 bg-secondary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[280px]">
-                                    <div className="relative z-10 max-w-[50%]">
-                                        <h3 className="text-2xl font-medium mb-3">Evanessence</h3>
-                                        <p className="text-xs text-muted-foreground leading-relaxed">
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, a.
-                                        </p>
-                                    </div>
-                                    {/* Bottle Image Absolute */}
-                                    <img
-                                        src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400"
-                                        alt="Bottle"
-                                        className="absolute right-0 w-1/2 h-auto object-cover"
-                                    />
-                                </div>
-
-                                {/* Bottom Small Card - Dark */}
-                                <div className="flex-1 bg-primary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[280px]">
-                                    <div className="relative z-10 max-w-[50%]">
-                                        <h3 className="text-2xl text-primary-foreground font-medium mb-3">Dynamyst</h3>
-                                        <p className="text-xs text-muted-foreground leading-relaxed">
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, a.
-                                        </p>
-                                    </div>
-                                    {/* Bottle Image Absolute */}
-                                    <img
-                                        src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400"
-                                        alt="Bottle"
-                                        className="absolute right-0 w-1/2 h-auto object-cover"
-                                    />
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -270,54 +181,134 @@ export default function Welcome() {
                     <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
                 </div>
 
-                {/* 4. PRODUCT SHOWCASE (Floating Tooltips) */}
-                <section className="w-full max-w-7xl mx-auto px-5">
-                    <div className="relative w-full aspect-square sm:aspect-video bg-secondary/50 rounded-3xl flex items-center justify-center overflow-hidden">
+                {/* PRODUCT SHOWCASE */}
+                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+                    {/* Header */}
+                    <h2 className="text-5xl md:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
+                        Wangi yang <span className="font-heading italic">Berkarakter</span>
+                    </h2>
 
-                        {/* Main Center Image */}
-                        <img
-                            src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&q=80&w=1200"
-                            alt="Product Collection"
-                            className="w-full h-full object-cover"
-                        />
+                    {/* Grid Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
-                        {/* Tooltip 1 (Left) */}
-                        <div className="absolute top-[60%] sm:top-[70%] left-[10%] sm:left-[20%] group cursor-pointer">
-                            <div className="w-3 h-3 bg-white rounded-full animate-pulse shadow-lg absolute -top-1 -left-1 z-10" />
-                            <div className="bg-background/95 backdrop-blur-sm border border-border p-2 pr-4 rounded-xl shadow-2xl flex items-center gap-4 transition-transform group-hover:-translate-y-1">
-                                <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=100" className="w-10 h-10 object-cover rounded-md" alt="Thumb" />
-                                <div>
-                                    <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Unisex</p>
-                                    <p className="text-sm font-medium">Vannessence EDP</p>
-                                    <p className="text-xs text-muted-foreground">Rp 135.000</p>
+                        {/* Left Large Card */}
+                        <div className="relative h-[450px] sm:h-[600px] rounded-3xl overflow-hidden group">
+                            <img
+                                src="https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?auto=format&fit=crop&q=80&w=1000"
+                                alt="Elegance"
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                            />
+                            {/* Floating Badge */}
+                            <div className="absolute bottom-6 left-6 right-6 sm:right-auto bg-background/95 backdrop-blur-md p-5 rounded-2xl shadow-lg max-w-xs">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                                    <span className="font-semibold text-sm">Tahan lama pagi sampai malam</span>
                                 </div>
-                                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                    Setiap aroma diracik dengan cermat menggunakan bahan-bahan premium dengan kualitas tertinggi.
+                                </p>
                             </div>
                         </div>
 
-                        {/* Tooltip 2 (Right) */}
-                        <div className="absolute top-[35%] right-[5%] sm:right-[15%] group cursor-pointer">
-                            <div className="w-3 h-3 bg-white rounded-full animate-pulse shadow-lg absolute -top-1 -left-1 z-10" />
-                            <div className="bg-background/95 backdrop-blur-sm border border-border p-2 pr-4 rounded-xl shadow-2xl flex items-center gap-4 transition-transform group-hover:-translate-y-1">
-                                <img src="https://images.unsplash.com/photo-1523293115678-02462479650b?auto=format&fit=crop&q=80&w=100" className="w-10 h-10 object-cover rounded-md" alt="Thumb" />
-                                <div>
-                                    <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Men</p>
-                                    <p className="text-sm font-medium">Dynamyst EDP</p>
-                                    <p className="text-xs text-muted-foreground">Rp 125.000</p>
-                                </div>
-                                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </div>
-                        </div>
+                        {/* Right Stacked Cards */}
+                        <div className="flex flex-col gap-3">
 
+                            {/* Top Small Card - Light */}
+                            <div className="flex-1 bg-secondary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[280px]">
+                                <div className="relative z-10 max-w-[50%]">
+                                    <h3 className="text-2xl font-medium mb-3">Evanessence</h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, a.
+                                    </p>
+                                </div>
+                                {/* Bottle Image Absolute */}
+                                <img
+                                    src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400"
+                                    alt="Bottle"
+                                    className="absolute right-0 w-1/2 h-auto object-cover"
+                                />
+                            </div>
+
+                            {/* Bottom Small Card - Dark */}
+                            <div className="flex-1 bg-primary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[280px]">
+                                <div className="relative z-10 max-w-[50%]">
+                                    <h3 className="text-2xl text-primary-foreground font-medium mb-3">Dynamyst</h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, a.
+                                    </p>
+                                </div>
+                                {/* Bottle Image Absolute */}
+                                <img
+                                    src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400"
+                                    alt="Bottle"
+                                    className="absolute right-0 w-1/2 h-auto object-cover"
+                                />
+                            </div>
+
+                        </div>
                     </div>
                 </section>
 
+                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+                    <div className="space-y-1 text-center">
+                        <h2 className="text-5xl md:text-7xl font-semibold">
+                            FAQ
+                        </h2>
+                        <p className="text-lg text-muted-foreground">
+                            Pertanyaan yang sering diajukan oleh pelanggan kami.
+                        </p>
+                    </div>
+                    <Accordion
+                        type="single"
+                        collapsible
+                        defaultValue="faq-0"
+                    >
+                        {faqs.map((faq, index) => (
+                            <AccordionItem key={index} value={`faq-${index}`}>
+                                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                                <AccordionContent>
+                                    {faq.answer}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </section>
+
             </main>
-            
-            <StickyFooter />
         </>
     );
 }
+
+const faqs = [
+    {
+        question: "Berapa lama waktu pengiriman parfum setelah pemesanan?",
+        answer: "Pengiriman biasanya memakan waktu 1-3 hari kerja untuk Jabodetabek dan 3-5 hari kerja untuk luar daerah/pulau. Pengiriman gratis ongkir untuk pemesanan dari dalam Pulau Jawa.",
+    },
+    {
+        question: "Berapa lama daya tahan (longevity) parfum ini?",
+        answer: "Rata-rata parfum kami bertahan 6-8 jam di kulit dan hingga 12 jam jika disemprotkan ke pakaian, tergantung pada jenis aktivitas dan tempat penyimpanan.",
+    },
+    {
+        question: "Bagaimana jika botol pecah atau spray rusak saat sampai?",
+        answer: "Kami memberikan Garansi 100% Ganti Baru. Cukup kirimkan video unboxing tanpa jeda ke customer service kami dalam waktu maksimal 2x24 jam setelah barang diterima.",
+    },
+    {
+        question: "Apakah parfum ini aman untuk kulit sensitif?",
+        answer: "Ya, parfum kami diformulasikan dengan bahan yang aman dan telah terdaftar di BPOM. Namun, jika Anda memiliki riwayat kulit sangat sensitif, disarankan melakukan tes patch di pergelangan tangan terlebih dahulu.",
+    },
+    {
+        question: "Apakah parfum ini menggunakan alkohol?",
+        answer: "Ya, kami menggunakan alkohol standar kosmetik/perfumer's grade yang aman untuk kulit dan berfungsi menyebarkan aroma secara optimal.",
+    },
+    {
+        question: "Bagaimana cara pakai parfum agar wanginya lebih tahan lama?",
+        answer: "Semprotkan pada titik-titik nadi (pergelangan tangan, leher, belakang telinga) dari jarak 15–20 cm. Pastikan kulit dalam kondisi lembap (bisa memakai unscented lotion terlebih dahulu).",
+    },
+    {
+        question: "Bagaimana cara menyimpan parfum yang benar?",
+        answer: "Simpan di tempat yang sejuk, kering, dan terhindar dari paparan sinar matahari langsung. Hindari menyimpan parfum di dalam mobil atau kamar mandi karena perubahan suhunya drastis.",
+    },
+];
 
 function WhatsAppIcon() {
     return (
