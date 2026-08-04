@@ -64,13 +64,16 @@ class ProductsController extends Controller
     }
 
     /**
+/**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        // $product = Product::findOrFail($id);
+        $product = Product::findOrFail($id);
 
-        // return view('products.show', compact('product'));
+        return Inertia::render('products/detail', [
+            'product' => $product,
+        ]);
     }
 
     /**
