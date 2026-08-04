@@ -6,44 +6,73 @@ export default function AboutUs() {
       <Navbar />
 
       <main className="flex min-h-screen flex-col items-center bg-background text-foreground overflow-hidden">
-        {/* Hero */}
-        <section className="flex w-full max-w-7xl flex-col gap-6 px-5 py-24 sm:py-32">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-            Smell Good. Feel Confident.
-          </p>
-          <h1 className="text-6xl font-semibold capitalize leading-[1.05] sm:text-7xl">
-            About <span className="font-heading italic">Perfu.me</span>
-          </h1>
-          <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Perfu.me lahir dari sebuah keyakinan sederhana: setiap orang berhak
-            tampil harum tanpa harus mengeluarkan biaya yang mahal. Kami
-            menghadirkan parfum dengan kualitas aroma premium, karakter yang
-            khas, dan harga yang tetap ramah di kantong.
-          </p>
-        </section>
-              {/* Signature ticker — slogan brand sendiri, terus berjalan */}
-      <div className="overflow-hidden border-y border-border bg-primary py-3">
-        <div className="marquee flex whitespace-nowrap text-sm font-semibold uppercase tracking-[0.25em] text-primary-foreground/80">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="mx-6 flex items-center gap-6">
-              Wangi Gak Harus Mahal
-              <span className="text-primary-foreground/40"></span>
-              Smell Good. Feel Confident
-              <span className="text-primary-foreground/40"></span>
-            </span>
-          ))}
-        </div>
-      </div>
+        
+        {/* Hero Section - Sempurna sejajar & Foto dijamin muncul */}
+        <section className="mx-auto w-full max-w-7xl px-5 pt-16 pb-20 lg:py-28">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+            
+            {/* Bagian Kiri: Teks */}
+            <div className="flex-1 flex flex-col justify-center gap-6 max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+                Smell Good. Feel Confident.
+              </p>
+              <h1 className="text-5xl font-semibold capitalize leading-[1.1] sm:text-6xl md:text-7xl">
+                About <span className="font-heading italic">Perfu.Me</span>
+              </h1>
+              <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">
+                Perfu.me lahir dari sebuah keyakinan sederhana: setiap orang berhak
+                tampil harum tanpa harus mengeluarkan biaya yang mahal. Kami
+                menghadirkan parfum dengan kualitas aroma premium, karakter yang
+                khas, dan harga yang tetap ramah di kantong.
+              </p>
+            </div>
 
-        {/* Story */}
-        <section className="grid w-full max-w-7xl grid-cols-1 gap-12 border-t border-border px-5 py-20 sm:grid-cols-2">
-          <div className="relative flex h-full min-h-[320px] items-end overflow-hidden rounded-lg border border-border bg-muted p-8">
-            <span className="relative text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+            {/* Bagian Kanan: Foto Kotak (Aman & Tidak Collapse) */}
+            <div className="w-full lg:w-[400px] flex-shrink-0 flex justify-center">
+              <div className="w-full rounded-2xl overflow-hidden border border-border shadow-lg group">
+                <img 
+                  src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800" 
+                  alt="Perfu.me Elegance" 
+                  className="w-full h-[480px] object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* Signature ticker — slogan brand sendiri, terus berjalan */}
+        <div className="w-full overflow-hidden border-y border-border bg-primary py-3">
+          <div className="marquee flex whitespace-nowrap text-sm font-semibold uppercase tracking-[0.25em] text-primary-foreground/80">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <span key={i} className="mx-6 flex items-center gap-6">
+                Wangi Gak Harus Mahal
+                <span className="text-primary-foreground/40">•</span>
+                Smell Good. Feel Confident
+                <span className="text-primary-foreground/40">•</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Story Section */}
+        <section className="grid w-full max-w-7xl grid-cols-1 gap-12 border-t border-border px-5 py-20 sm:grid-cols-2 items-center">
+          
+          {/* Kotak Foto Story */}
+          <div className="relative w-full h-[400px] overflow-hidden rounded-2xl border border-border group">
+            <img 
+              src="https://images.unsplash.com/photo-1615397323164-964fa07b4685?auto=format&fit=crop&q=80&w=800" 
+              alt="Dua Karakter Perfu.me" 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            {/* Gradient hitam di bawah supaya teks putihnya terbaca */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <span className="absolute bottom-8 left-8 z-10 text-xs font-semibold uppercase tracking-[0.3em] text-white">
               Dua Karakter, Satu Keyakinan
             </span>
           </div>
 
-          <div className="flex flex-col gap-6 self-center">
+          <div className="flex flex-col gap-6">
             <h2 className="text-3xl font-semibold sm:text-4xl">
               Kami memulai perjalanan ini dengan dua signature scent
             </h2>
