@@ -4,6 +4,7 @@ import { Star, CheckCircle2, Recycle, ArrowRight, BadgeCheck, Truck, Sparkles, L
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/ui/marquee"
+import { StickyFooter } from '@/components/footer';
 
 const reviews = [
     {
@@ -312,6 +313,8 @@ export default function Welcome() {
                 </section>
 
             </main>
+            
+            <StickyFooter />
         </>
     );
 }
