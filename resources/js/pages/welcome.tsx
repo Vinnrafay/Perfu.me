@@ -2,6 +2,81 @@ import { Head, Link } from '@inertiajs/react';
 import Navbar from '@/components/blocks/navbar';
 import { Star, CheckCircle2, Recycle, ArrowRight, BadgeCheck, Truck, Sparkles, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from "@/lib/utils"
+import { Marquee } from "@/components/ui/marquee"
+
+const reviews = [
+    {
+        name: "Bagas",
+        username: "@bagas_pratama",
+        body: "Wanginya enak banget dan tahan lama seharian. Parfum lokal terfavorit!",
+        img: "https://avatar.vercel.sh/bagas",
+    },
+    {
+        name: "Siti",
+        username: "@sitinur",
+        body: "Kualitasnya juara padahal harganya terjangkau. Auto reorder lagi sih ini.",
+        img: "https://avatar.vercel.sh/siti",
+    },
+    {
+        name: "Dimas",
+        username: "@dimas_a",
+        body: "Baru pertama coba langsung suka. Banyak yang nanyain pakenya parfum apa.",
+        img: "https://avatar.vercel.sh/dimas",
+    },
+    {
+        name: "Clara",
+        username: "@clara_sella",
+        body: "Aromanya mewah dan pas banget buat dipake harian. Keren banget brand lokal satu ini!",
+        img: "https://avatar.vercel.sh/clara",
+    },
+    {
+        name: "Rian",
+        username: "@rian_feb",
+        body: "Blend-nya rapi dan gak nyengat di hidung. Luar biasa mantap!",
+        img: "https://avatar.vercel.sh/rian",
+    },
+    {
+        name: "Nabila",
+        username: "@nabilart",
+        body: "Packaging rapi, spray-nya halus, dan aromanya tahan lama. Rekomended!",
+        img: "https://avatar.vercel.sh/nabila",
+    },
+];
+
+const firstRow = reviews.slice(0, reviews.length / 2)
+const secondRow = reviews.slice(reviews.length / 2)
+const ReviewCard = ({
+    img,
+    name,
+    username,
+    body,
+}: {
+    img: string
+    name: string
+    username: string
+    body: string
+}) => {
+    return (
+        <figure
+            className={cn(
+                "relative h-full w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
+                "border bg-card hover:bg-muted/50",
+            )}
+        >
+            <div className="flex flex-row items-center gap-2">
+                <img className="rounded-full" width="32" height="32" alt="" src={img} />
+                <div className="flex flex-col">
+                    <figcaption className="text-sm font-medium dark:text-white">
+                        {name}
+                    </figcaption>
+                    <p className="text-xs font-medium dark:text-white/40">{username}</p>
+                </div>
+            </div>
+            <blockquote className="mt-2 text-sm line-clamp-2">{body}</blockquote>
+        </figure>
+    )
+}
 
 export default function Welcome() {
     return (
@@ -9,7 +84,7 @@ export default function Welcome() {
             <Head title="Welcome" />
             <Navbar />
 
-            <main className="min-h-screen w-full bg-background text-foreground pb-24">
+            <main className="min-h-screen w-full bg-background text-foreground pb-24 space-y-16">
                 <section className="flex flex-col gap-16 w-full max-w-7xl mx-auto px-5 py-16">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
@@ -38,31 +113,31 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-2">
-                            <div className="relative aspect-square w-full overflow-hidden">
+                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-2">
+                            <div className="relative aspect-square w-full rounded-t-[2rem] overflow-hidden">
                                 <img
-                                    src=""
+                                    src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                     alt="Perfume Bottle"
                                     className="absolute inset-0 bg-red-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
                             </div>
-                            <div className="relative aspect-square w-full overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-r-[2rem] overflow-hidden">
                                 <img
-                                    src=""
+                                    src="https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                     alt="Perfume Bottle"
                                     className="absolute inset-0 bg-green-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
                             </div>
-                            <div className="relative aspect-square w-full overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-l-[2rem] overflow-hidden">
                                 <img
-                                    src=""
+                                    src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                     alt="Perfume Bottle"
                                     className="absolute inset-0 bg-indigo-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
                             </div>
-                            <div className="relative aspect-square w-full overflow-hidden">
+                            <div className="relative aspect-square w-full rounded-b-[2rem] overflow-hidden">
                                 <img
-                                    src=""
+                                    src="https://images.unsplash.com/photo-1595425959632-34f2822322ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGZyYWdyYW5jZXxlbnwwfHwwfHx8MA%3D%3D"
                                     alt="Perfume Bottle"
                                     className="absolute inset-0 bg-yellow-500 w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                                 />
@@ -73,7 +148,7 @@ export default function Welcome() {
                         {/* Header */}
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                             <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.1]">
-                                2 Wangi Khas yang <span className="font-heading italic">Berkarakter</span>
+                                Wangi Khas yang <span className="font-heading italic">Berkarakter</span>
                             </h2>
 
                             {/* Rating Summary */}
@@ -156,17 +231,17 @@ export default function Welcome() {
                     </div>
                 </section>
 
-                <section className="w-full max-w-4xl mx-auto px-5 py-24 text-center flex flex-col items-center">
+                <section className="w-full max-w-4xl mx-auto text-center flex flex-col items-center">
                     {/* Polaroid Icon */}
                     <div className="bg-background w-14 h-14 shadow-xl rounded-full rotate-3 mb-8 border border-border overflow-hidden">
                         <img
-                            src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=100"
+                            src="https://i.pravatar.cc/100?img=8"
                             alt="Mini"
                             className="w-full h-full object-cover"
                         />
                     </div>
 
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl leading-relaxed sm:leading-relaxed font-medium mb-8 max-w-3xl">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl leading-tight font-medium mb-8 max-w-3xl">
                         "Saya menjadi lebih percaya diri dari sebelumnya. Rasanya saya memakai aroma yang benar-benar mencerminkan diri saya!"
                     </h2>
 
@@ -175,12 +250,27 @@ export default function Welcome() {
                             <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         ))}
                     </div>
-                    <p className="font-semibold text-sm">Jennifer K.</p>
+                    <p className="font-semibold text-sm">Bang Aris</p>
                     <p className="text-xs text-muted-foreground">Verified Buyer</p>
                 </section>
 
+                <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
+                    <Marquee pauseOnHover className="[--duration:30s]">
+                        {firstRow.map((review) => (
+                            <ReviewCard key={review.username} {...review} />
+                        ))}
+                    </Marquee>
+                    <Marquee reverse pauseOnHover className="[--duration:30s]">
+                        {secondRow.map((review) => (
+                            <ReviewCard key={review.username} {...review} />
+                        ))}
+                    </Marquee>
+                    <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r"></div>
+                    <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
+                </div>
+
                 {/* 4. PRODUCT SHOWCASE (Floating Tooltips) */}
-                <section className="w-full max-w-7xl mx-auto px-5 py-10">
+                <section className="w-full max-w-7xl mx-auto px-5">
                     <div className="relative w-full aspect-square sm:aspect-video bg-secondary/50 rounded-3xl flex items-center justify-center overflow-hidden">
 
                         {/* Main Center Image */}
