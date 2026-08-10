@@ -13,7 +13,7 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        return Inertia::render('products/index', [
+        return Inertia::render('dashboard/products/index', [
         ]);
     }
 
@@ -64,7 +64,6 @@ class ProductsController extends Controller
     }
 
     /**
-/**
      * Display the specified resource.
      */
     public function show(string $id)
