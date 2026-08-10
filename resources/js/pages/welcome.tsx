@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Star, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Star, CheckCircle2, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/ui/marquee"
@@ -84,7 +84,8 @@ export default function Welcome() {
             <Head title="Welcome" />
 
             <main className="min-h-screen w-full bg-background text-foreground pb-16 space-y-16">
-                <section className="min-h-screen flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 py-16">
+                {/* Hero Section */}
+                <section className="min-h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 pt-16 2xl:pt-24">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
@@ -143,9 +144,53 @@ export default function Welcome() {
                     </div>
                 </section>
 
+                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <img src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
+                            alt="" className="w-full aspect-square object-cover rounded-3xl" />
+
+                        <div className="flex flex-col justify-center gap-6">
+                            <div className="space-y-3">
+                                <h3 className="text-5xl font-semibold">Evanessence</h3>
+                                <p className="text-base text-muted-foreground">
+                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi ducimus labore nostrum. Quas beatae possimus, sunt dolore ad inventore velit iste animi delectus, facilis atque minima a nobis, nemo laboriosam non explicabo autem quod.
+                                </p>
+                            </div>
+
+                            <p className="text-4xl font-medium">Rp199.000</p>
+
+                            <Button className="w-fit">
+                                Lihat Detail
+                                <ArrowUpRight className="size-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex flex-col justify-center gap-6 order-last md:order-first">
+                            <div className="space-y-3">
+                                <h3 className="text-5xl font-semibold">Dynamyst</h3>
+                                <p className="text-base text-muted-foreground">
+                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi ducimus labore nostrum. Quas beatae possimus, sunt dolore ad inventore velit iste animi delectus, facilis atque minima a nobis, nemo laboriosam non explicabo autem quod.
+                                </p>
+                            </div>
+
+                            <p className="text-4xl font-medium">Rp199.000</p>
+
+                            <Button className="w-fit">
+                                Lihat Detail
+                                <ArrowUpRight className="size-4" />
+                            </Button>
+                        </div>
+
+                        <img src="https://images.unsplash.com/photo-1595425959632-34f2822322ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGZyYWdyYW5jZXxlbnwwfHwwfHx8MA%3D%3D"
+                            alt="" className="w-full aspect-square object-cover rounded-3xl" />
+                    </div>
+                </section>
+
                 <section className="w-full max-w-4xl mx-auto text-center flex flex-col items-center">
-                    {/* Polaroid Icon */}
-                    <div className="bg-background w-14 h-14 shadow-xl rounded-full rotate-3 mb-8 border border-border overflow-hidden">
+                    <div className="bg-background w-14 h-14 rounded-full rotate-3 my-6 border border-border overflow-hidden">
                         <img
                             src="https://i.pravatar.cc/100?img=8"
                             alt="Mini"
