@@ -11,9 +11,21 @@ class ProductsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->string('search')->toString();
+
+        $products = Product::query()
+            ->when($search, fn ($query) => $query->where('nama', 'like', "%{$search}%"))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return Inertia::render('dashboard/products/index', [
+            'products' => $products,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
