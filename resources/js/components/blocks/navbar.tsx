@@ -57,9 +57,6 @@ export default function Navbar() {
                 </div>
             </nav>
 
-            {/* Spacer so page content isn't hidden behind the fixed navbar */}
-            <div className="h-16" />
-
             {/* Backdrop */}
             <div
                 onClick={() => setOpen(false)}

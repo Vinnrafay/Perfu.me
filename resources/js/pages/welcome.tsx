@@ -85,7 +85,7 @@ export default function Welcome() {
 
             <main className="min-h-screen w-full bg-background text-foreground pb-16 space-y-16">
                 {/* Hero Section */}
-                <section className="min-h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 pt-16 2xl:pt-24">
+                <section className="min-h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 pt-16 md:pt-24">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
@@ -111,40 +111,39 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-2">
-                            <div className="relative aspect-square w-full rounded-tl-[2rem] overflow-hidden">
-                                <img
-                                    src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
-                                    alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-                                />
-                            </div>
-                            <div className="relative aspect-square w-full rounded-tr-[2rem] overflow-hidden">
-                                <img
-                                    src="https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
-                                    alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-                                />
-                            </div>
-                            <div className="relative aspect-square w-full rounded-bl-[2rem] overflow-hidden">
-                                <img
-                                    src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
-                                    alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-                                />
-                            </div>
-                            <div className="relative aspect-square w-full rounded-br-[2rem] overflow-hidden">
-                                <img
-                                    src="https://images.unsplash.com/photo-1595425959632-34f2822322ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGZyYWdyYW5jZXxlbnwwfHwwfHx8MA%3D%3D"
-                                    alt="Perfume Bottle"
-                                    className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-                                />
-                            </div>
+                        <div className="relative aspect-square w-full rounded-3xl overflow-hidden">
+                            <img
+                                src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
+                                alt="Perfume Bottle"
+                                className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                            />
                         </div>
                     </div>
                 </section>
 
+                <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
+                    <Marquee className="[--duration:60s] bg-primary gap-0">
+                        <div className="w-full overflow-hidden border-y border-muted-foreground border-dashed bg-primary py-3">
+                            <div className="flex whitespace-nowrap text-sm font-semibold uppercase tracking-[0.25em] text-primary-foreground/80">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <span key={i} className="mx-6 flex items-center gap-6">
+                                        Wangi Gak Harus Mahal
+                                        <span className="text-primary-foreground/40">•</span>
+                                        Smell Good. Feel Confident
+                                        <span className="text-primary-foreground/40">•</span>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </Marquee>
+                    <div className="from-background/50 pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r"></div>
+                    <div className="from-background/50 pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
+                </div>
+
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+                    <h2 className="text-5xl md:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
+                        Our <span className="font-heading italic">Signature</span> Scent
+                    </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <img src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
@@ -161,7 +160,7 @@ export default function Welcome() {
                             <p className="text-4xl font-medium">Rp199.000</p>
 
                             <Button className="w-fit">
-                                Lihat Detail
+                                Lihat Detail Produk
                                 <ArrowUpRight className="size-4" />
                             </Button>
                         </div>
@@ -179,7 +178,7 @@ export default function Welcome() {
                             <p className="text-4xl font-medium">Rp199.000</p>
 
                             <Button className="w-fit">
-                                Lihat Detail
+                                Lihat Detail Produk
                                 <ArrowUpRight className="size-4" />
                             </Button>
                         </div>
@@ -222,8 +221,8 @@ export default function Welcome() {
                             <ReviewCard key={review.username} {...review} />
                         ))}
                     </Marquee>
-                    <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r"></div>
-                    <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
+                    <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-linear-to-r"></div>
+                    <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-linear-to-l"></div>
                 </div>
 
                 {/* PRODUCT SHOWCASE */}
