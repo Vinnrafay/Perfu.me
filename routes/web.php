@@ -10,7 +10,10 @@ Route::inertia('/contact', 'contact')->name('contact');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
-    Route::get('/dashboard/products', [ProductsController::class, 'index'])->name('products.index');
+
+    Route::resource('dashboard/products', ProductsController::class)
+        ->parameters(['products' => 'product'])
+        ->names('products');
 });
 
 require __DIR__.'/settings.php';
