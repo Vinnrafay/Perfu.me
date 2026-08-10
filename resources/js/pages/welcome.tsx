@@ -180,9 +180,9 @@ export default function Welcome() {
 
                         <div className="flex flex-col justify-center gap-6">
                             <div className="space-y-3">
-                                <h3 className="text-5xl font-semibold">Evanessence</h3>
+                                <h3 className="text-5xl font-semibold">Vanessence</h3>
                                 <p className="text-base text-muted-foreground">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi ducimus labore nostrum. Quas beatae possimus, sunt dolore ad inventore velit iste animi delectus, facilis atque minima a nobis, nemo laboriosam non explicabo autem quod.
+                                    Aroma vanilla yang lembut, creamy, dan elegan dengan nuansa hangat yang menenangkan. Cocok untuk penggunaan sehari-hari maupun momen spesial.
                                 </p>
                             </div>
 
@@ -200,7 +200,7 @@ export default function Welcome() {
                             <div className="space-y-3">
                                 <h3 className="text-5xl font-semibold">Dynamyst</h3>
                                 <p className="text-base text-muted-foreground">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi ducimus labore nostrum. Quas beatae possimus, sunt dolore ad inventore velit iste animi delectus, facilis atque minima a nobis, nemo laboriosam non explicabo autem quod.
+                                    Aroma fresh, sporty, dan clean dengan sentuhan hangat yang memberikan kesan maskulin, energik, dan percaya diri. Cocok digunakan untuk aktivitas sehari-hari.
                                 </p>
                             </div>
 
