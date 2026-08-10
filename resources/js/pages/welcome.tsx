@@ -78,6 +78,35 @@ const ReviewCard = ({
     )
 }
 
+import { CheckCircle2Icon } from "lucide-react";
+
+const benefits = [
+    {
+        number: "01",
+        title: "Tahan Lama",
+        description:
+            "Dirancang untuk menemani aktivitasmu dari pagi hingga malam.",
+    },
+    {
+        number: "02",
+        title: "Aroma Berkarakter",
+        description:
+            "Setiap aroma memiliki karakter unik yang dirancang untuk meninggalkan kesan.",
+    },
+    {
+        number: "03",
+        title: "Harga Bersahabat",
+        description:
+            "Nikmati aroma berkualitas tanpa harus mengeluarkan biaya yang berlebihan.",
+    },
+    {
+        number: "04",
+        title: "Dibuat dengan Cermat",
+        description:
+            "Setiap produk dipersiapkan dengan perhatian pada kualitas dan konsistensi aroma.",
+    },
+];
+
 export default function Welcome() {
     return (
         <>
@@ -188,6 +217,49 @@ export default function Welcome() {
                     </div>
                 </section>
 
+                {/* Why us Section */}
+                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+                    <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
+
+                        {/* Section Heading */}
+                        <div className="lg:sticky lg:top-32 lg:self-start">
+                            <h2 className="text-4xl font-medium tracking-tight sm:text-6xl">
+                                Lebih dari sekadar <span className="font-heading italic">wangi.</span>
+                            </h2>
+
+                            <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
+                                Kami percaya parfum bukan hanya tentang aroma,
+                                tetapi tentang karakter, kesan, dan momen yang
+                                ingin kamu tinggalkan.
+                            </p>
+                        </div>
+
+                        {/* Benefits */}
+                        <div className="divide-y border-y">
+                            {benefits.map((benefit) => (
+                                <div
+                                    key={benefit.number}
+                                    className="grid gap-3 py-7 sm:grid-cols-[64px_1fr]"
+                                >
+                                    <span className="text-sm text-muted-foreground">
+                                        {benefit.number}
+                                    </span>
+
+                                    <div className="space-y-1">
+                                        <h3 className="text-2xl font-medium">
+                                            {benefit.title}
+                                        </h3>
+
+                                        <p className="max-w-lg text-sm leading-6 text-muted-foreground">
+                                            {benefit.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
                 <section className="w-full max-w-4xl mx-auto text-center flex flex-col items-center">
                     <div className="bg-background w-14 h-14 rounded-full rotate-3 my-6 border border-border overflow-hidden">
                         <img
@@ -225,74 +297,6 @@ export default function Welcome() {
                     <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-linear-to-l"></div>
                 </div>
 
-                {/* PRODUCT SHOWCASE */}
-                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    {/* Header */}
-                    <h2 className="text-5xl md:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
-                        Wangi yang <span className="font-heading italic">Berkarakter</span>
-                    </h2>
-
-                    {/* Grid Layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-
-                        {/* Left Large Card */}
-                        <div className="relative h-[450px] sm:h-[600px] rounded-3xl overflow-hidden group">
-                            <img
-                                src="https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?auto=format&fit=crop&q=80&w=1000"
-                                alt="Elegance"
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                            />
-                            {/* Floating Badge */}
-                            <div className="absolute bottom-6 left-6 right-6 sm:right-auto bg-background/95 backdrop-blur-md p-5 rounded-2xl shadow-lg max-w-xs">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                                    <span className="font-semibold text-sm">Tahan lama pagi sampai malam</span>
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                    Setiap aroma diracik dengan cermat menggunakan bahan-bahan premium dengan kualitas tertinggi.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Right Stacked Cards */}
-                        <div className="flex flex-col gap-3">
-
-                            {/* Top Small Card - Light */}
-                            <div className="flex-1 bg-secondary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[280px]">
-                                <div className="relative z-10 max-w-[50%]">
-                                    <h3 className="text-2xl font-medium mb-3">Evanessence</h3>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, a.
-                                    </p>
-                                </div>
-                                {/* Bottle Image Absolute */}
-                                <img
-                                    src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400"
-                                    alt="Bottle"
-                                    className="absolute right-0 w-1/2 h-auto object-cover"
-                                />
-                            </div>
-
-                            {/* Bottom Small Card - Dark */}
-                            <div className="flex-1 bg-primary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[280px]">
-                                <div className="relative z-10 max-w-[50%]">
-                                    <h3 className="text-2xl text-primary-foreground font-medium mb-3">Dynamyst</h3>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, a.
-                                    </p>
-                                </div>
-                                {/* Bottle Image Absolute */}
-                                <img
-                                    src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400"
-                                    alt="Bottle"
-                                    className="absolute right-0 w-1/2 h-auto object-cover"
-                                />
-                            </div>
-
-                        </div>
-                    </div>
-                </section>
-
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
                     <div className="space-y-1 text-center">
                         <h2 className="text-5xl md:text-7xl font-semibold">
@@ -318,6 +322,54 @@ export default function Welcome() {
                     </Accordion>
                 </section>
 
+                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+                    <div className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-20 text-center sm:px-12 sm:py-28">
+                        <div className="relative z-10 mx-auto max-w-2xl">
+
+                            <h2 className="text-4xl font-medium tracking-tight text-primary-foreground sm:text-5xl lg:text-6xl">
+                                Sudah menemukan{" "}
+                                <span className="font-heading italic">
+                                    wangi favoritmu?
+                                </span>
+                            </h2>
+
+                            <p className="mx-auto mt-6 max-w-lg text-sm leading-7 text-primary-foreground/70 sm:text-base">
+                                Temukan aroma yang cocok untuk menemani
+                                setiap momen dan menjadi bagian dari
+                                karaktermu.
+                            </p>
+
+                            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                                <Button
+                                    asChild
+                                    variant="secondary"
+                                    size="lg"
+                                    className="rounded-full"
+                                >
+                                    <Link href="/products">
+                                        Lihat Koleksi
+                                        <ArrowRight />
+                                    </Link>
+                                </Button>
+
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    size="lg"
+                                    className="rounded-full border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                                >
+                                    <a
+                                        href="https://wa.me/628xxxxxxxxxx"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Chat via WhatsApp
+                                    </a>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
         </>
     );
