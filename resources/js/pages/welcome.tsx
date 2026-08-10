@@ -83,8 +83,8 @@ export default function Welcome() {
         <>
             <Head title="Welcome" />
 
-            <main className="min-h-screen w-full bg-background text-foreground pb-24 space-y-16">
-                <section className="flex flex-col gap-16 w-full max-w-7xl mx-auto px-5 py-16">
+            <main className="min-h-screen w-full bg-background text-foreground pb-16 space-y-16">
+                <section className="min-h-screen flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 py-16">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
@@ -99,12 +99,12 @@ export default function Welcome() {
                             <div className="flex flex-wrap items-center gap-3">
                                 <Button asChild size="lg">
                                     <Link href="/products">
-                                        Eksplor Katalog Kami
+                                        Lihat Koleksi Kami
                                         <ArrowRight className="size-4" />
                                     </Link>
                                 </Button>
                                 <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')} variant="outline" size="lg">
-                                    Hubungi WhatsApp Owner
+                                    Chat Via WhatsApp
                                     <WhatsAppIcon />
                                 </Button>
                             </div>

@@ -70,6 +70,14 @@ const mediaQuery = (): MediaQueryList | null => {
 
 const handleSystemThemeChange = (): void => applyTheme(currentAppearance);
 
+export function applyStoredAppearance(): void {
+    applyTheme(currentAppearance);
+}
+
+export function forceLightTheme(): void {
+    applyTheme('light');
+}
+
 export function initializeTheme(): void {
     if (typeof window === 'undefined') {
         return;
