@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { products } from '@/routes';
-import { edit, destroy } from '@/actions/App/Http/Controllers/ProductsController';
+import { destroy } from '@/actions/App/Http/Controllers/ProductsController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,17 +20,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
-
-interface Product {
-    id: number;
-    nama: string;
-    kategori: string;
-    gender: string;
-    Ukuran: number;
-    Harga: number;
-    Stok: number;
-    'Best Seller': 'yes' | 'no';
-}
+import AddProductSheet from './add';
+import EditProductSheet, { Product } from './edit'; // Adjust import path if needed
 
 interface PaginatedProducts {
     data: Product[];
@@ -90,6 +81,10 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         }
     };
 
+    const refreshList = () => {
+        router.reload({ only: ['products'] });
+    };
+
     const formatPrice = (val: number) =>
         new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -101,9 +96,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         <div className="flex flex-col gap-6 p-6">
             <div className="flex items-center justify-between">
                 <h1 className="font-heading text-2xl italic">Daftar Produk</h1>
-                <Button asChild>
-                    <Link href="/dashboard/products/create">Tambah Produk</Link>
-                </Button>
+                <AddProductSheet onCreated={refreshList} />
             </div>
 
             <div className="rounded-lg border border-border">
@@ -238,7 +231,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                 )}
                                 {visibleColumns['Best Seller'] && (
                                     <TableCell>
-                                        {product['Best Seller'] === 'yes' ? (
+                                        {product.Best_Seller === 'yes' ? (
                                             <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                                                 Yes
                                             </span>
@@ -255,9 +248,15 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem asChild>
-                                                <Link href={edit(product.id)}>Edit</Link>
-                                            </DropdownMenuItem>
+                                            <EditProductSheet
+                                                product={product}
+                                                onUpdated={refreshList}
+                                                trigger={
+                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                }
+                                            />
                                             <DropdownMenuItem
                                                 onClick={() => handleDelete(product.id)}
                                                 className="text-destructive focus:text-destructive"

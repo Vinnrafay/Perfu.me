@@ -17,18 +17,18 @@ return new class extends Migration
             $table->enum('kategori', ['EDP', 'EDT', 'Roll-On', 'Body Mist']);
             $table->enum('gender', ['male', 'female', 'unisex']);
             $table->string('Varian');
-            $table->string('Top Note');
-            $table->string('Middle Note');
-            $table->string('Base Note');
+            $table->string('Top_Note');
+            $table->string('Middle_Note');
+            $table->string('Base_Note');
             $table->string('Komposisi');
             $table->string('Kemasan')->nullable();
             $table->integer('Ukuran');
             $table->decimal('Harga', 8, 2);
             $table->integer('Stok');
-            $table->date('Tanggal launch')->nullable();
+            $table->date('Tanggal_launch')->nullable();
             $table->text('Deskripsi');
             $table->string('Foto', 255)->nullable();
-            $table->enum('Best Seller', ['yes', 'no'])->default('no');
+            $table->enum('Best_Seller', ['yes', 'no'])->default('no');
             $table->timestamps();
         });
     }
