@@ -5,6 +5,7 @@ import { destroy } from '@/actions/App/Http/Controllers/ProductsController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import {
     Table,
     TableBody,
@@ -15,26 +16,36 @@ import {
 } from '@/components/ui/table';
 import {
     DropdownMenu,
+    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
+import {
+    ArrowUpDown,
+    ChevronDown,
+    MoreHorizontal,
+    Search,
+    SlidersHorizontal,
+    Trash2,
+    PackageX,
+    Sparkles,
+    Package,
+    ChevronLeft,
+    ChevronRight,
+} from 'lucide-react';
 import AddProductSheet from './add';
 import EditProductSheet, { Product } from './edit';
-
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
-}
 
 interface PaginatedProducts {
     data: Product[];
     current_page: number;
     last_page: number;
     total: number;
-    links: PaginationLink[];
+    per_page?: number;
+    links: { url: string | null; label: string; active: boolean }[];
 }
 
 interface Props {
@@ -45,6 +56,13 @@ interface Props {
 const allColumns = ['Kategori', 'Ukuran', 'Harga', 'Stok', 'Best Seller'] as const;
 type ColumnKey = (typeof allColumns)[number];
 type NameSort = 'none' | 'asc' | 'desc';
+
+const formatPrice = (val: number) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(val);
 
 export default function ProductsList({ products: paginated, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
@@ -57,16 +75,11 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         Stok: true,
         'Best Seller': true,
     });
-    const [columnsOpen, setColumnsOpen] = useState(false);
 
-    // Default: ikutin urutan asli dari backend (terbaru di atas, dari `latest()`).
-    // Cuma di-override kalau user eksplisit klik header "Nama" buat sort alfabetis.
+    // Client-side sorting berdasarkan nama
     const rows = useMemo(() => {
-        if (nameSort === 'none') return paginated.data;
-        return [...paginated.data].sort((a, b) =>
-            nameSort === 'asc'
-                ? a.nama.localeCompare(b.nama)
-                : b.nama.localeCompare(a.nama)
+        return [...(paginated.data || [])].sort((a, b) =>
+            sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama)
         );
     }, [paginated.data, nameSort]);
 
@@ -82,18 +95,37 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         );
     };
 
-    const cycleNameSort = () => {
-        setNameSort((prev) => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
+    // FIX: Gunakan window.location.pathname agar tidak terlempar ke halaman public catalog
+    const handlePageChange = (page: number) => {
+        router.get(
+            window.location.pathname,
+            { search, page },
+            { preserveState: true, replace: true }
+        );
     };
 
+    // FIX: Search tetap di halaman saat ini dan reset ke halaman 1
     const submitSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(products(), { search }, { preserveState: true, replace: true });
+        router.get(
+            window.location.pathname,
+            { search, page: 1 },
+            { preserveState: true, replace: true }
+        );
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Yakin mau hapus produk ini?')) {
-            router.delete(destroy(id));
+        if (confirm('Yakin ingin menghapus produk ini?')) {
+            router.delete(destroy(id), {
+                onSuccess: () => setSelected((prev) => prev.filter((item) => item !== id)),
+            });
+        }
+    };
+
+    const handleBulkDelete = () => {
+        if (confirm(`Yakin ingin menghapus ${selected.length} produk terpilih?`)) {
+            selected.forEach((id) => router.delete(destroy(id)));
+            setSelected([]);
         }
     };
 
@@ -101,17 +133,11 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         router.reload({ only: ['products'] });
     };
 
-    const goToPageUrl = (url: string | null) => {
-        if (!url) return;
-        router.visit(url, { preserveState: true, preserveScroll: true });
-    };
-
-    const formatPrice = (val: number) =>
-        new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(val);
+    // Perhitungan Info Paginasi
+    const totalItems = paginated.total ?? 0;
+    const perPage = paginated.per_page || paginated.data?.length || 10;
+    const from = totalItems === 0 ? 0 : (paginated.current_page - 1) * perPage + 1;
+    const to = Math.min(from + (paginated.data?.length || 0) - 1, totalItems);
 
     // Buang link "« Previous" dan "Next »" bawaan Laravel dari tengah,
     // kita render Previous/Next sendiri secara terpisah biar bisa full styling.
@@ -120,225 +146,295 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     const nextLink = paginated.links[paginated.links.length - 1];
 
     return (
-        <div className="flex flex-col gap-6 p-6">
-            <div className="flex items-center justify-between">
-                <h1 className="font-heading text-2xl italic">Daftar Produk</h1>
+        <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        Daftar Produk
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Kelola stok, harga, dan informasi produk toko kamu.
+                    </p>
+                </div>
                 <AddProductSheet onCreated={refreshList} />
             </div>
 
-            <div className="rounded-lg border border-border">
+            {/* Table Card Container */}
+            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
                 {/* Toolbar */}
-                <div className="flex items-center justify-between gap-3 border-b border-border p-4">
-                    <form onSubmit={submitSearch} className="max-w-xs flex-1">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-b border-border bg-muted/20">
+                    {/* Search Form */}
+                    <form onSubmit={submitSearch} className="relative w-full sm:max-w-xs">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Cari nama produk..."
-                            className="rounded-md"
+                            className="h-9 pl-9 text-sm rounded-lg bg-background"
                         />
                     </form>
 
-                    <div className="relative">
-                        <Button
-                            variant="outline"
-                            onClick={() => setColumnsOpen((v) => !v)}
-                            className="flex items-center gap-2 rounded-md"
-                        >
-                            Columns
-                            <ChevronDown className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-
-                        {columnsOpen && (
-                            <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-border bg-popover p-2 shadow-md">
-                                {allColumns.map((col) => (
-                                    <label
-                                        key={col}
-                                        className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
-                                    >
-                                        <Checkbox
-                                            checked={visibleColumns[col]}
-                                            onCheckedChange={(checked) =>
-                                                setVisibleColumns((prev) => ({
-                                                    ...prev,
-                                                    [col]: Boolean(checked),
-                                                }))
-                                            }
-                                        />
-                                        {col}
-                                    </label>
-                                ))}
-                            </div>
+                    {/* Toolbar Action Buttons */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        {selected.length > 0 && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleBulkDelete}
+                                className="h-9 gap-1.5 text-xs animate-in fade-in zoom-in-95 duration-150"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Hapus ({selected.length})
+                            </Button>
                         )}
+
+                        {/* Column Toggle Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg text-xs font-medium">
+                                    <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+                                    Kolom
+                                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuLabel className="text-xs">Tampilkan Kolom</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {allColumns.map((col) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={col}
+                                        checked={visibleColumns[col]}
+                                        onCheckedChange={(checked) =>
+                                            setVisibleColumns((prev) => ({
+                                                ...prev,
+                                                [col]: Boolean(checked),
+                                            }))
+                                        }
+                                        className="text-xs capitalize"
+                                    >
+                                        {col}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
 
                 {/* Table */}
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-10">
-                                <Checkbox
-                                    checked={allSelected}
-                                    onCheckedChange={toggleAll}
-                                    aria-label="Pilih semua"
-                                />
-                            </TableHead>
-                            <TableHead>
-                                <button
-                                    type="button"
-                                    onClick={cycleNameSort}
-                                    className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
-                                >
-                                    Nama
-                                    <ArrowUpDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-                                    {nameSort !== 'none' && (
-                                        <span className="text-[10px] normal-case text-muted-foreground/70">
-                                            ({nameSort === 'asc' ? 'A-Z' : 'Z-A'})
-                                        </span>
-                                    )}
-                                </button>
-                            </TableHead>
-                            {visibleColumns.Kategori && (
-                                <TableHead className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                    Kategori
-                                </TableHead>
-                            )}
-                            {visibleColumns.Ukuran && (
-                                <TableHead className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                    Ukuran
-                                </TableHead>
-                            )}
-                            {visibleColumns.Harga && (
-                                <TableHead className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                    Harga
-                                </TableHead>
-                            )}
-                            {visibleColumns.Stok && (
-                                <TableHead className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                    Stok
-                                </TableHead>
-                            )}
-                            {visibleColumns['Best Seller'] && (
-                                <TableHead className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                    Best Seller
-                                </TableHead>
-                            )}
-                            <TableHead className="w-10" />
-                        </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                        {rows.length === 0 && (
+                <div className="relative overflow-x-auto">
+                    <Table>
+                        <TableHeader className="bg-muted/30">
                             <TableRow>
-                                <TableCell
-                                    colSpan={7}
-                                    className="py-10 text-center text-sm text-muted-foreground"
-                                >
-                                    Belum ada produk.
-                                </TableCell>
-                            </TableRow>
-                        )}
-
-                        {rows.map((product) => (
-                            <TableRow key={product.id}>
-                                <TableCell>
+                                <TableHead className="w-12 text-center">
                                     <Checkbox
-                                        checked={selected.includes(product.id)}
-                                        onCheckedChange={() => toggleRow(product.id)}
-                                        aria-label={`Pilih ${product.nama}`}
+                                        checked={allSelected}
+                                        onCheckedChange={toggleAll}
+                                        aria-label="Pilih semua produk"
                                     />
-                                </TableCell>
-                                <TableCell className="font-medium">{product.nama}</TableCell>
+                                </TableHead>
+                                <TableHead>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSortAsc((v) => !v)}
+                                        className="-ml-3 h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                                    >
+                                        Nama
+                                        <ArrowUpDown className="h-3.5 w-3.5" />
+                                    </Button>
+                                </TableHead>
                                 {visibleColumns.Kategori && (
-                                    <TableCell>{product.kategori}</TableCell>
+                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                        Kategori
+                                    </TableHead>
                                 )}
                                 {visibleColumns.Ukuran && (
-                                    <TableCell>{product.Ukuran}ml</TableCell>
+                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                        Ukuran
+                                    </TableHead>
                                 )}
                                 {visibleColumns.Harga && (
-                                    <TableCell>{formatPrice(product.Harga)}</TableCell>
+                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                        Harga
+                                    </TableHead>
                                 )}
                                 {visibleColumns.Stok && (
-                                    <TableCell>{product.Stok}</TableCell>
+                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                        Stok
+                                    </TableHead>
                                 )}
                                 {visibleColumns['Best Seller'] && (
-                                    <TableCell>
-                                        {product.Best_Seller === 'yes' ? (
-                                            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-                                                Yes
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-muted-foreground">No</span>
-                                        )}
-                                    </TableCell>
+                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                        Best Seller
+                                    </TableHead>
                                 )}
-                                <TableCell>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <EditProductSheet
-                                                product={product}
-                                                onUpdated={refreshList}
-                                                trigger={
-                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                        Edit
-                                                    </DropdownMenuItem>
-                                                }
-                                            />
-                                            <DropdownMenuItem
-                                                onClick={() => handleDelete(product.id)}
-                                                className="text-destructive focus:text-destructive"
-                                            >
-                                                Hapus
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
+                                <TableHead className="w-12 text-right" />
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
 
-                {/* Footer */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4">
-                    <span className="text-sm text-muted-foreground">
-                        {selected.length} of {rows.length} row(s) selected.
-                    </span>
+                        <TableBody>
+                            {/* Empty State */}
+                            {rows.length === 0 && (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={8}
+                                        className="py-12 text-center text-muted-foreground"
+                                    >
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <PackageX className="h-10 w-10 stroke-[1.25] text-muted-foreground/60" />
+                                            <p className="text-sm font-medium text-foreground">Tidak Ada Produk</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Belum ada produk yang ditambahkan atau pencarian tidak ditemukan.
+                                            </p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+
+                            {/* Data Rows */}
+                            {rows.map((product) => {
+                                const isSelected = selected.includes(product.id);
+                                return (
+                                    <TableRow
+                                        key={product.id}
+                                        className={isSelected ? 'bg-muted/50 data-[state=selected]:bg-muted/50' : undefined}
+                                    >
+                                        <TableCell className="text-center">
+                                            <Checkbox
+                                                checked={isSelected}
+                                                onCheckedChange={() => toggleRow(product.id)}
+                                                aria-label={`Pilih ${product.nama}`}
+                                            />
+                                        </TableCell>
+
+                                        <TableCell className="font-medium text-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <Package className="h-4 w-4 text-muted-foreground/70 hidden sm:block" />
+                                                <span>{product.nama}</span>
+                                            </div>
+                                        </TableCell>
+
+                                        {visibleColumns.Kategori && (
+                                            <TableCell className="text-muted-foreground text-sm">
+                                                {product.kategori || '-'}
+                                            </TableCell>
+                                        )}
+
+                                        {visibleColumns.Ukuran && (
+                                            <TableCell className="text-muted-foreground text-sm">
+                                                {product.Ukuran} ml
+                                            </TableCell>
+                                        )}
+
+                                        {visibleColumns.Harga && (
+                                            <TableCell className="font-semibold text-foreground text-sm">
+                                                {formatPrice(product.Harga)}
+                                            </TableCell>
+                                        )}
+
+                                        {visibleColumns.Stok && (
+                                            <TableCell>
+                                                {product.Stok === 0 ? (
+                                                    <Badge variant="destructive" className="text-[10px] px-2 py-0">
+                                                        Habis
+                                                    </Badge>
+                                                ) : product.Stok <= 5 ? (
+                                                    <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] px-2 py-0">
+                                                        Sisa {product.Stok}
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="text-sm text-muted-foreground">{product.Stok}</span>
+                                                )}
+                                            </TableCell>
+                                        )}
+
+                                        {visibleColumns['Best Seller'] && (
+                                            <TableCell>
+                                                {product.Best_Seller === 'yes' || product['Best Seller'] === 'yes' ? (
+                                                    <Badge variant="secondary" className="gap-1 text-[11px] font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border-indigo-200/50">
+                                                        <Sparkles className="h-3 w-3 fill-indigo-500 text-indigo-500" />
+                                                        Ya
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground/60">-</span>
+                                                )}
+                                            </TableCell>
+                                        )}
+
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Buka menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-36">
+                                                    <EditProductSheet
+                                                        product={product}
+                                                        onUpdated={refreshList}
+                                                        trigger={
+                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                                                Edit
+                                                            </DropdownMenuItem>
+                                                        }
+                                                    />
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDelete(product.id)}
+                                                        className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                                                    >
+                                                        Hapus
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {/* Footer Paginasi (FIXED LOGIC) */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border p-4 bg-muted/10 text-xs text-muted-foreground">
+                    <div>
+                        {selected.length > 0 ? (
+                            <span className="font-medium text-foreground">
+                                {selected.length} dari {rows.length} baris terpilih.
+                            </span>
+                        ) : (
+                            <span>
+                                Menampilkan <strong className="text-foreground">{from}</strong> - <strong className="text-foreground">{to}</strong> dari <strong className="text-foreground">{totalItems}</strong> produk
+                            </span>
+                        )}
+                    </div>
 
                     <div className="flex items-center gap-1">
                         <Button
                             variant="outline"
                             size="sm"
-                            disabled={!prevLink?.url}
-                            onClick={() => goToPageUrl(prevLink?.url ?? null)}
+                            disabled={paginated.current_page <= 1}
+                            onClick={() => handlePageChange(paginated.current_page - 1)}
+                            className="h-8 px-3 text-xs gap-1"
                         >
-                            Previous
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                            Sebelumnya
                         </Button>
 
-                        {pageLinks.map((link, i) => (
-                            <Button
-                                key={i}
-                                variant={link.active ? 'default' : 'outline'}
-                                size="sm"
-                                disabled={!link.url}
-                                onClick={() => goToPageUrl(link.url)}
-                                className="min-w-9"
-                            >
-                                {link.label}
-                            </Button>
-                        ))}
+                        <span className="px-3 py-1 font-medium text-foreground bg-background border border-border rounded-md">
+                            {paginated.current_page} / {paginated.last_page || 1}
+                        </span>
 
                         <Button
                             variant="outline"
                             size="sm"
-                            disabled={!nextLink?.url}
-                            onClick={() => goToPageUrl(nextLink?.url ?? null)}
+                            disabled={paginated.current_page >= paginated.last_page}
+                            onClick={() => handlePageChange(paginated.current_page + 1)}
+                            className="h-8 px-3 text-xs gap-1"
                         >
-                            Next
+                            Selanjutnya
+                            <ChevronRight className="h-3.5 w-3.5" />
                         </Button>
                     </div>
                 </div>

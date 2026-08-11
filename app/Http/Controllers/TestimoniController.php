@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Testimoni;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,7 +17,6 @@ class TestimoniController extends Controller
     public function index(Request $request): Response
     {
         $testimonis = Testimoni::query()
-            // Fitur Search: cari berdasarkan nama, email, atau komentar
             ->when($request->input('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
@@ -26,11 +26,10 @@ class TestimoniController extends Controller
             })
             ->latest()
             ->paginate(10)
-            ->withQueryString(); // Mempertahankan query ?search= di URL pagination
+            ->withQueryString();
 
         return Inertia::render('dashboard/testimoni/index', [
             'testimonis' => $testimonis,
-            // 🛠️ FIX UTAMA: Mengirim prop filters yang dicari oleh React
             'filters' => [
                 'search' => $request->input('search', ''),
             ],
@@ -53,10 +52,16 @@ class TestimoniController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:testimonis,email'],
-            'profil' => ['nullable', 'string', 'max:255'],
+            // Ini gua FIX: Ubah validasi string jadi file gambar
+            'profil' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'komentar' => ['required', 'string', 'max:1000'],
             'rating' => ['required', 'integer', 'in:1,2,3,4,5'],
         ]);
+
+        // Ini gua FIX: simpanz
+        if ($request->hasFile('profil')) {
+            $validated['profil'] = $request->file('profil')->store('testimonis', 'public');
+        }
 
         Testimoni::create($validated);
 
@@ -93,10 +98,20 @@ class TestimoniController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:testimonis,email,' . $testimoni->id],
-            'profil' => ['nullable', 'string', 'max:255'],
+            // Ini gua FIX: validasi string jadi file gambar 
+            'profil' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'komentar' => ['required', 'string', 'max:1000'],
             'rating' => ['required', 'integer', 'in:1,2,3,4,5'],
         ]);
+
+        // Ini gua FIX: Handle update file profil (rafay)
+        if ($request->hasFile('profil')) {
+            // Hapus foto lama jika ada
+            if ($testimoni->profil && Storage::disk('public')->exists($testimoni->profil)) {
+                Storage::disk('public')->delete($testimoni->profil);
+            }
+            $validated['profil'] = $request->file('profil')->store('testimonis', 'public');
+        }
 
         $testimoni->update($validated);
 
@@ -110,6 +125,11 @@ class TestimoniController extends Controller
      */
     public function destroy(Testimoni $testimoni): RedirectResponse
     {
+        // Opsional: Hapus file dari storage saat data dihapus
+        if ($testimoni->profil && Storage::disk('public')->exists($testimoni->profil)) {
+            Storage::disk('public')->delete($testimoni->profil);
+        }
+
         $testimoni->delete();
 
         return redirect()

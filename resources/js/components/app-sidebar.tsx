@@ -1,5 +1,11 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, PackageIcon, Star } from 'lucide-react';
+import {
+    LayoutDashboard,
+    Package,
+    Star,
+    Store,
+    ExternalLink,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -11,22 +17,26 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarGroupContent,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as productsIndex } from '@/routes/products';
 import { index as testimoniIndex } from '@/routes/testimoni';
-import type { NavItem } from '@/types'
+import type { NavItem } from '@/types';
 
+// Menu Navigasi Utama
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: LayoutDashboard,
     },
     {
-        title: 'Products',
+        title: 'Produk',
         href: productsIndex(),
-        icon: PackageIcon,
+        icon: Package,
     },
     {
         title: 'Testimoni',
@@ -37,11 +47,12 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" variant="inset" className="border-r border-sidebar-border/60">
+            {/* Header: Logo & Identity */}
+            <SidebarHeader className="border-b border-sidebar-border/40 pb-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50 transition-colors">
                             <Link href={dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
@@ -50,11 +61,46 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
+            {/* Content: Main Navigation */}
+            <SidebarContent className="gap-0 py-2">
+                {/* Grup Menu Utama */}
+                <SidebarGroup>
+                    <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">
+                        Manajemen
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <NavMain items={mainNavItems} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Grup Akses Cepat / Pintas (Didorong ke bawah dengan mt-auto) */}
+                <SidebarGroup className="mt-auto pt-4">
+                    <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">
+                        Akses Cepat
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild tooltip="Lihat Toko">
+                                    <a
+                                        href="/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                                    >
+                                        <Store className="h-4 w-4" />
+                                        <span>Lihat Website</span>
+                                        <ExternalLink className="ml-auto h-3 w-3 opacity-40" />
+                                    </a>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter>
+            {/* Footer: Profile & Account */}
+            <SidebarFooter className="border-t border-sidebar-border/40 pt-2">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

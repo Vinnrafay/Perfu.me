@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/ProductsController';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,28 @@ import {
     Sheet,
     SheetClose,
     SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Loader2,
+    UploadCloud,
+    X,
+} from 'lucide-react';
 
 const kategoriOptions = ['EDP', 'EDT', 'Roll-On', 'Body Mist'];
-const genderOptions = ['male', 'female', 'unisex'];
+const genderOptions = [
+    { value: 'male', label: 'Pria' },
+    { value: 'female', label: 'Wanita' },
+    { value: 'unisex', label: 'Unisex' },
+];
 
 interface Props {
     onCreated?: () => void;
@@ -26,6 +39,8 @@ interface Props {
 
 export default function AddProductSheet({ onCreated }: Props) {
     const [open, setOpen] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         nama: '',
@@ -46,12 +61,33 @@ export default function AddProductSheet({ onCreated }: Props) {
         Best_Seller: false,
     });
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('Foto', file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setData('Foto', null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     const submitProduct = (e: React.FormEvent) => {
         e.preventDefault();
         post(store().url, {
             forceFormData: true,
             onSuccess: () => {
                 reset();
+                setImagePreview(null);
                 setOpen(false);
                 onCreated?.();
             },
@@ -61,252 +97,274 @@ export default function AddProductSheet({ onCreated }: Props) {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button>Tambah Produk</Button>
+                <Button className="bg-black hover:bg-black/90 text-white rounded-lg">
+                    Tambah Produk
+                </Button>
             </SheetTrigger>
-            <SheetContent className="flex h-full flex-col gap-0 sm:max-w-lg">
-                <SheetHeader className="shrink-0">
-                    <SheetTitle>Tambah Produk</SheetTitle>
-                    <SheetDescription>
-                        Lengkapi detail produk, lalu klik simpan.
-                    </SheetDescription>
-                </SheetHeader>
-
-                <form
-                    onSubmit={submitProduct}
-                    data-lenis-prevent
-                    className="grid min-h-0 flex-1 auto-rows-min gap-5 overflow-y-auto px-4 pb-4"
-                >
-                    <div className="grid gap-2">
-                        <Label htmlFor="nama">Nama</Label>
-                        <Input
-                            id="nama"
-                            value={data.nama}
-                            onChange={(e) => setData('nama', e.target.value)}
-                        />
-                        {errors.nama && (
-                            <span className="text-xs text-destructive">{errors.nama}</span>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="grid gap-2">
-                            <Label htmlFor="kategori">Kategori</Label>
-                            <select
-                                id="kategori"
-                                value={data.kategori}
-                                onChange={(e) => setData('kategori', e.target.value)}
-                                className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+            
+            <SheetContent 
+                side="bottom" 
+                className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
+            >
+                <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
+                    
+                    {/* STICKY HEADER: Selalu menempel di atas layar, tidak ikut ter-scroll */}
+                    <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
+                        <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                            Tambah Produk Baru
+                        </SheetTitle>
+                        
+                        <div className="flex items-center gap-3">
+                            <SheetClose asChild>
+                                <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs h-9">
+                                    Batal
+                                </Button>
+                            </SheetClose>
+                            <Button 
+                                type="submit" 
+                                disabled={processing} 
+                                className="rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9 min-w-[120px]"
                             >
-                                <option value="">Pilih kategori</option>
-                                {kategoriOptions.map((opt) => (
-                                    <option key={opt} value={opt}>
-                                        {opt}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.kategori && (
-                                <span className="text-xs text-destructive">{errors.kategori}</span>
-                            )}
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="gender">Gender</Label>
-                            <select
-                                id="gender"
-                                value={data.gender}
-                                onChange={(e) => setData('gender', e.target.value)}
-                                className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-                            >
-                                <option value="">Pilih gender</option>
-                                {genderOptions.map((opt) => (
-                                    <option key={opt} value={opt}>
-                                        {opt}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.gender && (
-                                <span className="text-xs text-destructive">{errors.gender}</span>
-                            )}
+                                {processing ? (
+                                    <>
+                                        <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    'Simpan Produk'
+                                )}
+                            </Button>
                         </div>
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="varian">Varian</Label>
-                        <Input
-                            id="varian"
-                            value={data.Varian}
-                            onChange={(e) => setData('Varian', e.target.value)}
-                        />
-                        {errors.Varian && (
-                            <span className="text-xs text-destructive">{errors.Varian}</span>
-                        )}
-                    </div>
+                    {/* SCROLLABLE AREA: Bagian isi form yang bisa digulir ke bawah */}
+                    <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
+                        <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
+                            
+                            {/* Baris 1: Nama & Varian */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="nama" className="text-sm font-medium">Nama Produk <span className="text-destructive">*</span></Label>
+                                    <Input
+                                        id="nama"
+                                        placeholder="Contoh: Vanessence"
+                                        value={data.nama}
+                                        onChange={(e) => setData('nama', e.target.value)}
+                                    />
+                                    {errors.nama && <span className="text-[10px] text-destructive">{errors.nama}</span>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="varian" className="text-sm font-medium">Varian Aroma</Label>
+                                    <Input
+                                        id="varian"
+                                        placeholder="Contoh: Extrait de Parfum"
+                                        value={data.Varian}
+                                        onChange={(e) => setData('Varian', e.target.value)}
+                                    />
+                                    {errors.Varian && <span className="text-[10px] text-destructive">{errors.Varian}</span>}
+                                </div>
+                            </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="top_note">Top Note</Label>
-                        <Input
-                            id="top_note"
-                            value={data.Top_Note}
-                            onChange={(e) => setData('Top_Note', e.target.value)}
-                        />
-                        {errors.Top_Note && (
-                            <span className="text-xs text-destructive">{errors.Top_Note}</span>
-                        )}
-                    </div>
+                            {/* Baris 2: Kategori & Gender */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="grid gap-2">
+                                    <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
+                                    <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Pilih kategori" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {kategoriOptions.map((opt) => (
+                                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.kategori && <span className="text-[10px] text-destructive">{errors.kategori}</span>}
+                                </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="middle_note">Middle Note</Label>
-                        <Input
-                            id="middle_note"
-                            value={data.Middle_Note}
-                            onChange={(e) => setData('Middle_Note', e.target.value)}
-                        />
-                        {errors.Middle_Note && (
-                            <span className="text-xs text-destructive">{errors.Middle_Note}</span>
-                        )}
-                    </div>
+                                <div className="grid gap-2">
+                                    <Label className="text-sm font-medium">Gender <span className="text-destructive">*</span></Label>
+                                    <Select value={data.gender} onValueChange={(val) => setData('gender', val)}>
+                                        <SelectTrigger className="capitalize">
+                                            <SelectValue placeholder="Pilih target" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {genderOptions.map((opt) => (
+                                                <SelectItem key={opt.value} value={opt.value} className="capitalize">
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.gender && <span className="text-[10px] text-destructive">{errors.gender}</span>}
+                                </div>
+                            </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="base_note">Base Note</Label>
-                        <Input
-                            id="base_note"
-                            value={data.Base_Note}
-                            onChange={(e) => setData('Base_Note', e.target.value)}
-                        />
-                        {errors.Base_Note && (
-                            <span className="text-xs text-destructive">{errors.Base_Note}</span>
-                        )}
-                    </div>
+                            {/* Notes Aroma */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="top_note" className="text-sm font-medium">Top Note</Label>
+                                    <Input
+                                        id="top_note"
+                                        placeholder="Wangian awal..."
+                                        value={data.Top_Note}
+                                        onChange={(e) => setData('Top_Note', e.target.value)}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="middle_note" className="text-sm font-medium">Middle Note</Label>
+                                    <Input
+                                        id="middle_note"
+                                        placeholder="Wangian inti..."
+                                        value={data.Middle_Note}
+                                        onChange={(e) => setData('Middle_Note', e.target.value)}
+                                    />
+                                </div>
+                                <div className="grid gap-2 sm:col-span-2">
+                                    <Label htmlFor="base_note" className="text-sm font-medium">Base Note</Label>
+                                    <Input
+                                        id="base_note"
+                                        placeholder="Wangian akhir (dry down)..."
+                                        value={data.Base_Note}
+                                        onChange={(e) => setData('Base_Note', e.target.value)}
+                                    />
+                                </div>
+                            </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="komposisi">Komposisi</Label>
-                        <Input
-                            id="komposisi"
-                            value={data.Komposisi}
-                            onChange={(e) => setData('Komposisi', e.target.value)}
-                        />
-                        {errors.Komposisi && (
-                            <span className="text-xs text-destructive">{errors.Komposisi}</span>
-                        )}
-                    </div>
+                            {/* Komposisi & Deskripsi */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="komposisi" className="text-sm font-medium">Komposisi Bahan</Label>
+                                <Textarea
+                                    id="komposisi"
+                                    rows={2}
+                                    placeholder="Alkohol, Fragrance, Aqua..."
+                                    value={data.Komposisi}
+                                    onChange={(e) => setData('Komposisi', e.target.value)}
+                                    className="resize-none"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="deskripsi" className="text-sm font-medium">Deskripsi Singkat</Label>
+                                <Textarea
+                                    id="deskripsi"
+                                    rows={4}
+                                    placeholder="Jelaskan karakteristik parfum ini..."
+                                    value={data.Deskripsi}
+                                    onChange={(e) => setData('Deskripsi', e.target.value)}
+                                    className="resize-none"
+                                />
+                            </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="kemasan">Kemasan (opsional)</Label>
-                        <Input
-                            id="kemasan"
-                            value={data.Kemasan}
-                            onChange={(e) => setData('Kemasan', e.target.value)}
-                        />
-                        {errors.Kemasan && (
-                            <span className="text-xs text-destructive">{errors.Kemasan}</span>
-                        )}
-                    </div>
+                            {/* Harga, Stok, dll */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="ukuran" className="text-sm font-medium">Ukuran (ml) <span className="text-destructive">*</span></Label>
+                                    <Input
+                                        id="ukuran"
+                                        type="number"
+                                        placeholder="50"
+                                        value={data.Ukuran}
+                                        onChange={(e) => setData('Ukuran', e.target.value)}
+                                    />
+                                    {errors.Ukuran && <span className="text-[10px] text-destructive">{errors.Ukuran}</span>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="kemasan" className="text-sm font-medium">Tipe Kemasan</Label>
+                                    <Input
+                                        id="kemasan"
+                                        placeholder="Botol Kaca"
+                                        value={data.Kemasan}
+                                        onChange={(e) => setData('Kemasan', e.target.value)}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="harga" className="text-sm font-medium">Harga Jual (Rp) <span className="text-destructive">*</span></Label>
+                                    <Input
+                                        id="harga"
+                                        type="number"
+                                        placeholder="199000"
+                                        value={data.Harga}
+                                        onChange={(e) => setData('Harga', e.target.value)}
+                                    />
+                                    {errors.Harga && <span className="text-[10px] text-destructive">{errors.Harga}</span>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="stok" className="text-sm font-medium">Stok Awal <span className="text-destructive">*</span></Label>
+                                    <Input
+                                        id="stok"
+                                        type="number"
+                                        placeholder="100"
+                                        value={data.Stok}
+                                        onChange={(e) => setData('Stok', e.target.value)}
+                                    />
+                                    {errors.Stok && <span className="text-[10px] text-destructive">{errors.Stok}</span>}
+                                </div>
+                            </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className="grid gap-2">
-                            <Label htmlFor="ukuran">Ukuran (ml)</Label>
-                            <Input
-                                id="ukuran"
-                                type="number"
-                                value={data.Ukuran}
-                                onChange={(e) => setData('Ukuran', e.target.value)}
-                            />
-                            {errors.Ukuran && (
-                                <span className="text-xs text-destructive">{errors.Ukuran}</span>
-                            )}
+                            {/* File Upload Dropzone */}
+                            <div className="grid gap-2">
+                                <Label className="text-sm font-medium">Foto Produk</Label>
+                                <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px]">
+                                    {imagePreview ? (
+                                        <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-md overflow-hidden border border-border bg-white">
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <button
+                                                type="button"
+                                                onClick={removeImage}
+                                                className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-1.5 rounded-full transition-all"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-6">
+                                            <UploadCloud className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                                            <p className="text-sm font-medium">Klik untuk mengunggah foto</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Format: JPG, PNG, WebP (Maks. 2MB)</p>
+                                        </div>
+                                    )}
+                                    <Input
+                                        ref={fileInputRef}
+                                        id="foto"
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        onChange={handleImageChange}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        disabled={!!imagePreview}
+                                    />
+                                </div>
+                                {errors.Foto && <span className="text-[10px] text-destructive">{errors.Foto}</span>}
+                            </div>
+
+                            {/* Options (Launch Date & Best Seller) */}
+                            <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10">
+                                <div className="grid gap-2 flex-1">
+                                    <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
+                                    <Input
+                                        id="tanggal_launch"
+                                        type="date"
+                                        value={data.Tanggal_launch}
+                                        onChange={(e) => setData('Tanggal_launch', e.target.value)}
+                                    />
+                                </div>
+                                
+                                <div className="flex-1 border border-border rounded-lg p-4 flex items-center justify-between bg-card">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="best_seller" className="text-sm font-medium cursor-pointer">
+                                            Status Best Seller
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground">Tandai produk ini sebagai unggulan toko</p>
+                                    </div>
+                                    <Checkbox
+                                        id="best_seller"
+                                        checked={data.Best_Seller}
+                                        onCheckedChange={(checked) => setData('Best_Seller', Boolean(checked))}
+                                        className="data-[state=checked]:bg-black data-[state=checked]:border-black"
+                                    />
+                                </div>
+                            </div>
                         </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="harga">Harga</Label>
-                            <Input
-                                id="harga"
-                                type="number"
-                                value={data.Harga}
-                                onChange={(e) => setData('Harga', e.target.value)}
-                            />
-                            {errors.Harga && (
-                                <span className="text-xs text-destructive">{errors.Harga}</span>
-                            )}
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="stok">Stok</Label>
-                            <Input
-                                id="stok"
-                                type="number"
-                                value={data.Stok}
-                                onChange={(e) => setData('Stok', e.target.value)}
-                            />
-                            {errors.Stok && (
-                                <span className="text-xs text-destructive">{errors.Stok}</span>
-                            )}
-                        </div>
                     </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="tanggal_launch">Tanggal Launch (opsional)</Label>
-                        <Input
-                            id="tanggal_launch"
-                            type="date"
-                            value={data.Tanggal_launch}
-                            onChange={(e) => setData('Tanggal_launch', e.target.value)}
-                        />
-                        {errors.Tanggal_launch && (
-                            <span className="text-xs text-destructive">
-                                {errors.Tanggal_launch}
-                            </span>
-                        )}
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="deskripsi">Deskripsi</Label>
-                        <Textarea
-                            id="deskripsi"
-                            rows={4}
-                            value={data.Deskripsi}
-                            onChange={(e) => setData('Deskripsi', e.target.value)}
-                        />
-                        {errors.Deskripsi && (
-                            <span className="text-xs text-destructive">{errors.Deskripsi}</span>
-                        )}
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="foto">Foto (opsional)</Label>
-                        <Input
-                            id="foto"
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            onChange={(e) =>
-                                setData('Foto', e.target.files ? e.target.files[0] : null)
-                            }
-                        />
-                        {errors.Foto && (
-                            <span className="text-xs text-destructive">{errors.Foto}</span>
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <Checkbox
-                            id="best_seller"
-                            checked={data.Best_Seller}
-                            onCheckedChange={(checked) =>
-                                setData('Best_Seller', Boolean(checked))
-                            }
-                        />
-                        <Label htmlFor="best_seller" className="font-normal">
-                            Tandai sebagai Best Seller
-                        </Label>
-                    </div>
-
-                    <SheetFooter className="px-0">
-                        <Button type="submit" disabled={processing}>
-                            {processing ? 'Menyimpan...' : 'Simpan Produk'}
-                        </Button>
-                        <SheetClose asChild>
-                            <Button type="button" variant="outline">Batal</Button>
-                        </SheetClose>
-                    </SheetFooter>
                 </form>
             </SheetContent>
         </Sheet>
