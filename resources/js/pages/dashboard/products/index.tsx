@@ -21,14 +21,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
 import AddProductSheet from './add';
-import EditProductSheet, { Product } from './edit'; // Adjust import path if needed
+import EditProductSheet, { Product } from './edit';
+
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
 
 interface PaginatedProducts {
     data: Product[];
     current_page: number;
     last_page: number;
     total: number;
-    links: { url: string | null; label: string; active: boolean }[];
+    links: PaginationLink[];
 }
 
 interface Props {
@@ -38,11 +44,12 @@ interface Props {
 
 const allColumns = ['Kategori', 'Ukuran', 'Harga', 'Stok', 'Best Seller'] as const;
 type ColumnKey = (typeof allColumns)[number];
+type NameSort = 'none' | 'asc' | 'desc';
 
 export default function ProductsList({ products: paginated, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selected, setSelected] = useState<number[]>([]);
-    const [sortAsc, setSortAsc] = useState(true);
+    const [nameSort, setNameSort] = useState<NameSort>('none');
     const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>({
         Kategori: true,
         Ukuran: true,
@@ -52,11 +59,16 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     });
     const [columnsOpen, setColumnsOpen] = useState(false);
 
+    // Default: ikutin urutan asli dari backend (terbaru di atas, dari `latest()`).
+    // Cuma di-override kalau user eksplisit klik header "Nama" buat sort alfabetis.
     const rows = useMemo(() => {
+        if (nameSort === 'none') return paginated.data;
         return [...paginated.data].sort((a, b) =>
-            sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama)
+            nameSort === 'asc'
+                ? a.nama.localeCompare(b.nama)
+                : b.nama.localeCompare(a.nama)
         );
-    }, [paginated.data, sortAsc]);
+    }, [paginated.data, nameSort]);
 
     const allSelected = rows.length > 0 && selected.length === rows.length;
 
@@ -68,6 +80,10 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         setSelected((prev) =>
             prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
         );
+    };
+
+    const cycleNameSort = () => {
+        setNameSort((prev) => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
     };
 
     const submitSearch = (e: React.FormEvent) => {
@@ -85,12 +101,23 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         router.reload({ only: ['products'] });
     };
 
+    const goToPageUrl = (url: string | null) => {
+        if (!url) return;
+        router.visit(url, { preserveState: true, preserveScroll: true });
+    };
+
     const formatPrice = (val: number) =>
         new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0,
         }).format(val);
+
+    // Buang link "« Previous" dan "Next »" bawaan Laravel dari tengah,
+    // kita render Previous/Next sendiri secara terpisah biar bisa full styling.
+    const pageLinks = paginated.links.slice(1, -1);
+    const prevLink = paginated.links[0];
+    const nextLink = paginated.links[paginated.links.length - 1];
 
     return (
         <div className="flex flex-col gap-6 p-6">
@@ -159,11 +186,16 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                             <TableHead>
                                 <button
                                     type="button"
-                                    onClick={() => setSortAsc((v) => !v)}
+                                    onClick={cycleNameSort}
                                     className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
                                 >
                                     Nama
                                     <ArrowUpDown className="h-3.5 w-3.5" strokeWidth={1.5} />
+                                    {nameSort !== 'none' && (
+                                        <span className="text-[10px] normal-case text-muted-foreground/70">
+                                            ({nameSort === 'asc' ? 'A-Z' : 'Z-A'})
+                                        </span>
+                                    )}
                                 </button>
                             </TableHead>
                             {visibleColumns.Kategori && (
@@ -272,37 +304,39 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                 </Table>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between border-t border-border p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4">
                     <span className="text-sm text-muted-foreground">
                         {selected.length} of {rows.length} row(s) selected.
                     </span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <Button
                             variant="outline"
                             size="sm"
-                            disabled={paginated.current_page <= 1}
-                            onClick={() =>
-                                router.get(
-                                    products(),
-                                    { search, page: paginated.current_page - 1 },
-                                    { preserveState: true }
-                                )
-                            }
+                            disabled={!prevLink?.url}
+                            onClick={() => goToPageUrl(prevLink?.url ?? null)}
                         >
                             Previous
                         </Button>
+
+                        {pageLinks.map((link, i) => (
+                            <Button
+                                key={i}
+                                variant={link.active ? 'default' : 'outline'}
+                                size="sm"
+                                disabled={!link.url}
+                                onClick={() => goToPageUrl(link.url)}
+                                className="min-w-9"
+                            >
+                                {link.label}
+                            </Button>
+                        ))}
+
                         <Button
                             variant="outline"
                             size="sm"
-                            disabled={paginated.current_page >= paginated.last_page}
-                            onClick={() =>
-                                router.get(
-                                    products(),
-                                    { search, page: paginated.current_page + 1 },
-                                    { preserveState: true }
-                                )
-                            }
+                            disabled={!nextLink?.url}
+                            onClick={() => goToPageUrl(nextLink?.url ?? null)}
                         >
                             Next
                         </Button>
