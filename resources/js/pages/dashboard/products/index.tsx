@@ -55,6 +55,7 @@ interface Props {
 
 const allColumns = ['Kategori', 'Ukuran', 'Harga', 'Stok', 'Best Seller'] as const;
 type ColumnKey = (typeof allColumns)[number];
+type NameSort = 'none' | 'asc' | 'desc';
 
 const formatPrice = (val: number) =>
     new Intl.NumberFormat('id-ID', {
@@ -66,7 +67,7 @@ const formatPrice = (val: number) =>
 export default function ProductsList({ products: paginated, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selected, setSelected] = useState<number[]>([]);
-    const [sortAsc, setSortAsc] = useState(true);
+    const [nameSort, setNameSort] = useState<NameSort>('none');
     const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>({
         Kategori: true,
         Ukuran: true,
@@ -80,7 +81,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         return [...(paginated.data || [])].sort((a, b) =>
             sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama)
         );
-    }, [paginated.data, sortAsc]);
+    }, [paginated.data, nameSort]);
 
     const allSelected = rows.length > 0 && selected.length === rows.length;
 
@@ -137,6 +138,12 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     const perPage = paginated.per_page || paginated.data?.length || 10;
     const from = totalItems === 0 ? 0 : (paginated.current_page - 1) * perPage + 1;
     const to = Math.min(from + (paginated.data?.length || 0) - 1, totalItems);
+
+    // Buang link "« Previous" dan "Next »" bawaan Laravel dari tengah,
+    // kita render Previous/Next sendiri secara terpisah biar bisa full styling.
+    const pageLinks = paginated.links.slice(1, -1);
+    const prevLink = paginated.links[0];
+    const nextLink = paginated.links[paginated.links.length - 1];
 
     return (
         <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
@@ -403,7 +410,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <Button
                             variant="outline"
                             size="sm"

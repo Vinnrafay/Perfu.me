@@ -18,11 +18,11 @@ import {
     Star,
 } from 'lucide-react';
 
-interface AddTestimoniSheetProps {
+interface Props {
     onCreated?: () => void;
 }
 
-export default function AddTestimoniSheet({ onCreated }: AddTestimoniSheetProps) {
+export default function AddTestimoniSheet({ onCreated }: Props) {
     const [open, setOpen] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -32,10 +32,11 @@ export default function AddTestimoniSheet({ onCreated }: AddTestimoniSheetProps)
         rating: 5,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const submitTestimoni = (e: React.FormEvent) => {
         e.preventDefault();
 
         post(store().url, {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
                 reset();

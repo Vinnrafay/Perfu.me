@@ -18,17 +18,13 @@ import {
 } from 'lucide-react';
 import { Testimoni } from './index';
 
-interface EditTestimoniSheetProps {
+interface Props {
     testimoni: Testimoni;
     trigger?: React.ReactNode;
     onUpdated?: () => void;
 }
 
-export default function EditTestimoniSheet({
-    testimoni,
-    trigger,
-    onUpdated,
-}: EditTestimoniSheetProps) {
+export default function EditTestimoniSheet({ testimoni, trigger, onUpdated }: Props) {
     const [open, setOpen] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -43,6 +39,7 @@ export default function EditTestimoniSheet({
         e.preventDefault();
 
         post(update(testimoni.id).url, {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false);

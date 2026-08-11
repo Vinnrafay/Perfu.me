@@ -48,6 +48,12 @@ export interface Testimoni {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface PaginatedTestimoni {
     data: Testimoni[];
     current_page: number;
@@ -64,6 +70,7 @@ interface Props {
 
 const allColumns = ['Email', 'Komentar', 'Rating', 'Tanggal'] as const;
 type ColumnKey = (typeof allColumns)[number];
+type NameSort = 'none' | 'asc' | 'desc';
 
 // Helper pintar untuk mendeteksi berbagai format path foto agar tidak inkonsisten
 const getProfilUrl = (profil: string | null | undefined) => {
@@ -77,7 +84,7 @@ const getProfilUrl = (profil: string | null | undefined) => {
 export default function TestimoniList({ testimonis: paginated, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selected, setSelected] = useState<number[]>([]);
-    const [sortAsc, setSortAsc] = useState(true);
+    const [nameSort, setNameSort] = useState<NameSort>('none');
     const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>({
         Email: true,
         Komentar: true,
@@ -90,7 +97,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
         return [...(paginated.data || [])].sort((a, b) =>
             sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama)
         );
-    }, [paginated.data, sortAsc]);
+    }, [paginated.data, nameSort]);
 
     const allSelected = rows.length > 0 && selected.length === rows.length;
 
@@ -138,6 +145,11 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
 
     const refreshList = () => {
         router.reload({ only: ['testimonis'] });
+    };
+
+    const goToPageUrl = (url: string | null) => {
+        if (!url) return;
+        router.visit(url, { preserveState: true, preserveScroll: true });
     };
 
     const renderStars = (rating: number) => {
@@ -408,7 +420,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <Button
                             variant="outline"
                             size="sm"
