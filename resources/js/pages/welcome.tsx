@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Star, CheckCircle2, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { Star, ArrowRight, ArrowUpRight, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/ui/marquee"
@@ -78,8 +78,6 @@ const ReviewCard = ({
     )
 }
 
-import { CheckCircle2Icon } from "lucide-react";
-
 const benefits = [
     {
         number: "01",
@@ -142,7 +140,7 @@ export default function Welcome() {
 
                         <div className="relative aspect-square w-full rounded-3xl overflow-hidden">
                             <img
-                                src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
+                                src="/images/BannerAboutMe.png"
                                 alt="Perfume Bottle"
                                 className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
                             />
@@ -151,7 +149,7 @@ export default function Welcome() {
                 </section>
 
                 <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-                    <Marquee className="[--duration:60s] bg-primary gap-0">
+                    <Marquee className="[--duration:120s] bg-primary gap-0">
                         <div className="w-full overflow-hidden border-y border-muted-foreground border-dashed bg-primary py-3">
                             <div className="flex whitespace-nowrap text-sm font-semibold uppercase tracking-[0.25em] text-primary-foreground/80">
                                 {Array.from({ length: 8 }).map((_, i) => (
@@ -175,8 +173,8 @@ export default function Welcome() {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <img src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
-                            alt="" className="w-full aspect-square object-cover rounded-3xl" />
+                        <img src="\images\Vannessence.svg"
+                            alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
 
                         <div className="flex flex-col justify-center gap-6">
                             <div className="space-y-3">
@@ -212,8 +210,8 @@ export default function Welcome() {
                             </Button>
                         </div>
 
-                        <img src="https://images.unsplash.com/photo-1595425959632-34f2822322ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGZyYWdyYW5jZXxlbnwwfHwwfHx8MA%3D%3D"
-                            alt="" className="w-full aspect-square object-cover rounded-3xl" />
+                        <img src="\images\Dynamist.svg"
+                            alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
                     </div>
                 </section>
 
@@ -323,32 +321,31 @@ export default function Welcome() {
                 </section>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    <div className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-20 text-center sm:px-12 sm:py-28">
-                        <div className="relative z-10 mx-auto max-w-2xl">
+                    <div className="relative flex flex-col md:flex-row justify-between overflow-hidden rounded-3xl bg-foreground bg-grid-dark p-16">
+                        <div className="flex-1 relative z-10 max-w-2xl">
 
                             <h2 className="text-4xl font-medium tracking-tight text-primary-foreground sm:text-5xl lg:text-6xl">
-                                Sudah menemukan{" "}
+                                Sudah menemukan{" "} <br />
                                 <span className="font-heading italic">
                                     wangi favoritmu?
                                 </span>
                             </h2>
 
-                            <p className="mx-auto mt-6 max-w-lg text-sm leading-7 text-primary-foreground/70 sm:text-base">
+                            <p className="mt-6 max-w-lg text-sm leading-7 text-primary-foreground/90 sm:text-base">
                                 Temukan aroma yang cocok untuk menemani
                                 setiap momen dan menjadi bagian dari
                                 karaktermu.
                             </p>
 
-                            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                                 <Button
                                     asChild
                                     variant="secondary"
                                     size="lg"
-                                    className="rounded-full"
                                 >
-                                    <Link href="/products">
-                                        Lihat Koleksi
-                                        <ArrowRight />
+                                    <Link href="/quiz">
+                                        Quiz Cari Parfum-mu
+                                        <Compass />
                                     </Link>
                                 </Button>
 
@@ -356,18 +353,23 @@ export default function Welcome() {
                                     asChild
                                     variant="outline"
                                     size="lg"
-                                    className="rounded-full border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                                    className="bg-transparent text-primary-foreground hover:bg-primary/10 hover:text-primary-foreground"
                                 >
-                                    <a
-                                        href="https://wa.me/628xxxxxxxxxx"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Chat via WhatsApp
-                                    </a>
+                                    <Link href="/products">
+                                        Lihat Koleksi
+                                        <ArrowRight />
+                                    </Link>
                                 </Button>
                             </div>
                         </div>
+                        <div className="relative h-full flex-1 z-0">
+                            <img
+                                src="/images/RawNoShadow.png"
+                                alt="Perfume Bottle"
+                                className="absolute -right-16 w-full h-auto"
+                            />
+                        </div>
+                        <div className="absolute inset-0 h-full bg-linear-to-t from-primary/85 to-transparent z-1" />
                     </div>
                 </section>
             </main>
