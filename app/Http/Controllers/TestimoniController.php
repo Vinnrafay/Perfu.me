@@ -13,12 +13,27 @@ class TestimoniController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $testimonis = Testimoni::latest()->paginate(10);
+        $testimonis = Testimoni::query()
+            // Fitur Search: cari berdasarkan nama, email, atau komentar
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('komentar', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString(); // Mempertahankan query ?search= di URL pagination
 
-        return Inertia::render('testimoni/index', [
+        return Inertia::render('dashboard/testimoni/index', [
             'testimonis' => $testimonis,
+            // 🛠️ FIX UTAMA: Mengirim prop filters yang dicari oleh React
+            'filters' => [
+                'search' => $request->input('search', ''),
+            ],
         ]);
     }
 
@@ -27,7 +42,7 @@ class TestimoniController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('testimoni/create');
+        return Inertia::render('dashboard/testimoni/create');
     }
 
     /**
@@ -55,7 +70,7 @@ class TestimoniController extends Controller
      */
     public function show(Testimoni $testimoni): Response
     {
-        return Inertia::render('testimoni/show', [
+        return Inertia::render('dashboard/testimoni/show', [
             'testimoni' => $testimoni,
         ]);
     }
@@ -65,7 +80,7 @@ class TestimoniController extends Controller
      */
     public function edit(Testimoni $testimoni): Response
     {
-        return Inertia::render('testimoni/edit', [
+        return Inertia::render('dashboard/testimoni/edit', [
             'testimoni' => $testimoni,
         ]);
     }
