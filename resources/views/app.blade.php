@@ -42,7 +42,7 @@
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased custom-scrollbar">
         <x-inertia::app />
     </body>
 </html>
