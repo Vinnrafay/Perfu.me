@@ -42,31 +42,35 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
+        // Checkbox dari frontend dikirim sebagai boolean (true/false),
+        // tapi kolom Best_Seller di database cuma nerima 'yes'/'no'.
+        // Konversi dulu sebelum divalidasi.
+        $request->merge([
+            'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
+        ]);
+
         $validated = $request->validate([
             'nama'               => 'required|string|max:255',
             'kategori'           => 'required|in:EDP,EDT,Roll-On,Body Mist',
             'gender'             => 'required|in:male,female,unisex',
             'Varian'             => 'required|string|max:255',
-            'Top Note'           => 'required|string|max:255',
-            'Middle Note'        => 'required|string|max:255',
-            'Base Note'          => 'required|string|max:255',
+            'Top_Note'           => 'required|string|max:255',
+            'Middle_Note'        => 'required|string|max:255',
+            'Base_Note'          => 'required|string|max:255',
             'Komposisi'          => 'required|string|max:255',
             'Kemasan'            => 'nullable|string|max:255',
             'Ukuran'             => 'required|integer',
             'Harga'              => 'required|numeric',
             'Stok'               => 'required|integer',
-            'Tanggal launch'     => 'nullable|date',
+            'Tanggal_launch'     => 'nullable|date',
             'Deskripsi'          => 'required|string',
             'Foto'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'Best Seller'        => 'nullable|in:yes,no',
+            'Best_Seller'        => 'required|in:yes,no',
         ]);
 
         if ($request->hasFile('Foto')) {
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
         }
-
-        // Default Best Seller
-        $validated['Best Seller'] = $validated['Best Seller'] ?? 'no';
 
         Product::create($validated);
 
@@ -92,9 +96,11 @@ class ProductsController extends Controller
      */
     public function edit(string $id)
     {
-        // $product = Product::findOrFail($id);
+        $product = Product::findOrFail($id);
 
-        // return view('products.edit', compact('product'));
+        return Inertia::render('dashboard/products/edit', [
+            'product' => $product,
+        ]);
     }
 
     /**
@@ -104,30 +110,34 @@ class ProductsController extends Controller
     {
         $product = Product::findOrFail($id);
 
+        // Sama kayak store(): checkbox boolean dari frontend dikonversi
+        // dulu ke 'yes'/'no' sebelum divalidasi.
+        $request->merge([
+            'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
+        ]);
+
         $validated = $request->validate([
             'nama'               => 'required|string|max:255',
             'kategori'           => 'required|in:EDP,EDT,Roll-On,Body Mist',
             'gender'             => 'required|in:male,female,unisex',
             'Varian'             => 'required|string|max:255',
-            'Top Note'           => 'required|string|max:255',
-            'Middle Note'        => 'required|string|max:255',
-            'Base Note'          => 'required|string|max:255',
+            'Top_Note'           => 'required|string|max:255',
+            'Middle_Note'        => 'required|string|max:255',
+            'Base_Note'          => 'required|string|max:255',
             'Komposisi'          => 'required|string|max:255',
             'Kemasan'            => 'nullable|string|max:255',
             'Ukuran'             => 'required|integer',
             'Harga'              => 'required|numeric',
             'Stok'               => 'required|integer',
-            'Tanggal launch'     => 'nullable|date',
+            'Tanggal_launch'     => 'nullable|date',
             'Deskripsi'          => 'required|string',
             'Foto'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'Best Seller'        => 'nullable|in:yes,no',
+            'Best_Seller'        => 'required|in:yes,no',
         ]);
 
         if ($request->hasFile('Foto')) {
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
         }
-
-        $validated['Best Seller'] = $validated['Best Seller'] ?? 'no';
 
         $product->update($validated);
 

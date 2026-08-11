@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { store } from '@/actions/App/Http/Controllers/ProductsController';
+import { update } from '@/actions/App/Http/Controllers/ProductsController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,40 +20,68 @@ import {
 const kategoriOptions = ['EDP', 'EDT', 'Roll-On', 'Body Mist'];
 const genderOptions = ['male', 'female', 'unisex'];
 
-interface Props {
-    onCreated?: () => void;
+export interface Product {
+    id: number;
+    nama: string;
+    kategori: string;
+    gender: string;
+    Varian: string;
+    Top_Note: string;
+    Middle_Note: string;
+    Base_Note: string;
+    Komposisi: string;
+    Kemasan: string | null;
+    Ukuran: number;
+    Harga: number;
+    Stok: number;
+    Tanggal_launch: string | null;
+    Deskripsi: string;
+    Foto: string | null;
+    Best_Seller: 'yes' | 'no';
 }
 
-export default function AddProductSheet({ onCreated }: Props) {
+interface Props {
+    product: Product;
+    trigger?: React.ReactNode;
+    onUpdated?: () => void;
+}
+
+export default function EditProductSheet({ product, trigger, onUpdated }: Props) {
     const [open, setOpen] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        nama: '',
-        kategori: '',
-        gender: '',
-        Varian: '',
-        Top_Note: '',
-        Middle_Note: '',
-        Base_Note: '',
-        Komposisi: '',
-        Kemasan: '',
-        Ukuran: '',
-        Harga: '',
-        Stok: '',
-        Tanggal_launch: '',
-        Deskripsi: '',
+    const { data, setData, post, processing, errors, transform } = useForm({
+        nama: product.nama ?? '',
+        kategori: product.kategori ?? '',
+        gender: product.gender ?? '',
+        Varian: product.Varian ?? '',
+        Top_Note: product.Top_Note ?? '',
+        Middle_Note: product.Middle_Note ?? '',
+        Base_Note: product.Base_Note ?? '',
+        Komposisi: product.Komposisi ?? '',
+        Kemasan: product.Kemasan ?? '',
+        Ukuran: product.Ukuran?.toString() ?? '',
+        Harga: product.Harga?.toString() ?? '',
+        Stok: product.Stok?.toString() ?? '',
+        Tanggal_launch: product.Tanggal_launch ?? '',
+        Deskripsi: product.Deskripsi ?? '',
         Foto: null as File | null,
-        Best_Seller: false,
+        Best_Seller: product.Best_Seller === 'yes',
     });
 
     const submitProduct = (e: React.FormEvent) => {
         e.preventDefault();
-        post(store().url, {
+
+        // Method spoofing agar upload file binary bisa terkirim via PUT di Inertia/Laravel
+        transform((data) => ({
+            ...data,
+            _method: 'put',
+        }));
+
+        post(update(product.id).url, {
             forceFormData: true,
             onSuccess: () => {
-                reset();
                 setOpen(false);
-                onCreated?.();
+                onUpdated?.();
             },
         });
     };
@@ -61,13 +89,13 @@ export default function AddProductSheet({ onCreated }: Props) {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button>Tambah Produk</Button>
+                {trigger ?? <Button variant="outline">Edit</Button>}
             </SheetTrigger>
             <SheetContent className="flex h-full flex-col gap-0 sm:max-w-lg">
                 <SheetHeader className="shrink-0">
-                    <SheetTitle>Tambah Produk</SheetTitle>
+                    <SheetTitle>Edit Produk</SheetTitle>
                     <SheetDescription>
-                        Lengkapi detail produk, lalu klik simpan.
+                        Ubah detail produk, lalu klik simpan perubahan.
                     </SheetDescription>
                 </SheetHeader>
 
@@ -248,7 +276,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                         <Input
                             id="tanggal_launch"
                             type="date"
-                            value={data.Tanggal_launch}
+                            value={data.Tanggal_launch ?? ''}
                             onChange={(e) => setData('Tanggal_launch', e.target.value)}
                         />
                         {errors.Tanggal_launch && (
@@ -272,7 +300,16 @@ export default function AddProductSheet({ onCreated }: Props) {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="foto">Foto (opsional)</Label>
+                        <Label htmlFor="foto">
+                            Foto {product.Foto && '(kosongkan kalau tidak ingin ganti)'}
+                        </Label>
+                        {product.Foto && (
+                            <img
+                                src={`/storage/${product.Foto}`}
+                                alt={data.nama}
+                                className="h-20 w-20 rounded-md border border-border object-cover"
+                            />
+                        )}
                         <Input
                             id="foto"
                             type="file"
@@ -301,10 +338,12 @@ export default function AddProductSheet({ onCreated }: Props) {
 
                     <SheetFooter className="px-0">
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Menyimpan...' : 'Simpan Produk'}
+                            {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </Button>
                         <SheetClose asChild>
-                            <Button type="button" variant="outline">Batal</Button>
+                            <Button type="button" variant="outline">
+                                Batal
+                            </Button>
                         </SheetClose>
                     </SheetFooter>
                 </form>
