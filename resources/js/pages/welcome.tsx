@@ -260,8 +260,8 @@ export default function Welcome() {
                     </div>
                 </section>
 
-                <section className="w-full max-w-4xl mx-auto text-center flex flex-col items-center p-5">
-                    <div className="bg-background w-14 h-14 rounded-full rotate-3 my-6 border border-border overflow-hidden">
+                <section className="w-full max-w-7xl mx-auto text-center flex flex-col items-center p-5 space-y-6">
+                    <div className="bg-background w-14 h-14 rounded-full rotate-3 border border-border overflow-hidden">
                         <img
                             src="https://i.pravatar.cc/100?img=8"
                             alt="Mini"
@@ -269,33 +269,37 @@ export default function Welcome() {
                         />
                     </div>
 
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl leading-tight font-medium mb-8 max-w-3xl">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl leading-tight font-medium max-w-3xl">
                         "Saya menjadi lebih percaya diri dari sebelumnya. Rasanya saya memakai aroma yang benar-benar mencerminkan diri saya!"
                     </h2>
 
-                    <div className="flex items-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        ))}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            ))}
+                        </div>
+                        <div>
+                            <p className="font-semibold text-sm">Bang Aris</p>
+                            <p className="text-xs text-muted-foreground">Verified Buyer</p>
+                        </div>
                     </div>
-                    <p className="font-semibold text-sm">Bang Aris</p>
-                    <p className="text-xs text-muted-foreground">Verified Buyer</p>
+                    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
+                        <Marquee pauseOnHover className="[--duration:30s]">
+                            {firstRow.map((review) => (
+                                <ReviewCard key={review.username} {...review} />
+                            ))}
+                        </Marquee>
+                        <Marquee reverse pauseOnHover className="[--duration:30s]">
+                            {secondRow.map((review) => (
+                                <ReviewCard key={review.username} {...review} />
+                            ))}
+                        </Marquee>
+                        <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/6 bg-linear-to-r"></div>
+                        <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/6 bg-linear-to-l"></div>
+                    </div>
                 </section>
 
-                <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-                    <Marquee pauseOnHover className="[--duration:30s]">
-                        {firstRow.map((review) => (
-                            <ReviewCard key={review.username} {...review} />
-                        ))}
-                    </Marquee>
-                    <Marquee reverse pauseOnHover className="[--duration:30s]">
-                        {secondRow.map((review) => (
-                            <ReviewCard key={review.username} {...review} />
-                        ))}
-                    </Marquee>
-                    <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-linear-to-r"></div>
-                    <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-linear-to-l"></div>
-                </div>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
                     <div className="space-y-1 text-center">
