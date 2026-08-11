@@ -112,11 +112,11 @@ export default function Welcome() {
 
             <main className="min-h-screen w-full bg-background text-foreground pb-16 space-y-16">
                 {/* Hero Section */}
-                <section className="min-h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 pt-16 md:pt-24">
+                <section className="md:min-h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 pt-24">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
-                                <h1 className="text-5xl leading-none tracking-tight text-balance text-foreground md:text-7xl font-semibold">
+                                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-semibold">
                                     Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
                                 </h1>
                                 <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
@@ -125,13 +125,13 @@ export default function Welcome() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3">
-                                <Button asChild size="lg">
+                                <Button asChild size="lg" className="w-full md:w-fit">
                                     <Link href="/products">
                                         Lihat Koleksi Kami
                                         <ArrowRight className="size-4" />
                                     </Link>
                                 </Button>
-                                <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')} variant="outline" size="lg">
+                                <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')} variant="outline" size="lg" className="w-full md:w-fit">
                                     Chat Via WhatsApp
                                     <WhatsAppIcon />
                                 </Button>
@@ -168,50 +168,52 @@ export default function Welcome() {
                 </div>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    <h2 className="text-5xl md:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
+                    <h2 className="text-5xl md:text-6xl lg:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
                         Our <span className="font-heading italic">Signature</span> Scent
                     </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <img src="\images\Vannessence.svg"
-                            alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
+                    <div className="space-y-12 md:space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <img src="\images\Vannessence.svg"
+                                alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
 
-                        <div className="flex flex-col justify-center gap-6">
-                            <div className="space-y-3">
-                                <h3 className="text-5xl font-semibold">Vanessence</h3>
-                                <p className="text-base text-muted-foreground">
-                                    Aroma vanilla yang lembut, creamy, dan elegan dengan nuansa hangat yang menenangkan. Cocok untuk penggunaan sehari-hari maupun momen spesial.
-                                </p>
+                            <div className="flex flex-col justify-center gap-6">
+                                <div className="space-y-3">
+                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold">Vanessence</h3>
+                                    <p className="text-base text-muted-foreground">
+                                        Aroma vanilla yang lembut, creamy, dan elegan dengan nuansa hangat yang menenangkan. Cocok untuk penggunaan sehari-hari maupun momen spesial.
+                                    </p>
+                                </div>
+
+                                <p className="text-2xl md:text-3xl lg:text-4xl font-medium">Rp199.000</p>
+
+                                <Button className="w-fit">
+                                    Lihat Detail Produk
+                                    <ArrowUpRight className="size-4" />
+                                </Button>
                             </div>
-
-                            <p className="text-4xl font-medium">Rp199.000</p>
-
-                            <Button className="w-fit">
-                                Lihat Detail Produk
-                                <ArrowUpRight className="size-4" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex flex-col justify-center gap-6 order-last md:order-first">
-                            <div className="space-y-3">
-                                <h3 className="text-5xl font-semibold">Dynamyst</h3>
-                                <p className="text-base text-muted-foreground">
-                                    Aroma fresh, sporty, dan clean dengan sentuhan hangat yang memberikan kesan maskulin, energik, dan percaya diri. Cocok digunakan untuk aktivitas sehari-hari.
-                                </p>
-                            </div>
-
-                            <p className="text-4xl font-medium">Rp199.000</p>
-
-                            <Button className="w-fit">
-                                Lihat Detail Produk
-                                <ArrowUpRight className="size-4" />
-                            </Button>
                         </div>
 
-                        <img src="\images\Dynamist.svg"
-                            alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex flex-col justify-center gap-6 order-last md:order-first">
+                                <div className="space-y-3">
+                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold">Dynamyst</h3>
+                                    <p className="text-base text-muted-foreground">
+                                        Aroma fresh, sporty, dan clean dengan sentuhan hangat yang memberikan kesan maskulin, energik, dan percaya diri. Cocok digunakan untuk aktivitas sehari-hari.
+                                    </p>
+                                </div>
+
+                                <p className="text-2xl md:text-3xl lg:text-4xl font-medium">Rp199.000</p>
+
+                                <Button className="w-fit">
+                                    Lihat Detail Produk
+                                    <ArrowUpRight className="size-4" />
+                                </Button>
+                            </div>
+
+                            <img src="\images\Dynamist.svg"
+                                alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
+                        </div>
                     </div>
                 </section>
 
@@ -221,7 +223,7 @@ export default function Welcome() {
 
                         {/* Section Heading */}
                         <div className="lg:sticky lg:top-32 lg:self-start">
-                            <h2 className="text-4xl font-medium tracking-tight sm:text-6xl">
+                            <h2 className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight sm:text-6xl">
                                 Lebih dari sekadar <span className="font-heading italic">wangi.</span>
                             </h2>
 
@@ -258,7 +260,7 @@ export default function Welcome() {
                     </div>
                 </section>
 
-                <section className="w-full max-w-4xl mx-auto text-center flex flex-col items-center">
+                <section className="w-full max-w-4xl mx-auto text-center flex flex-col items-center p-5">
                     <div className="bg-background w-14 h-14 rounded-full rotate-3 my-6 border border-border overflow-hidden">
                         <img
                             src="https://i.pravatar.cc/100?img=8"
@@ -321,8 +323,8 @@ export default function Welcome() {
                 </section>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    <div className="relative flex flex-col md:flex-row justify-between overflow-hidden rounded-3xl bg-foreground bg-grid-dark p-16">
-                        <div className="flex-1 relative z-10 max-w-2xl">
+                    <div className="relative overflow-hidden rounded-3xl bg-foreground bg-grid-dark p-5 md:p-16">
+                        <div className="flex-1 relative z-10 max-w-xl">
 
                             <h2 className="text-4xl font-medium tracking-tight text-primary-foreground sm:text-5xl lg:text-6xl">
                                 Sudah menemukan{" "} <br />
@@ -331,8 +333,8 @@ export default function Welcome() {
                                 </span>
                             </h2>
 
-                            <p className="mt-6 max-w-lg text-sm leading-7 text-primary-foreground/90 sm:text-base">
-                                Temukan aroma yang cocok untuk menemani
+                            <p className="mt-6 max-w-lg text-sm text-primary-foreground/90 sm:text-base">
+                                Temukan aroma yang cocok menemani
                                 setiap momen dan menjadi bagian dari
                                 karaktermu.
                             </p>
@@ -356,20 +358,18 @@ export default function Welcome() {
                                     className="bg-transparent text-primary-foreground hover:bg-primary/10 hover:text-primary-foreground"
                                 >
                                     <Link href="/products">
-                                        Lihat Koleksi
+                                        Lihat Koleksi Kami
                                         <ArrowRight />
                                     </Link>
                                 </Button>
                             </div>
                         </div>
-                        <div className="relative h-full flex-1 z-0">
-                            <img
-                                src="/images/RawNoShadow.png"
-                                alt="Perfume Bottle"
-                                className="absolute -right-16 w-full h-auto"
-                            />
-                        </div>
-                        <div className="absolute inset-0 h-full bg-linear-to-t from-primary/85 to-transparent z-1" />
+                        <img
+                            src="/images/RawNoShadow.png"
+                            alt="Perfume Bottle"
+                            className="absolute top-0 -right-24 md:-right-42 lg:-right-64 w-full h-full object-cover object-center"
+                        />
+                        <div className="absolute inset-0 h-full bg-linear-to-t from-primary md:from-primary/85 to-transparent z-1" />
                     </div>
                 </section>
             </main>
