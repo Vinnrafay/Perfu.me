@@ -110,9 +110,9 @@ export default function Welcome() {
         <>
             <Head title="Welcome" />
 
-            <main className="min-h-screen w-full bg-background text-foreground pb-16 space-y-16">
+            <main className="relative -top-16 min-h-screen w-full pb-16 space-y-16">
                 {/* Hero Section */}
-                <section className="md:min-h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5 pt-24">
+                <section className="md:h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
@@ -138,7 +138,7 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="relative aspect-square w-full rounded-3xl overflow-hidden">
+                        <div className="relative aspect-square w-full p-16 rounded-3xl overflow-hidden">
                             <img
                                 src="/images/BannerAboutMe.png"
                                 alt="Perfume Bottle"
@@ -153,10 +153,10 @@ export default function Welcome() {
                         <div className="w-full overflow-hidden border-y border-muted-foreground border-dashed bg-primary py-3">
                             <div className="flex whitespace-nowrap text-sm font-semibold uppercase tracking-[0.25em] text-primary-foreground/80">
                                 {Array.from({ length: 8 }).map((_, i) => (
-                                    <span key={i} className="mx-6 flex items-center gap-6">
+                                    <span key={i} className="mr-6 flex items-center gap-6">
                                         Wangi Gak Harus Mahal
                                         <span className="text-primary-foreground/40">•</span>
-                                        Smell Good. Feel Confident
+                                        Smell Good, Feel Confident
                                         <span className="text-primary-foreground/40">•</span>
                                     </span>
                                 ))}
@@ -349,22 +349,19 @@ export default function Welcome() {
                                     variant="secondary"
                                     size="lg"
                                 >
-                                    <Link href="/quiz">
-                                        Quiz Cari Parfum-mu
+                                    <Link href="/products">
+                                        Jelajahi Koleksi Kami
                                         <Compass />
                                     </Link>
                                 </Button>
 
-                                <Button
-                                    asChild
+                                <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')}
                                     variant="outline"
                                     size="lg"
                                     className="bg-transparent text-primary-foreground hover:bg-primary/10 hover:text-primary-foreground"
                                 >
-                                    <Link href="/products">
-                                        Lihat Koleksi Kami
-                                        <ArrowRight />
-                                    </Link>
+                                    Hubungi Kami
+                                    <WhatsAppIcon />
                                 </Button>
                             </div>
                         </div>
@@ -385,10 +382,6 @@ const faqs = [
     {
         question: "Berapa lama waktu pengiriman parfum setelah pemesanan?",
         answer: "Pengiriman biasanya memakan waktu 1-3 hari kerja untuk Jabodetabek dan 3-5 hari kerja untuk luar daerah/pulau. Pengiriman gratis ongkir untuk pemesanan dari dalam Pulau Jawa.",
-    },
-    {
-        question: "Berapa lama daya tahan (longevity) parfum ini?",
-        answer: "Rata-rata parfum kami bertahan 6-8 jam di kulit dan hingga 12 jam jika disemprotkan ke pakaian, tergantung pada jenis aktivitas dan tempat penyimpanan.",
     },
     {
         question: "Bagaimana jika botol pecah atau spray rusak saat sampai?",

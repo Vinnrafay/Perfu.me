@@ -236,25 +236,25 @@ export default function Catalog({ products = [] }: Props) {
     return (
         <div className="min-h-screen pb-24 bg-background text-foreground flex flex-col">
             {/* Hero Banner Section */}
-            <section className="relative w-full h-[38vh] min-h-[340px] flex flex-col items-center justify-center text-center overflow-hidden">
+            <section className="relative w-full h-[38vh] min-h-90 flex flex-col items-center justify-center text-center overflow-hidden">
                 <div className="absolute inset-0 w-full h-full">
                     <img
                         src="/images/BannerPageProduct.png"
                         alt="Discover Your Scent"
                         className="w-full h-full object-cover object-center scale-105 filter brightness-90"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-black/50 to-black/30" />
+                    <div className="absolute inset-0 bg-linear-to-t from-background via-black/50 to-black/30" />
                 </div>
 
-                <div className="relative z-10 px-6 max-w-3xl mx-auto flex flex-col items-center space-y-3">
+                <div className="relative -top-6 z-10 px-6 max-w-3xl mx-auto flex flex-col items-center space-y-1">
                     {/* <Badge variant="outline" className="border-white/30 text-white bg-white/10 backdrop-blur-md px-3.5 py-1 text-[11px] font-medium tracking-widest uppercase">
                         Katalog Eksklusif
                     </Badge> */}
                     <h1 className="text-3xl sm:text-5xl md:text-6xl font-light text-white tracking-tight leading-tight">
-                        Discover Your <span className="font-serif italic font-normal text-indigo-200">Scent</span>
+                        Discover Your <span className="font-heading italic">Scent</span>
                     </h1>
-                    <p className="text-white/80 text-xs sm:text-sm md:text-base font-light leading-relaxed max-w-lg">
-                        Eksplorasi wewangian aromatik terpilih untuk melengkapi personalitas dan persona unikmu.
+                    <p className="text-muted text-xs sm:text-sm md:text-base font-light leading-relaxed">
+                        Eksplorasi wewangian aromatik terpilih untuk melengkapi kepribadian dan persona unikmu.
                     </p>
                 </div>
             </section>
