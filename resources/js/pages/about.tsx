@@ -101,8 +101,8 @@ export default function AboutUs() {
               <div className="my-auto flex flex-col items-center justify-between gap-8 sm:flex-row">
 
                 {/* Teks Deskripsi */}
-                <div className="z-10 flex w-full flex-col gap-3 sm:w-[48%]">
-                  <h3 className="font-heading text-5xl italic sm:text-6xl">Dynamyst</h3>
+                <div className="z-12 flex w-full flex-col gap-3 sm:w-[48%]">
+                  <h3 className="font-heading text-5xl sm:text-6xl">Dynamyst</h3>
                   <p className="text-sm leading-relaxed text-primary-foreground/70 sm:text-base">
                     Hadir untuk mereka yang aktif, percaya diri, dan penuh
                     semangat. Perpaduan aroma fresh, sporty, clean, dengan
@@ -118,8 +118,9 @@ export default function AboutUs() {
                     alt="Dynamyst Perfume"
                     className="h-80 w-auto -rotate-12 object-contain transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] drop-shadow-[0_25px_30px_rgba(0,0,0,0.65)] group-hover:rotate-0 group-hover:-translate-y-5 group-hover:scale-105 group-hover:drop-shadow-[0_40px_40px_rgba(0,0,0,0.85)] sm:h-96 lg:h-[420px]"
                   />
-                  <div className="absolute inset-0 h-full bg-linear-to-t from-primary via-transparent to-transparent z-11" />
                 </div>
+
+                <div className="absolute inset-0 h-full bg-linear-to-t from-primary via-primary/15 to-transparent z-11" />
 
               </div>
             </div>
@@ -131,8 +132,8 @@ export default function AboutUs() {
               <div className="my-auto flex flex-col items-center justify-between gap-8 sm:flex-row">
 
                 {/* Teks Deskripsi */}
-                <div className="z-10 flex w-full flex-col gap-3 sm:w-[48%]">
-                  <h3 className="font-heading text-5xl italic sm:text-6xl">Vannessence</h3>
+                <div className="z-12 flex w-full flex-col gap-3 sm:w-[48%]">
+                  <h3 className="font-heading text-5xl sm:text-6xl">Vannessence</h3>
                   <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
                     Diciptakan untuk mereka yang menyukai kelembutan dan
                     ketenangan. Aroma vanilla yang creamy berpadu dengan nuansa
@@ -147,8 +148,9 @@ export default function AboutUs() {
                     alt="Vannessence Perfume"
                     className="h-80 w-auto rotate-12 object-contain transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] drop-shadow-[0_25px_30px_rgba(0,0,0,0.2)] group-hover:rotate-0 group-hover:-translate-y-5 group-hover:scale-105 group-hover:drop-shadow-[0_40px_40px_rgba(0,0,0,0.38)] sm:h-96 lg:h-[420px]"
                   />
-                  <div className="absolute inset-0 h-full bg-linear-to-t from-secondary via-transparent to-transparent z-11" />
                 </div>
+                
+                <div className="absolute inset-0 h-full bg-linear-to-t from-secondary via-secondary/15 to-transparent z-11" />
 
               </div>
             </div>
