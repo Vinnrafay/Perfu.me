@@ -60,7 +60,7 @@ interface PaginatedTestimoni {
     last_page: number;
     total: number;
     per_page?: number;
-    links: { url: string | null; label: string; active: boolean }[];
+    links: PaginationLink[];
 }
 
 interface Props {
@@ -92,12 +92,21 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
         Tanggal: true,
     });
 
-    // Client-side sorting berdasarkan nama
+    // Default: ikutin urutan asli dari backend (terbaru di atas).
+    // Cuma di-override kalau user eksplisit klik header "Nama".
     const rows = useMemo(() => {
-        return [...(paginated.data || [])].sort((a, b) =>
-            sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama)
+        const data = paginated.data || [];
+        if (nameSort === 'none') return data;
+        return [...data].sort((a, b) =>
+            nameSort === 'asc'
+                ? a.nama.localeCompare(b.nama)
+                : b.nama.localeCompare(a.nama)
         );
     }, [paginated.data, nameSort]);
+
+    const cycleNameSort = () => {
+        setNameSort((prev) => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
+    };
 
     const allSelected = rows.length > 0 && selected.length === rows.length;
 
@@ -147,11 +156,6 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
         router.reload({ only: ['testimonis'] });
     };
 
-    const goToPageUrl = (url: string | null) => {
-        if (!url) return;
-        router.visit(url, { preserveState: true, preserveScroll: true });
-    };
-
     const renderStars = (rating: number) => {
         return Array.from({ length: 5 }, (_, i) => (
             <Star
@@ -170,9 +174,9 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
     const to = Math.min(from + (paginated.data?.length || 0) - 1, totalItems);
 
     return (
-        <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
             {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
                         Daftar Testimoni
@@ -185,9 +189,9 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
             </div>
 
             {/* Table Card Container */}
-            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 {/* Toolbar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-b border-border bg-muted/20">
+                <div className="flex flex-col items-center justify-between gap-3 border-b border-border bg-muted/20 p-4 sm:flex-row">
                     {/* Search Form */}
                     <form onSubmit={submitSearch} className="relative w-full sm:max-w-xs">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -195,18 +199,18 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Cari ulasan atau nama..."
-                            className="h-9 pl-9 text-sm rounded-lg bg-background"
+                            className="h-9 rounded-lg bg-background pl-9 text-sm"
                         />
                     </form>
 
                     {/* Toolbar Action Buttons */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
                         {selected.length > 0 && (
                             <Button
                                 variant="destructive"
                                 size="sm"
                                 onClick={handleBulkDelete}
-                                className="h-9 gap-1.5 text-xs animate-in fade-in zoom-in-95 duration-150"
+                                className="h-9 animate-in gap-1.5 fade-in zoom-in-95 text-xs duration-150"
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
                                 Hapus ({selected.length})
@@ -219,7 +223,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                 <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg text-xs font-medium">
                                     <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
                                     Kolom
-                                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
+                                    <ChevronDown className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-44">
@@ -261,11 +265,16 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => setSortAsc((v) => !v)}
+                                        onClick={cycleNameSort}
                                         className="-ml-3 h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
                                     >
                                         Nama
                                         <ArrowUpDown className="h-3.5 w-3.5" />
+                                        {nameSort !== 'none' && (
+                                            <span className="text-[10px] normal-case text-muted-foreground/70">
+                                                ({nameSort === 'asc' ? 'A-Z' : 'Z-A'})
+                                            </span>
+                                        )}
                                     </Button>
                                 </TableHead>
                                 {visibleColumns.Email && (
@@ -331,29 +340,18 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
 
                                         <TableCell className="font-medium text-foreground">
                                             <div className="flex items-center gap-2.5">
-                                                {profilUrl ? (
-                                                    <img
-                                                        src={profilUrl}
-                                                        alt={item.nama}
-                                                        className="h-7 w-7 rounded-full object-cover shrink-0 border border-border"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground shrink-0 border border-border">
-                                                        <User className="h-3.5 w-3.5" />
-                                                    </div>
-                                                )}
                                                 <span className="truncate">{item.nama}</span>
                                             </div>
                                         </TableCell>
 
                                         {visibleColumns.Email && (
-                                            <TableCell className="text-muted-foreground text-sm">
+                                            <TableCell className="text-sm text-muted-foreground">
                                                 {item.email}
                                             </TableCell>
                                         )}
 
                                         {visibleColumns.Komentar && (
-                                            <TableCell className="text-muted-foreground text-sm max-w-xs truncate">
+                                            <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
                                                 {item.komentar}
                                             </TableCell>
                                         )}
@@ -367,7 +365,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                         )}
 
                                         {visibleColumns.Tanggal && (
-                                            <TableCell className="text-muted-foreground text-xs">
+                                            <TableCell className="text-xs text-muted-foreground">
                                                 {item.created_at || '-'}
                                             </TableCell>
                                         )}
@@ -392,7 +390,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                                     />
                                                     <DropdownMenuItem
                                                         onClick={() => handleDelete(item.id)}
-                                                        className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                                                        className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
                                                     >
                                                         Hapus
                                                     </DropdownMenuItem>
@@ -407,7 +405,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                 </div>
 
                 {/* Footer Paginasi */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border p-4 bg-muted/10 text-xs text-muted-foreground">
+                <div className="flex flex-col items-center justify-between gap-4 border-t border-border bg-muted/10 p-4 text-xs text-muted-foreground sm:flex-row">
                     <div>
                         {selected.length > 0 ? (
                             <span className="font-medium text-foreground">
@@ -426,13 +424,13 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                             size="sm"
                             disabled={paginated.current_page <= 1}
                             onClick={() => handlePageChange(paginated.current_page - 1)}
-                            className="h-8 px-3 text-xs gap-1"
+                            className="h-8 gap-1 px-3 text-xs"
                         >
                             <ChevronLeft className="h-3.5 w-3.5" />
                             Sebelumnya
                         </Button>
 
-                        <span className="px-3 py-1 font-medium text-foreground bg-background border border-border rounded-md">
+                        <span className="rounded-md border border-border bg-background px-3 py-1 font-medium text-foreground">
                             {paginated.current_page} / {paginated.last_page || 1}
                         </span>
 
@@ -441,7 +439,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                             size="sm"
                             disabled={paginated.current_page >= paginated.last_page}
                             onClick={() => handlePageChange(paginated.current_page + 1)}
-                            className="h-8 px-3 text-xs gap-1"
+                            className="h-8 gap-1 px-3 text-xs"
                         >
                             Selanjutnya
                             <ChevronRight className="h-3.5 w-3.5" />

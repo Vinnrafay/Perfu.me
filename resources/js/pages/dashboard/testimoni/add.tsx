@@ -30,6 +30,7 @@ export default function AddTestimoniSheet({ onCreated }: Props) {
         email: '',
         komentar: '',
         rating: 5,
+        profil: null as File | null,
     });
 
     const submitTestimoni = (e: React.FormEvent) => {
@@ -55,27 +56,27 @@ export default function AddTestimoniSheet({ onCreated }: Props) {
                 </Button>
             </SheetTrigger>
 
-            <SheetContent 
-                side="bottom" 
+            <SheetContent
+                side="right"
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
-                <form onSubmit={handleSubmit} className="flex flex-col h-full w-full overflow-hidden">
-                    
+                <form onSubmit={submitTestimoni} className="flex flex-col h-full w-full overflow-hidden">
+
                     {/* STICKY HEADER */}
                     <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
                         <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                             Tambah Testimoni Baru
                         </SheetTitle>
-                        
+
                         <div className="flex items-center gap-3">
                             <SheetClose asChild>
                                 <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs h-9">
                                     Batal
                                 </Button>
                             </SheetClose>
-                            <Button 
-                                type="submit" 
-                                disabled={processing} 
+                            <Button
+                                type="submit"
+                                disabled={processing}
                                 className="rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9 min-w-[130px]"
                             >
                                 {processing ? (
@@ -93,7 +94,7 @@ export default function AddTestimoniSheet({ onCreated }: Props) {
                     {/* SCROLLABLE FORM CONTENT */}
                     <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
                         <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
-                            
+
                             {/* Baris 1: Nama & Email */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
@@ -157,7 +158,7 @@ export default function AddTestimoniSheet({ onCreated }: Props) {
                             </div>
 
                             {/* Komentar / Ulasan */}
-                            <div className="grid gap-2 pb-10">
+                            <div className="grid gap-2">
                                 <Label htmlFor="komentar" className="text-sm font-medium">
                                     Komentar / Ulasan <span className="text-destructive">*</span>
                                 </Label>

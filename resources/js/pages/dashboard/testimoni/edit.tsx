@@ -55,7 +55,7 @@ export default function EditTestimoniSheet({ testimoni, trigger, onUpdated }: Pr
             </SheetTrigger>
 
             <SheetContent 
-                side="bottom" 
+                side="right" 
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={handleSubmit} className="flex flex-col h-full w-full overflow-hidden">
