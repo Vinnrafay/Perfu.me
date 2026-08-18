@@ -60,7 +60,7 @@ export default function Navbar() {
                     {/* Desktop CTA */}
                     <div className="flex-1 hidden items-center justify-end lg:flex">
                         <Button onClick={() => window.open('https://wa.me/6281234567890', '_blank')}>
-                            <Icon />
+                            <WhatsAppIcon />
                             Pesan Sekarang!
                         </Button>
                     </div>
