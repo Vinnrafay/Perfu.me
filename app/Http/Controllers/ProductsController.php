@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ProductsController extends Controller
@@ -13,28 +14,26 @@ class ProductsController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->string('search')->toString();
+        $search = trim($request->string('search')->toString());
 
         $products = Product::query()
-            ->when($search, fn ($query) => $query->where('nama', 'like', "%{$search}%"))
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                      ->orWhere('Varian', 'like', "%{$search}%")
+                      ->orWhere('kategori', 'like', "%{$search}%");
+                });
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('dashboard/products/index', [
             'products' => $products,
-            'filters' => [
+            'filters'  => [
                 'search' => $search,
             ],
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-       
     }
 
     /**
@@ -42,31 +41,12 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        // Checkbox dari frontend dikirim sebagai boolean (true/false),
-        // tapi kolom Best_Seller di database cuma nerima 'yes'/'no'.
-        // Konversi dulu sebelum divalidasi.
+        // Konversi checkbox boolean ke format database ('yes'/'no')
         $request->merge([
             'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
         ]);
 
-        $validated = $request->validate([
-            'nama'               => 'required|string|max:255',
-            'kategori'           => 'required|in:EDP,EDT,Roll-On,Body Mist',
-            'gender'             => 'required|in:male,female,unisex',
-            'Varian'             => 'required|string|max:255',
-            'Top_Note'           => 'required|string|max:255',
-            'Middle_Note'        => 'required|string|max:255',
-            'Base_Note'          => 'required|string|max:255',
-            'Komposisi'          => 'required|string|max:255',
-            'Kemasan'            => 'nullable|string|max:255',
-            'Ukuran'             => 'required|integer',
-            'Harga'              => 'required|numeric',
-            'Stok'               => 'required|integer',
-            'Tanggal_launch'     => 'nullable|date',
-            'Deskripsi'          => 'required|string',
-            'Foto'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'Best_Seller'        => 'required|in:yes,no',
-        ]);
+        $validated = $request->validate($this->validationRules());
 
         if ($request->hasFile('Foto')) {
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
@@ -75,17 +55,15 @@ class ProductsController extends Controller
         Product::create($validated);
 
         return redirect()
-            ->route('products.index')
+            ->back()
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Product $product)
     {
-        $product = Product::findOrFail($id);
-
         return Inertia::render('products/detail', [
             'product' => $product,
         ]);
@@ -94,10 +72,8 @@ class ProductsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Product $product)
     {
-        $product = Product::findOrFail($id);
-
         return Inertia::render('dashboard/products/edit', [
             'product' => $product,
         ]);
@@ -106,57 +82,93 @@ class ProductsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Product $product)
     {
-        $product = Product::findOrFail($id);
-
-        // Sama kayak store(): checkbox boolean dari frontend dikonversi
-        // dulu ke 'yes'/'no' sebelum divalidasi.
         $request->merge([
             'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
         ]);
 
-        $validated = $request->validate([
-            'nama'               => 'required|string|max:255',
-            'kategori'           => 'required|in:EDP,EDT,Roll-On,Body Mist',
-            'gender'             => 'required|in:male,female,unisex',
-            'Varian'             => 'required|string|max:255',
-            'Top_Note'           => 'required|string|max:255',
-            'Middle_Note'        => 'required|string|max:255',
-            'Base_Note'          => 'required|string|max:255',
-            'Komposisi'          => 'required|string|max:255',
-            'Kemasan'            => 'nullable|string|max:255',
-            'Ukuran'             => 'required|integer',
-            'Harga'              => 'required|numeric',
-            'Stok'               => 'required|integer',
-            'Tanggal_launch'     => 'nullable|date',
-            'Deskripsi'          => 'required|string',
-            'Foto'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'Best_Seller'        => 'required|in:yes,no',
-        ]);
+        $validated = $request->validate($this->validationRules($product->id));
 
         if ($request->hasFile('Foto')) {
+            // Hapus gambar lama dari storage jika ada gambar baru
+            if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
+                Storage::disk('public')->delete($product->Foto);
+            }
+
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
         }
 
         $product->update($validated);
 
         return redirect()
-            ->route('products.index')
+            ->back()
             ->with('success', 'Produk berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        $product = Product::findOrFail($id);
+        // Hapus file gambar terkait dari storage
+        if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
+            Storage::disk('public')->delete($product->Foto);
+        }
 
         $product->delete();
 
         return redirect()
-            ->route('products.index')
+            ->back()
             ->with('success', 'Produk berhasil dihapus.');
+    }
+
+    /**
+
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:products,id',
+        ]);
+
+        $products = Product::whereIn('id', $request->ids)->get();
+
+        foreach ($products as $product) {
+            if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
+                Storage::disk('public')->delete($product->Foto);
+            }
+            $product->delete();
+        }
+
+        return redirect()
+            ->back()
+            ->with('success', count($request->ids) . ' produk berhasil dihapus.');
+    }
+
+    /**
+     * Helper Aturan Validasi Produk
+     */
+    private function validationRules(?int $productId = null): array
+    {
+        return [
+            'nama'           => 'required|string|max:255',
+            'kategori'       => 'required|in:EDP,EDT,Roll-On,Body Mist',
+            'gender'         => 'required|in:male,female,unisex',
+            'Varian'         => 'required|string|max:255',
+            'Top_Note'       => 'required|string|max:255',
+            'Middle_Note'    => 'required|string|max:255',
+            'Base_Note'      => 'required|string|max:255',
+            'Komposisi'      => 'required|string|max:255',
+            'Kemasan'        => 'nullable|string|max:255',
+            'Ukuran'         => 'required|integer|min:1',
+            'Harga'          => 'required|numeric|min:0',
+            'Stok'           => 'required|integer|min:0',
+            'Tanggal_launch' => 'nullable|date',
+            'Deskripsi'      => 'required|string',
+            'Foto'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'Best_Seller'    => 'required|in:yes,no',
+        ];
     }
 }

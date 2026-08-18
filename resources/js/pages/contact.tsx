@@ -1,4 +1,5 @@
 import Navbar from "@/components/blocks/navbar";
+import { Card } from "@/components/ui/card";
 import { Phone, Mail, Instagram, Clock, MapPin } from "lucide-react";
 
 export default function Contact() {
@@ -29,26 +30,21 @@ export default function Contact() {
 
   return (
     <>
-      <Navbar />
-
-      <main className="flex min-h-screen flex-col items-center bg-background text-foreground">
+      <main className="flex min-h-screen flex-col items-center gap-12 bg-background text-foreground py-12">
         {/* Hero */}
-        <section className="flex w-full max-w-7xl flex-col gap-6 px-5 py-24 sm:py-32">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-            We&apos;d love to hear from you
-          </p>
+        <section className="flex w-full max-w-7xl flex-col gap-3 px-5">
           <h1 className="text-6xl font-semibold capitalize leading-[1.05] sm:text-7xl">
             Contact <span className="font-heading italic">Perfu.me</span>
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Ada pertanyaan soal produk, kolaborasi, atau butuh bantuan
-            sebelum checkout? Tim kami siap bantu — pilih cara termudah buat
+            sebelum checkout? Kami siap bantu dan pilih cara termudah buat
             kamu.
           </p>
         </section>
 
         {/* Contact info + map */}
-        <section className="grid w-full max-w-7xl grid-cols-1 gap-12 border-t border-border px-5 py-20 sm:grid-cols-2">
+        <section className="grid w-full max-w-7xl grid-cols-1 gap-6 px-5 sm:grid-cols-2">
           {/* Left: contact channels */}
           <div className="flex flex-col gap-4">
             {contactItems.map(({ icon: Icon, label, value, href }) => (
@@ -57,41 +53,39 @@ export default function Contact() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-4 rounded-lg border border-border bg-muted p-6 transition-colors hover:bg-accent hover:text-accent-foreground"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-background">
-                  <Icon className="h-5 w-5" strokeWidth={1.5} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                    {label}
-                  </span>
-                  <span className="text-lg font-medium">{value}</span>
-                </div>
+                <Card className="group flex-row items-center gap-4 px-6">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                    <Icon className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {label}
+                    </span>
+                    <span className="text-lg font-medium">{value}</span>
+                  </div>
+                </Card>
               </a>
             ))}
 
-            <div className="mt-4 flex items-start gap-4 rounded-lg border border-border bg-background p-6">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" strokeWidth={1.5} />
+            <Card className="flex-row items-start gap-4 px-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                <Clock className="h-5 w-5" strokeWidth={1.5} />
+              </div>
               <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                <span className="text-xs font-medium text-muted-foreground">
                   Jam Operasional
                 </span>
-                <span className="text-sm text-foreground">
+                <span className="text-lg font-medium text-foreground">
                   Setiap hari, 09.00 – 21.00 WIB
                 </span>
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Right: location / map */}
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted p-8">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                Kunjungi Kami
-              </span>
-              <h2 className="font-heading text-2xl italic">Lokasi Perfu.me</h2>
-            </div>
+          <Card className="px-6">
+            <h2 className="text-xl font-medium">Kunjungi Kami Secara Langsung</h2>
 
             <div className="overflow-hidden rounded-lg border border-border">
               <iframe
@@ -106,13 +100,13 @@ export default function Contact() {
             </div>
 
             <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" strokeWidth={1.5} />
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 Jl. Lingkar Dramaga RT 03/04, Desa Dramaga, Kec. Dramaga,
                 Kabupaten Bogor, Jawa Barat
               </p>
             </div>
-          </div>
+          </Card>
         </section>
       </main>
 
