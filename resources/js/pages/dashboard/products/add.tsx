@@ -32,21 +32,38 @@ const genderOptions = [
     { value: 'female', label: 'Wanita' },
     { value: 'unisex', label: 'Unisex' },
 ];
+const originalOptions = [
+    { value: 'Original', label: 'Original' },
+    { value: 'Refill', label: 'Refill' },
+] as const;
 
 interface Props {
     onCreated?: () => void;
 }
 
+// Helper untuk memformat angka dengan pemisah ribuan (contoh: 199000 -> 199.000)
+const formatNumber = (val: string | number | null | undefined): string => {
+    if (val === null || val === undefined || val === '') return '';
+    const raw = val.toString().replace(/\D/g, '');
+    if (!raw) return '';
+    return new Intl.NumberFormat('id-ID').format(Number(raw));
+};
+
+const parseRawNumber = (val: string): string => val.replace(/\D/g, '');
+
 export default function AddProductSheet({ onCreated }: Props) {
     const [open, setOpen] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [displayHarga, setDisplayHarga] = useState<string>('');
+    const [displayDiskon, setDisplayDiskon] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         nama: '',
         kategori: '',
         gender: '',
-        Varian: '',
+        original: 'Original' as 'Original' | 'Refill',
+        brand: '',
         Top_Note: '',
         Middle_Note: '',
         Base_Note: '',
@@ -54,12 +71,35 @@ export default function AddProductSheet({ onCreated }: Props) {
         Kemasan: '',
         Ukuran: '',
         Harga: '',
+        Diskon: '',
         Stok: '',
         Tanggal_launch: '',
         Deskripsi: '',
         Foto: null as File | null,
         Best_Seller: false,
+        signature: false,
     });
+
+    const isRefill = data.original === 'Refill';
+
+    // Harga akhir dihitung live di frontend cuma buat preview,
+    // perhitungan yang beneran dipakai tetap dari backend (accessor harga_akhir di model).
+    const hargaAkhirPreview = Math.max(
+        0,
+        (Number(data.Harga) || 0) - (Number(data.Diskon) || 0)
+    );
+
+    const handleHargaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = parseRawNumber(e.target.value);
+        setData('Harga', raw);
+        setDisplayHarga(formatNumber(raw));
+    };
+
+    const handleDiskonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = parseRawNumber(e.target.value);
+        setData('Diskon', raw);
+        setDisplayDiskon(formatNumber(raw));
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -81,12 +121,23 @@ export default function AddProductSheet({ onCreated }: Props) {
         }
     };
 
+    const selectOriginal = (val: 'Original' | 'Refill') => {
+        setData((prev) => ({
+            ...prev,
+            original: val,
+            // Signature cuma berlaku buat Original — reset kalau pindah ke Refill
+            signature: val === 'Refill' ? false : prev.signature,
+        }));
+    };
+
     const submitProduct = (e: React.FormEvent) => {
         e.preventDefault();
         post(store().url, {
             forceFormData: true,
             onSuccess: () => {
                 reset();
+                setDisplayHarga('');
+                setDisplayDiskon('');
                 setImagePreview(null);
                 setOpen(false);
                 onCreated?.();
@@ -108,7 +159,7 @@ export default function AddProductSheet({ onCreated }: Props) {
             >
                 <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
                     
-                    {/* STICKY HEADER: Selalu menempel di atas layar, tidak ikut ter-scroll */}
+                    {/* STICKY HEADER */}
                     <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
                         <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                             Tambah Produk Baru
@@ -137,40 +188,66 @@ export default function AddProductSheet({ onCreated }: Props) {
                         </div>
                     </div>
 
-                    {/* SCROLLABLE AREA: Bagian isi form yang bisa digulir ke bawah */}
-                    <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
+                    {/* SCROLLABLE AREA */}
+                    <div className="flex-1 min-h-0 overflow-y-auto w-full custom-scrollbar" data-lenis-prevent>
                         <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
-                            
-                            {/* Baris 1: Nama & Varian */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="nama" className="text-sm font-medium">Nama Produk <span className="text-destructive">*</span></Label>
-                                    <Input
-                                        id="nama"
-                                        placeholder="Contoh: Vanessence"
-                                        value={data.nama}
-                                        onChange={(e) => setData('nama', e.target.value)}
-                                    />
-                                    {errors.nama && <span className="text-[10px] text-destructive">{errors.nama}</span>}
+
+                            {/* Tipe Produk */}
+                            <div className="grid gap-2">
+                                <Label className="text-sm font-medium">
+                                    Tipe Produk <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {originalOptions.map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => selectOriginal(opt.value)}
+                                            className={`h-10 rounded-lg border text-sm font-medium transition-colors ${
+                                                data.original === opt.value
+                                                    ? 'bg-black text-white border-black'
+                                                    : 'bg-background text-foreground border-border hover:bg-muted/50'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="varian" className="text-sm font-medium">Varian Aroma</Label>
-                                    <Input
-                                        id="varian"
-                                        placeholder="Contoh: Extrait de Parfum"
-                                        value={data.Varian}
-                                        onChange={(e) => setData('Varian', e.target.value)}
-                                    />
-                                    {errors.Varian && <span className="text-[10px] text-destructive">{errors.Varian}</span>}
-                                </div>
+                                {errors.original && <span className="text-[10px] text-destructive">{errors.original}</span>}
                             </div>
+                            
+                            {/* Nama */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="nama" className="text-sm font-medium">Nama Produk <span className="text-destructive">*</span></Label>
+                                <Input
+                                    id="nama"
+                                    placeholder="Contoh: Vanessence"
+                                    value={data.nama}
+                                    onChange={(e) => setData('nama', e.target.value)}
+                                />
+                                {errors.nama && <span className="text-[10px] text-destructive">{errors.nama}</span>}
+                            </div>
+
+                            {/* Brand — cuma muncul kalau Refill */}
+                            {isRefill && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="brand" className="text-sm font-medium">Brand Original <span className="text-destructive">*</span></Label>
+                                    <Input
+                                        id="brand"
+                                        placeholder="Contoh: Chanel, Dior, YSL..."
+                                        value={data.brand}
+                                        onChange={(e) => setData('brand', e.target.value)}
+                                    />
+                                    {errors.brand && <span className="text-[10px] text-destructive">{errors.brand}</span>}
+                                </div>
+                            )}
 
                             {/* Baris 2: Kategori & Gender */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
                                     <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)}>
-                                        <SelectTrigger>
+                                        <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Pilih kategori" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -185,7 +262,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Gender <span className="text-destructive">*</span></Label>
                                     <Select value={data.gender} onValueChange={(val) => setData('gender', val)}>
-                                        <SelectTrigger className="capitalize">
+                                        <SelectTrigger className="w-full capitalize">
                                             <SelectValue placeholder="Pilih target" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -200,34 +277,37 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 </div>
                             </div>
 
-                            {/* Notes Aroma */}
+                            {/* Notes Aroma — sekarang selalu muncul, Original maupun Refill */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="top_note" className="text-sm font-medium">Top Note</Label>
+                                    <Label htmlFor="top_note" className="text-sm font-medium">Top Note <span className="text-destructive">*</span></Label>
                                     <Input
                                         id="top_note"
                                         placeholder="Wangian awal..."
                                         value={data.Top_Note}
                                         onChange={(e) => setData('Top_Note', e.target.value)}
                                     />
+                                    {errors.Top_Note && <span className="text-[10px] text-destructive">{errors.Top_Note}</span>}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="middle_note" className="text-sm font-medium">Middle Note</Label>
+                                    <Label htmlFor="middle_note" className="text-sm font-medium">Middle Note <span className="text-destructive">*</span></Label>
                                     <Input
                                         id="middle_note"
                                         placeholder="Wangian inti..."
                                         value={data.Middle_Note}
                                         onChange={(e) => setData('Middle_Note', e.target.value)}
                                     />
+                                    {errors.Middle_Note && <span className="text-[10px] text-destructive">{errors.Middle_Note}</span>}
                                 </div>
                                 <div className="grid gap-2 sm:col-span-2">
-                                    <Label htmlFor="base_note" className="text-sm font-medium">Base Note</Label>
+                                    <Label htmlFor="base_note" className="text-sm font-medium">Base Note <span className="text-destructive">*</span></Label>
                                     <Input
                                         id="base_note"
                                         placeholder="Wangian akhir (dry down)..."
                                         value={data.Base_Note}
                                         onChange={(e) => setData('Base_Note', e.target.value)}
                                     />
+                                    {errors.Base_Note && <span className="text-[10px] text-destructive">{errors.Base_Note}</span>}
                                 </div>
                             </div>
 
@@ -255,7 +335,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 />
                             </div>
 
-                            {/* Harga, Stok, dll */}
+                            {/* Ukuran & Kemasan */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label htmlFor="ukuran" className="text-sm font-medium">Ukuran (ml) <span className="text-destructive">*</span></Label>
@@ -277,28 +357,58 @@ export default function AddProductSheet({ onCreated }: Props) {
                                         onChange={(e) => setData('Kemasan', e.target.value)}
                                     />
                                 </div>
+                            </div>
+
+                            {/* Harga & Diskon */}
+                            <div className="grid grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label htmlFor="harga" className="text-sm font-medium">Harga Jual (Rp) <span className="text-destructive">*</span></Label>
                                     <Input
                                         id="harga"
-                                        type="number"
-                                        placeholder="199000"
-                                        value={data.Harga}
-                                        onChange={(e) => setData('Harga', e.target.value)}
+                                        type="text"
+                                        inputMode="numeric"
+                                        placeholder="199.000"
+                                        value={displayHarga}
+                                        onChange={handleHargaChange}
                                     />
                                     {errors.Harga && <span className="text-[10px] text-destructive">{errors.Harga}</span>}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="stok" className="text-sm font-medium">Stok Awal <span className="text-destructive">*</span></Label>
+                                    <Label htmlFor="diskon" className="text-sm font-medium">Diskon (Rp, opsional)</Label>
                                     <Input
-                                        id="stok"
-                                        type="number"
-                                        placeholder="100"
-                                        value={data.Stok}
-                                        onChange={(e) => setData('Stok', e.target.value)}
+                                        id="diskon"
+                                        type="text"
+                                        inputMode="numeric"
+                                        placeholder="0"
+                                        value={displayDiskon}
+                                        onChange={handleDiskonChange}
                                     />
-                                    {errors.Stok && <span className="text-[10px] text-destructive">{errors.Stok}</span>}
+                                    {errors.Diskon && <span className="text-[10px] text-destructive">{errors.Diskon}</span>}
                                 </div>
+                            </div>
+
+                            {/* Harga Akhir — preview otomatis, bukan input */}
+                            <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium">Harga Akhir</p>
+                                    <p className="text-xs text-muted-foreground">Harga setelah dikurangi diskon</p>
+                                </div>
+                                <span className="text-base font-semibold text-foreground">
+                                    Rp {formatNumber(hargaAkhirPreview)}
+                                </span>
+                            </div>
+
+                            {/* Stok */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="stok" className="text-sm font-medium">Stok Awal <span className="text-destructive">*</span></Label>
+                                <Input
+                                    id="stok"
+                                    type="number"
+                                    placeholder="100"
+                                    value={data.Stok}
+                                    onChange={(e) => setData('Stok', e.target.value)}
+                                />
+                                {errors.Stok && <span className="text-[10px] text-destructive">{errors.Stok}</span>}
                             </div>
 
                             {/* File Upload Dropzone */}
@@ -336,7 +446,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 {errors.Foto && <span className="text-[10px] text-destructive">{errors.Foto}</span>}
                             </div>
 
-                            {/* Options (Launch Date & Best Seller) */}
+                            {/* Options */}
                             <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10">
                                 <div className="grid gap-2 flex-1">
                                     <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
@@ -362,6 +472,24 @@ export default function AddProductSheet({ onCreated }: Props) {
                                         className="data-[state=checked]:bg-black data-[state=checked]:border-black"
                                     />
                                 </div>
+
+                                {/* Signature — cuma muncul kalau Original */}
+                                {!isRefill && (
+                                    <div className="flex-1 border border-border rounded-lg p-4 flex items-center justify-between bg-card">
+                                        <div className="space-y-0.5">
+                                            <Label htmlFor="signature" className="text-sm font-medium cursor-pointer">
+                                                Signature
+                                            </Label>
+                                            <p className="text-xs text-muted-foreground">Tandai sebagai racikan signature</p>
+                                        </div>
+                                        <Checkbox
+                                            id="signature"
+                                            checked={data.signature}
+                                            onCheckedChange={(checked) => setData('signature', Boolean(checked))}
+                                            className="data-[state=checked]:bg-black data-[state=checked]:border-black"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

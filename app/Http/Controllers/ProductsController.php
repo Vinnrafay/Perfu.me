@@ -20,7 +20,7 @@ class ProductsController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
-                      ->orWhere('Varian', 'like', "%{$search}%")
+                      ->orWhere('brand', 'like', "%{$search}%")
                       ->orWhere('kategori', 'like', "%{$search}%");
                 });
             })
@@ -41,10 +41,7 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        // Konversi checkbox boolean ke format database ('yes'/'no')
-        $request->merge([
-            'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
-        ]);
+        $this->normalizeToggles($request);
 
         $validated = $request->validate($this->validationRules());
 
@@ -84,9 +81,7 @@ class ProductsController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $request->merge([
-            'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
-        ]);
+        $this->normalizeToggles($request);
 
         $validated = $request->validate($this->validationRules($product->id));
 
@@ -124,7 +119,7 @@ class ProductsController extends Controller
     }
 
     /**
-
+     *
      */
     public function bulkDestroy(Request $request)
     {
@@ -148,7 +143,36 @@ class ProductsController extends Controller
     }
 
     /**
+     * Normalisasi field sebelum divalidasi:
+     * - Best_Seller: checkbox -> 'yes'/'no'
+     * - signature: checkbox -> 'yes'/'no', tapi dipaksa 'no' kalau produknya Refill
+     *   (karena toggle Signature nggak ditampilkan sama sekali di form Refill)
+     * - brand: dikosongin (null) kalau produknya Original, karena field brand
+     *   nggak ditampilkan di form Original dan nggak relevan buat tipe itu
+     * - Diskon: kalau dikosongin di form, default-in ke 0 (bukan null),
+     *   biar perhitungan harga akhir di model selalu aman
+     */
+    private function normalizeToggles(Request $request): void
+    {
+        $isRefill = $request->input('original') === 'Refill';
+
+        $request->merge([
+            'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
+            'signature'   => $isRefill ? 'no' : ($request->boolean('signature') ? 'yes' : 'no'),
+            'brand'       => $isRefill ? $request->input('brand') : null,
+            'Diskon'      => $request->input('Diskon') === null || $request->input('Diskon') === ''
+                ? 0
+                : $request->input('Diskon'),
+        ]);
+    }
+
+    /**
      * Helper Aturan Validasi Produk
+     *
+     * - Top_Note, Middle_Note, Base_Note selalu wajib, baik Original maupun Refill.
+     * - brand cuma wajib kalau produknya Refill.
+     * - Diskon nullable secara input, tapi selalu di-normalize ke angka (default 0)
+     *   sebelum masuk sini lewat normalizeToggles(), jadi validasinya numeric biasa.
      */
     private function validationRules(?int $productId = null): array
     {
@@ -156,19 +180,22 @@ class ProductsController extends Controller
             'nama'           => 'required|string|max:255',
             'kategori'       => 'required|in:EDP,EDT,Roll-On,Body Mist',
             'gender'         => 'required|in:male,female,unisex',
-            'Varian'         => 'required|string|max:255',
+            'original'       => 'required|in:Original,Refill',
+            'brand'          => 'nullable|required_if:original,Refill|string|max:255',
             'Top_Note'       => 'required|string|max:255',
             'Middle_Note'    => 'required|string|max:255',
             'Base_Note'      => 'required|string|max:255',
             'Komposisi'      => 'required|string|max:255',
             'Kemasan'        => 'nullable|string|max:255',
             'Ukuran'         => 'required|integer|min:1',
-            'Harga'          => 'required|numeric|min:0',
+            'Harga'          => 'required|numeric|min:0|max:999999999999.99',
+            'Diskon'         => 'nullable|numeric|min:0|max:999999999999.99|lte:Harga',
             'Stok'           => 'required|integer|min:0',
             'Tanggal_launch' => 'nullable|date',
             'Deskripsi'      => 'required|string',
             'Foto'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'Best_Seller'    => 'required|in:yes,no',
+            'signature'      => 'required|in:yes,no',
         ];
     }
 }
