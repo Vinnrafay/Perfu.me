@@ -116,7 +116,7 @@ export default function Welcome() {
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
-                                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-semibold">
+                                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-medium">
                                     Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
                                 </h1>
                                 <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
@@ -168,7 +168,7 @@ export default function Welcome() {
                 </div>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    <h2 className="text-5xl md:text-6xl lg:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
+                    <h2 className="text-5xl md:text-6xl lg:text-7xl text-center font-medium tracking-tight leading-[1.1]">
                         Our <span className="font-heading italic">Signature</span> Scent
                     </h2>
 

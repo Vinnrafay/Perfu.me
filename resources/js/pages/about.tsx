@@ -1,4 +1,3 @@
-import Navbar from "@/components/blocks/navbar";
 import { Marquee } from "@/components/ui/marquee"
 
 export default function AboutUs() {
@@ -12,10 +11,7 @@ export default function AboutUs() {
 
             {/* Bagian Kiri: Teks */}
             <div className="flex-1 flex flex-col justify-center gap-6 max-w-xl">
-              <p className="text-sm font-medium text-muted-foreground">
-                Smell Good, Feel Confident.
-              </p>
-              <h1 className="text-5xl font-semibold capitalize leading-[1.1] sm:text-6xl md:text-7xl">
+              <h1 className="text-5xl font-medium capitalize leading-[1.1] sm:text-6xl md:text-7xl">
                 About <span className="font-heading italic">Perfu.Me</span>
               </h1>
               <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -161,7 +157,7 @@ export default function AboutUs() {
         {/* Philosophy Quote */}
         <section className="flex w-full max-w-2xl flex-col items-center gap-3 px-5 py-24 text-center">
           <p className="text-2xl font-medium leading-tight sm:text-3xl md:text-4xl">
-            &ldquo;Bagi kami, parfum <span className="font-heading italic font-normal">bukan sekadar wangi</span>, tetapi juga cara seseorang <span className="font-heading italic font-normal">mengekspresikan dirinya.</span>&rdquo;
+            Bagi kami, parfum bukan sekadar wangi, tetapi juga cara seseorang mengekspresikan dirinya.
           </p>
         </section>
       </main>
