@@ -110,16 +110,16 @@ export default function Welcome() {
         <>
             <Head title="Welcome" />
 
-            <main className="relative -top-16 min-h-screen w-full pb-16 space-y-16">
+            <main className="relative -top-16 min-h-screen w-full pt-24 md:pt-0 pb-16 space-y-16">
                 {/* Hero Section */}
-                <section className="md:h-screen flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5">
-                    <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-                        <div className="space-y-8">
+                <section className="md:h-screen flex flex-col gap-10 w-full h-full max-w-7xl mx-auto px-5">
+                    <div className="flex flex-col md:flex-row items-center h-full">
+                        <div className="md:flex-1 space-y-8">
                             <div className="max-w-5xl space-y-3">
                                 <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-medium">
                                     Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
                                 </h1>
-                                <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+                                <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg text-balance">
                                     Temukan parfum-mu, formula bersih, dan paduan aroma khas yang dirancang untukmu, tahan dari pagi hingga malam.
                                 </p>
                             </div>
@@ -138,12 +138,14 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="relative aspect-square w-full md:p-16 2xl:p-0 rounded-3xl overflow-hidden">
-                            <img
-                                src="/images/BannerAboutMe.png"
-                                alt="Perfume Bottle"
-                                className="absolute inset-0 bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-                            />
+                        <div className="md:flex-1 w-full h-full flex flex-col items-center justify-center md:py-18">
+                            <div className="relative aspect-square w-full rounded-3xl overflow-hidden">
+                                <img
+                                    src="/images/BannerAboutMe.png"
+                                    alt="Perfume Bottle"
+                                    className="absolute bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                                />
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -187,7 +189,7 @@ export default function Welcome() {
 
                                 <p className="text-2xl md:text-3xl lg:text-4xl font-medium">Rp199.000</p>
 
-                                <Button className="w-fit">
+                                <Button className="md:w-fit">
                                     Lihat Detail Produk
                                     <ArrowUpRight className="size-4" />
                                 </Button>
@@ -205,7 +207,7 @@ export default function Welcome() {
 
                                 <p className="text-2xl md:text-3xl lg:text-4xl font-medium">Rp199.000</p>
 
-                                <Button className="w-fit">
+                                <Button className="md:w-fit">
                                     Lihat Detail Produk
                                     <ArrowUpRight className="size-4" />
                                 </Button>
@@ -260,6 +262,7 @@ export default function Welcome() {
                     </div>
                 </section>
 
+                {/* Testimonials Section */}
                 <section className="w-full max-w-7xl mx-auto text-center flex flex-col items-center p-5 space-y-6">
                     <div className="bg-background w-14 h-14 rounded-full rotate-3 border border-border overflow-hidden">
                         <img
@@ -295,9 +298,10 @@ export default function Welcome() {
                     </div>
                 </section>
 
+                {/* Purchase Steps & Informations Section */}
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <Card className="row-span-2">
+                        <Card className="row-span-2 text-center md:text-left">
                             <CardHeader>
                                 <CardTitle className="text-3xl font-medium font-sans">
                                     Langkah Pembelian
@@ -306,7 +310,7 @@ export default function Welcome() {
                             <CardContent>
                                 <div className="space-y-6">
                                     {stepPembelian.map((step) => (
-                                        <div key={step.number} className="flex gap-6 items-center">
+                                        <div key={step.number} className="flex flex-col md:flex-row gap-3 md:gap-6 items-center">
                                             <div className="flex items-center justify-center h-10 w-10 aspect-square bg-muted text-primary font-medium rounded-full">
                                                 {step.number}
                                             </div>
@@ -339,12 +343,12 @@ export default function Welcome() {
                             <img
                                 src="https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                 alt="Perfume Bottle"
-                                className="absolute -top-12 -right-10 w-42 md:w-52 h-64 object-cover object-center rotate-6 border-6 border-b-24 border-primary-foreground z-2"
+                                className="absolute -bottom-42 md:-bottom-32 right-16 md:right-24 w-42 md:w-52 h-64 object-cover object-center -rotate-12 border-6 border-b-24 border-primary-foreground z-2"
                             />
                             <img
                                 src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
                                 alt="Perfume Bottle"
-                                className="absolute -bottom-20 right-6 w-42 md:w-52 h-64 object-cover object-center -rotate-12 border-6 border-b-24 border-primary-foreground"
+                                className="absolute -bottom-34 md:-bottom-20 -right-12 md:-right-6 w-42 md:w-52 h-64 object-cover object-center -rotate-6 border-6 border-b-24 border-primary-foreground"
                             />
                             <div className="absolute inset-0 h-full bg-linear-to-t from-primary via-transparent to-transparent z-5" />
                         </Card>
@@ -443,7 +447,7 @@ export default function Welcome() {
                             alt="Perfume Bottle"
                             className="absolute top-0 -right-24 md:-right-42 lg:-right-64 w-full h-full object-cover object-center"
                         />
-                        <div className="absolute inset-0 h-full bg-linear-to-t from-primary md:from-primary/85 to-transparent z-1" />
+                        <div className="absolute inset-0 h-full bg-linear-to-t from-primary md:from-primary/85 via-primary/80 md:via-primary/25 to-transparent z-1" />
                     </div>
                 </section>
             </main>
