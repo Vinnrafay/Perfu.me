@@ -24,20 +24,25 @@ interface Product {
   kategori: "EDP" | "EDT" | "Roll-On" | "Body Mist";
   gender: "male" | "female" | "unisex";
   Varian: string;
-  "Top Note": string;
-  "Middle Note": string;
-  "Base Note": string;
+  "Top Note"?: string;
+  Top_Note?: string;
+  "Middle Note"?: string;
+  Middle_Note?: string;
+  "Base Note"?: string;
+  Base_Note?: string;
   Komposisi: string;
   Kemasan: string | null;
   Ukuran: number;
   Harga: number;
   Stok: number;
-  "Tanggal launch": string | null;
+  "Tanggal launch"?: string | null;
+  Tanggal_launch?: string | null;
   Deskripsi: string;
   Foto: string | null;
   Gallery?: string[];
   BPOM?: string;
-  "Best Seller": "yes" | "no";
+  "Best Seller"?: "yes" | "no";
+  Best_Seller?: "yes" | "no";
 }
 
 interface Props {
@@ -211,7 +216,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
 
               {/* Floating Badges */}
               <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start z-10 pointer-events-none">
-                {product["Best Seller"] === "yes" && (
+                {(product["Best Seller"] === "yes" || product.Best_Seller === "yes") && (
                   <Badge className="bg-foreground text-background font-semibold uppercase text-[11px] tracking-wider px-2.5 py-0.5 shadow-sm">
                     <Sparkles className="h-3 w-3 mr-1" /> Best Seller
                   </Badge>
@@ -318,19 +323,19 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Top Notes
                   </span>
-                  <span className="text-xs font-semibold text-foreground">{product["Top Note"]}</span>
+                  <span className="text-xs font-semibold text-foreground">{product.Top_Note ?? product["Top Note"]}</span>
                 </div>
                 <div className="flex flex-col gap-0.5 rounded-lg bg-background p-2.5 border border-border/60">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Middle Notes
                   </span>
-                  <span className="text-xs font-semibold text-foreground">{product["Middle Note"]}</span>
+                  <span className="text-xs font-semibold text-foreground">{product.Middle_Note ?? product["Middle Note"]}</span>
                 </div>
                 <div className="flex flex-col gap-0.5 rounded-lg bg-background p-2.5 border border-border/60">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Base Notes
                   </span>
-                  <span className="text-xs font-semibold text-foreground">{product["Base Note"]}</span>
+                  <span className="text-xs font-semibold text-foreground">{product.Base_Note ?? product["Base Note"]}</span>
                 </div>
               </div>
             </div>
