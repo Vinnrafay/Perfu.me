@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\TestimoniController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', [HomePageController::class, 'index'])->name('home');
 Route::get('/products', [ProductsController::class, 'catalog'])->name('products');
 Route::get('/products/{product}', [ProductsController::class, 'show'])->name('products.detail');
 Route::inertia('/about', 'about')->name('about');
