@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
-import { dashboard } from '@/routes';
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { index } from '@/routes/dashboard';
+import { Card, CardAction, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
@@ -92,21 +92,21 @@ const SummaryCardData = [
         label: 'Total Produk Original',
         value: 2,
         description: 'Total produk yang tersedia di toko',
-        actionLabel: 'Tambah Produk Original',
+        actionLabel: 'Tambah',
         onActionClick: () => { }
     },
     {
         label: 'Total Produk Refill',
         value: 10,
         description: 'Total produk yang tersedia untuk refill',
-        actionLabel: 'Tambah Produk Refill',
+        actionLabel: 'Tambah',
         onActionClick: () => { }
     },
     {
         label: 'Rating Toko',
         value: 4.5,
         description: 'Rata-rata rating toko dari pelanggan',
-        actionLabel: 'Tambah Testimoni',
+        actionLabel: 'Tambah',
         onActionClick: () => { }
     },
 ];
@@ -116,7 +116,7 @@ Dashboard.layout = {
     breadcrumbs: [
         {
             title: 'Dashboard Overview',
-            href: dashboard(),
+            href: index(),
         },
     ],
 };

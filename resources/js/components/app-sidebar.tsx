@@ -21,7 +21,7 @@ import {
     SidebarGroupLabel,
     SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { index as dashboard } from '@/routes/dashboard';
 import { index as productsIndex } from '@/routes/products';
 import { index as testimoniIndex } from '@/routes/testimoni';
 import type { NavItem } from '@/types';
