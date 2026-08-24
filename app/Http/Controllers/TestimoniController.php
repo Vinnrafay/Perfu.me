@@ -20,8 +20,8 @@ class TestimoniController extends Controller
             ->when($request->input('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('komentar', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('komentar', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -97,8 +97,8 @@ class TestimoniController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:testimonis,email,' . $testimoni->id],
-            // Ini gua FIX: validasi string jadi file gambar 
+            'email' => ['required', 'email', 'max:255', 'unique:testimonis,email,'.$testimoni->id],
+            // Ini gua FIX: validasi string jadi file gambar
             'profil' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'komentar' => ['required', 'string', 'max:1000'],
             'rating' => ['required', 'integer', 'in:1,2,3,4,5'],

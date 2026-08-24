@@ -66,7 +66,7 @@ const formatPrice = (val: number) =>
 export default function ProductsList({ products: paginated, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selected, setSelected] = useState<number[]>([]);
-    const [sortAsc, setSortAsc] = useState(true);
+    const [sortAsc, setSortAsc] = useState<boolean>(true);
     const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>({
         Kategori: true,
         Ukuran: true,
@@ -115,7 +115,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
 
     const handleDelete = (id: number) => {
         if (confirm('Yakin ingin menghapus produk ini?')) {
-            router.delete(destroy(id), {
+            router.delete(destroy(id).url, {
                 onSuccess: () => setSelected((prev) => prev.filter((item) => item !== id)),
             });
         }
@@ -123,7 +123,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
 
     const handleBulkDelete = () => {
         if (confirm(`Yakin ingin menghapus ${selected.length} produk terpilih?`)) {
-            selected.forEach((id) => router.delete(destroy(id)));
+            selected.forEach((id) => router.delete(destroy(id).url));
             setSelected([]);
         }
     };

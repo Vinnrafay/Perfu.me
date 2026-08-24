@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductsController extends Controller
 {
@@ -30,9 +31,23 @@ class ProductsController extends Controller
 
         return Inertia::render('dashboard/products/index', [
             'products' => $products,
-            'filters'  => [
+            'filters' => [
                 'search' => $search,
             ],
+        ]);
+    }
+
+    /**
+     * Display the public listing of products.
+     *
+     * @return Response
+     */
+    public function catalog()
+    {
+        $products = Product::latest()->get();
+
+        return Inertia::render('products/index', [
+            'products' => $products,
         ]);
     }
 
@@ -124,7 +139,7 @@ class ProductsController extends Controller
     public function bulkDestroy(Request $request)
     {
         $request->validate([
-            'ids'   => 'required|array',
+            'ids' => 'required|array',
             'ids.*' => 'exists:products,id',
         ]);
 
@@ -139,7 +154,7 @@ class ProductsController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', count($request->ids) . ' produk berhasil dihapus.');
+            ->with('success', count($request->ids).' produk berhasil dihapus.');
     }
 
     /**

@@ -9,6 +9,8 @@ import {
     X,
     ShoppingBag,
     ArrowUpDown,
+    CheckCircle2,
+    RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +38,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { useCart } from '@/hooks/useCart';
 
 export interface Product {
     id: number;
@@ -49,10 +52,11 @@ export interface Product {
     Foto: string | null;
     Best_Seller?: string;
     'Best Seller'?: string;
+    original?: string;
 }
 
 interface Props {
-    products: Product[];
+    products: Product[] | { data: Product[] };
 }
 
 const GENDER_OPTIONS = [
@@ -61,22 +65,30 @@ const GENDER_OPTIONS = [
     { value: 'unisex', label: 'Unisex' },
 ];
 
-export default function Catalog({ products = [] }: Props) {
-    // State Filter & Search
+export default function Catalog({ products }: Props) {
+    const { addToCart } = useCart();
+
+    const productList = useMemo<Product[]>(() => {
+        if (Array.isArray(products)) return products;
+        if (products && typeof products === 'object' && 'data' in products && Array.isArray(products.data)) {
+            return products.data;
+        }
+        return [];
+    }, [products]);
+
+    const [productType, setProductType] = useState<'original' | 'refill'>('original');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
     const [bestSellerOnly, setBestSellerOnly] = useState<boolean>(false);
     const [sortBy, setSortBy] = useState<string>('default');
 
-    // Menentukan harga maksimum tertinggi secara dinamis dari data
     const maxDataPrice = useMemo(() => {
-        if (!products.length) return 1000000;
-        return Math.max(...products.map((p) => Number(p.Harga) || 0));
-    }, [products]);
+        if (!productList.length) return 1000000;
+        return Math.max(...productList.map((p) => Number(p.Harga) || 0));
+    }, [productList]);
 
     const [priceRange, setPriceRange] = useState<number>(maxDataPrice || 1000000);
 
-    // Toggle Multi-select Checkbox Helper
     const handleToggleItem = (
         item: string,
         list: string[],
@@ -89,7 +101,6 @@ export default function Catalog({ products = [] }: Props) {
         }
     };
 
-    // Reset All Filters
     const isFiltered =
         searchTerm !== '' ||
         selectedGenders.length > 0 ||
@@ -104,34 +115,31 @@ export default function Catalog({ products = [] }: Props) {
         setSortBy('default');
     };
 
-    // Filter Data Produk (Tanpa Kategori)
     const filteredProducts = useMemo(() => {
-        return products.filter((product) => {
+        return productList.filter((product) => {
+            const isOriginal = product.kategori === 'EDP' || product.kategori === 'EDT';
+            const matchType = productType === 'original' ? isOriginal : !isOriginal;
+
             const isBestSeller =
                 product.Best_Seller === 'yes' || product['Best Seller'] === 'yes';
 
-            // Filter Pencarian (Nama & Varian)
             const matchSearch =
                 !searchTerm ||
                 product.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.Varian.toLowerCase().includes(searchTerm.toLowerCase());
 
-            // Filter Gender
             const matchGender =
                 selectedGenders.length === 0 ||
                 selectedGenders.includes(product.gender?.toLowerCase());
 
-            // Filter Best Seller
             const matchBestSeller = !bestSellerOnly || isBestSeller;
 
-            // Filter Harga
             const matchPrice = Number(product.Harga) <= priceRange;
 
-            return matchSearch && matchGender && matchBestSeller && matchPrice;
+            return matchType && matchSearch && matchGender && matchBestSeller && matchPrice;
         });
-    }, [products, searchTerm, selectedGenders, bestSellerOnly, priceRange]);
+    }, [productList, productType, searchTerm, selectedGenders, bestSellerOnly, priceRange]);
 
-    // Sorting Data Produk
     const sortedProducts = useMemo(() => {
         const items = [...filteredProducts];
         switch (sortBy) {
@@ -152,7 +160,6 @@ export default function Catalog({ products = [] }: Props) {
         }
     }, [filteredProducts, sortBy]);
 
-    // Helper Format Rupiah
     const formatPrice = (val: number) =>
         new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -160,27 +167,9 @@ export default function Catalog({ products = [] }: Props) {
             minimumFractionDigits: 0,
         }).format(val);
 
-    // Filter Content Component (Tanpa Kategori)
     const FilterContent = () => (
         <div className="space-y-6">
-            {/* Best Seller Quick Toggle
-            <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-indigo-500/5 to-transparent border border-amber-500/20">
-                <label
-                    htmlFor="best-seller-toggle"
-                    className="text-xs font-semibold text-foreground flex items-center gap-2 cursor-pointer"
-                >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    Hanya Best Seller
-                </label>
-                <Checkbox
-                    id="best-seller-toggle"
-                    checked={bestSellerOnly}
-                    onCheckedChange={(checked) => setBestSellerOnly(Boolean(checked))}
-                />
-            </div> */}
-
             <Accordion type="multiple" defaultValue={['gender', 'harga']} className="w-full space-y-2">
-                {/* Filter Gender */}
                 <AccordionItem value="gender" className="border-border">
                     <AccordionTrigger className="hover:no-underline text-xs font-bold uppercase tracking-wider text-foreground py-3">
                         Target Gender
@@ -206,7 +195,6 @@ export default function Catalog({ products = [] }: Props) {
                     </AccordionContent>
                 </AccordionItem>
 
-                {/* Filter Harga Maksimum */}
                 <AccordionItem value="harga" className="border-border border-b-0">
                     <AccordionTrigger className="hover:no-underline text-xs font-bold uppercase tracking-wider text-foreground py-3">
                         Harga Maksimum
@@ -235,7 +223,6 @@ export default function Catalog({ products = [] }: Props) {
 
     return (
         <div className="min-h-screen pb-24 bg-background text-foreground flex flex-col">
-            {/* Hero Banner Section */}
             <section className="relative w-full h-[38vh] min-h-90 flex flex-col items-center justify-center text-center overflow-hidden">
                 <div className="absolute inset-0 w-full h-full">
                     <img
@@ -247,9 +234,6 @@ export default function Catalog({ products = [] }: Props) {
                 </div>
 
                 <div className="relative -top-6 z-10 px-6 max-w-3xl mx-auto flex flex-col items-center space-y-1">
-                    {/* <Badge variant="outline" className="border-white/30 text-white bg-white/10 backdrop-blur-md px-3.5 py-1 text-[11px] font-medium tracking-widest uppercase">
-                        Katalog Eksklusif
-                    </Badge> */}
                     <h1 className="text-3xl sm:text-5xl md:text-6xl font-light text-white tracking-tight leading-tight">
                         Discover Your <span className="font-heading italic">Scent</span>
                     </h1>
@@ -259,10 +243,8 @@ export default function Catalog({ products = [] }: Props) {
                 </div>
             </section>
 
-            {/* Main Content Area */}
             <div className="container max-w-7xl w-full mx-auto px-4 sm:px-6 pt-10 flex flex-col md:flex-row gap-8">
                 
-                {/* Desktop Sidebar Filter */}
                 <aside className="hidden md:block w-64 shrink-0">
                     <div className="sticky top-24 p-5 rounded-2xl border border-border space-y-6">
                         <div className="flex items-center justify-between border-b border-border pb-3">
@@ -288,42 +270,65 @@ export default function Catalog({ products = [] }: Props) {
                     </div>
                 </aside>
 
-                {/* Main Product Catalog Section */}
                 <main className="flex-1 space-y-6">
-                    {/* Top Search & Filter Control Bar */}
-                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between p-3.5 rounded-2xl border border-border">
+                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
                         
-                        {/* Search Input */}
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <div className="inline-flex h-10 p-1 bg-muted/40 backdrop-blur-md rounded-xl border border-border/80 items-center gap-1 shrink-0 self-start sm:self-auto">
+                            <button
+                                type="button"
+                                onClick={() => setProductType('original')}
+                                className={`flex items-center gap-1.5 px-4 h-8 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                                    productType === 'original'
+                                        ? 'bg-background text-foreground shadow-xs border border-border/60'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
+                                }`}
+                            >
+                                <CheckCircle2 className={`w-3.5 h-3.5 ${productType === 'original' ? 'text-indigo-500' : 'text-muted-foreground'}`} />
+                                Original
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setProductType('refill')}
+                                className={`flex items-center gap-1.5 px-4 h-8 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                                    productType === 'refill'
+                                        ? 'bg-background text-foreground shadow-xs border border-border/60'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
+                                }`}
+                            >
+                                <RefreshCw className={`w-3.5 h-3.5 ${productType === 'refill' ? 'text-indigo-500' : 'text-muted-foreground'}`} />
+                                Refill
+                            </button>
+                        </div>
+
+                        <div className="relative flex-1 w-full min-w-0">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Cari nama parfum atau varian..."
-                                className="pl-9 h-9 text-xs rounded-xl bg-background/80"
+                                placeholder={`Cari ${productType === 'original' ? 'original' : 'refill'}...`}
+                                className="pl-10 h-10 w-full text-sm rounded-xl bg-background border-border/80"
                             />
                             {searchTerm && (
                                 <button
+                                    type="button"
                                     onClick={() => setSearchTerm('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                 >
-                                    <X className="w-3.5 h-3.5" />
+                                    <X className="w-4 h-4" />
                                 </button>
                             )}
                         </div>
 
-                        {/* Control Actions */}
-                        <div className="flex items-center gap-2 justify-between sm:justify-end">
-                            
-                            {/* Mobile Filter Sheet Button */}
+                        <div className="flex items-center gap-2.5 shrink-0 justify-between sm:justify-end">
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="md:hidden h-9 text-xs gap-2 rounded-xl"
+                                        className="md:hidden h-10 text-sm gap-2 rounded-xl px-4"
                                     >
-                                        <SlidersHorizontal className="w-3.5 h-3.5" />
+                                        <SlidersHorizontal className="w-4 h-4" />
                                         Filter {isFiltered && '(Aktif)'}
                                     </Button>
                                 </SheetTrigger>
@@ -352,26 +357,22 @@ export default function Catalog({ products = [] }: Props) {
                                 </SheetContent>
                             </Sheet>
 
-                            {/* Sort Dropdown */}
-                            <div className="flex items-center gap-2">
-                                <Select value={sortBy} onValueChange={setSortBy}>
-                                    <SelectTrigger className="h-9 w-[160px] text-xs rounded-xl bg-background/80">
-                                        <ArrowUpDown className="w-3 h-3 mr-1 text-muted-foreground" />
-                                        <SelectValue placeholder="Urutkan" />
-                                    </SelectTrigger>
-                                    <SelectContent align="end">
-                                        <SelectItem value="default" className="text-xs">Terbaru</SelectItem>
-                                        <SelectItem value="best-seller" className="text-xs">Best Seller</SelectItem>
-                                        <SelectItem value="price-asc" className="text-xs">Harga: Rendah ke Tinggi</SelectItem>
-                                        <SelectItem value="price-desc" className="text-xs">Harga: Tinggi ke Rendah</SelectItem>
-                                        <SelectItem value="name-asc" className="text-xs">Nama: A - Z</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            <Select value={sortBy} onValueChange={setSortBy}>
+                                <SelectTrigger className="h-10 w-[150px] text-sm rounded-xl bg-background border-border/80">
+                                    <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+                                    <SelectValue placeholder="Urutkan" />
+                                </SelectTrigger>
+                                <SelectContent align="end">
+                                    <SelectItem value="default" className="text-sm">Terbaru</SelectItem>
+                                    <SelectItem value="best-seller" className="text-sm">Best Seller</SelectItem>
+                                    <SelectItem value="price-asc" className="text-sm">Harga: Rendah ke Tinggi</SelectItem>
+                                    <SelectItem value="price-desc" className="text-sm">Harga: Tinggi ke Rendah</SelectItem>
+                                    <SelectItem value="name-asc" className="text-sm">Nama: A - Z</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
-                    {/* Active Filter Pills Indicator */}
                     {isFiltered && (
                         <div className="flex flex-wrap items-center gap-2 pt-1">
                             <span className="text-[11px] font-medium text-muted-foreground mr-1">
@@ -419,18 +420,18 @@ export default function Catalog({ products = [] }: Props) {
                         </div>
                     )}
 
-                    {/* Total Product Indicator */}
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground pt-1">
-                        Menampilkan <span className="text-foreground font-bold">{sortedProducts.length}</span> dari {products.length} produk
+                        Menampilkan <span className="text-foreground font-bold">{sortedProducts.length}</span> produk {productType}
                     </div>
 
-                    {/* Empty State */}
                     {sortedProducts.length === 0 ? (
                         <div className="py-20 flex flex-col items-center justify-center border border-dashed border-border rounded-2xl bg-card/30 gap-3 text-center px-4">
                             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-1">
                                 <Search className="w-6 h-6 text-muted-foreground/60" />
                             </div>
-                            <h3 className="font-semibold text-foreground text-base">Produk Tidak Ditemukan</h3>
+                            <h3 className="font-semibold text-foreground text-base">
+                                Produk {productType === 'original' ? 'Original' : 'Refill'} Tidak Ditemukan
+                            </h3>
                             <p className="text-muted-foreground font-normal text-xs max-w-sm">
                                 Coba ubah kata kunci pencarian atau bersihkan filter untuk menampilkan produk lainnya.
                             </p>
@@ -439,7 +440,6 @@ export default function Catalog({ products = [] }: Props) {
                             </Button>
                         </div>
                     ) : (
-                        /* Product Grid Layout */
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {sortedProducts.map((product) => {
                                 const isBestSeller =
@@ -450,7 +450,6 @@ export default function Catalog({ products = [] }: Props) {
                                         key={product.id}
                                         className="group border-border/80 bg-card/60 backdrop-blur-sm overflow-hidden hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 rounded-2xl flex flex-col justify-between"
                                     >
-                                        {/* Image Container */}
                                         <CardContent className="p-0 relative aspect-[4/5] bg-muted overflow-hidden">
                                             {product.Foto ? (
                                                 <img
@@ -464,7 +463,6 @@ export default function Catalog({ products = [] }: Props) {
                                                 </div>
                                             )}
 
-                                            {/* Top Floating Badges */}
                                             <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10 pointer-events-none">
                                                 <div className="flex flex-col gap-1.5 items-start">
                                                     {isBestSeller && (
@@ -480,21 +478,33 @@ export default function Catalog({ products = [] }: Props) {
                                                 </Badge>
                                             </div>
 
-                                            {/* Quick Action Button (Hover Effect) */}
-                                            <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10">
+                                            <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10 flex gap-2">
                                                 <Button
                                                     asChild
-                                                    className="w-full bg-background/95 backdrop-blur-md text-foreground hover:bg-primary hover:text-primary-foreground border border-border rounded-xl h-9 text-[11px] font-semibold uppercase tracking-wider shadow-lg gap-2"
+                                                    variant="outline"
+                                                    className="flex-1 bg-background/95 backdrop-blur-md text-foreground hover:bg-muted border border-border rounded-xl h-9 text-[10px] font-semibold uppercase tracking-wider shadow-lg"
                                                 >
                                                     <Link href={`/products/${product.id}`}>
-                                                        <ShoppingBag className="w-3.5 h-3.5" />
-                                                        Lihat Detail
+                                                        Detail
                                                     </Link>
+                                                </Button>
+
+                                                <Button
+                                                    onClick={() => addToCart({
+                                                        id: product.id,
+                                                        nama: product.nama,
+                                                        Varian: product.Varian,
+                                                        Harga: Number(product.Harga),
+                                                        Foto: product.Foto
+                                                    })}
+                                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-9 text-[10px] font-semibold uppercase tracking-wider shadow-lg gap-1.5"
+                                                >
+                                                    <ShoppingBag className="w-3.5 h-3.5" />
+                                                    + Cart
                                                 </Button>
                                             </div>
                                         </CardContent>
 
-                                        {/* Product Info */}
                                         <CardFooter className="p-4 flex flex-col items-start gap-1.5 bg-card">
                                             <div className="w-full flex justify-between items-start gap-2">
                                                 <h3 className="font-bold text-sm text-foreground tracking-tight line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
