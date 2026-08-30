@@ -1,8 +1,11 @@
 import { Marquee } from "@/components/ui/marquee"
+import { Head } from "@inertiajs/react";
 
 export default function AboutUs() {
   return (
     <>
+    <Head title="About Us" />
+
       <main className="flex min-h-screen flex-col items-center bg-background text-foreground overflow-hidden">
 
         {/* Hero Section — Simpel & Sejajar */}

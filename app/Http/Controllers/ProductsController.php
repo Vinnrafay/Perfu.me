@@ -21,7 +21,7 @@ class ProductsController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
-                      ->orWhere('Varian', 'like', "%{$search}%")
+                      ->orWhere('brand', 'like', "%{$search}%")
                       ->orWhere('kategori', 'like', "%{$search}%");
                 });
             })
@@ -208,6 +208,25 @@ class ProductsController extends Controller
             'Deskripsi'      => 'required|string',
             'Foto'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'Best_Seller'    => 'required|in:yes,no',
+            'signature'      => 'required|in:yes,no',
+=========
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|in:EDP,EDT,Roll-On,Body Mist',
+            'gender' => 'required|in:male,female,unisex',
+            'Varian' => 'required|string|max:255',
+            'Top_Note' => 'required|string|max:255',
+            'Middle_Note' => 'required|string|max:255',
+            'Base_Note' => 'required|string|max:255',
+            'Komposisi' => 'required|string|max:255',
+            'Kemasan' => 'nullable|string|max:255',
+            'Ukuran' => 'required|integer|min:1',
+            'Harga' => 'required|numeric|min:0',
+            'Stok' => 'required|integer|min:0',
+            'Tanggal_launch' => 'nullable|date',
+            'Deskripsi' => 'required|string',
+            'Foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'Best_Seller' => 'required|in:yes,no',
+>>>>>>>>> Temporary merge branch 2
         ];
     }
 }

@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import WhatsAppIcon from "@/components/whatsapp-icon";
+import { Head } from "@inertiajs/react";
 import { Mail, Instagram, Clock, MapPin } from "lucide-react";
 
 export default function Contact() {
@@ -29,6 +30,8 @@ export default function Contact() {
 
   return (
     <>
+    <Head title="Contact Us" />
+    
       <main className="flex min-h-screen flex-col items-center gap-12 bg-background text-foreground py-12">
         {/* Hero */}
         <section className="flex w-full max-w-7xl flex-col gap-3 px-5">
