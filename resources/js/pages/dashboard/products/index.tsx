@@ -55,7 +55,6 @@ interface Props {
 
 const allColumns = ['Kategori', 'Ukuran', 'Harga', 'Stok', 'Best Seller'] as const;
 type ColumnKey = (typeof allColumns)[number];
-type NameSort = 'none' | 'asc' | 'desc';
 
 const formatPrice = (val: number) =>
     new Intl.NumberFormat('id-ID', {
@@ -138,12 +137,6 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     const perPage = paginated.per_page || paginated.data?.length || 10;
     const from = totalItems === 0 ? 0 : (paginated.current_page - 1) * perPage + 1;
     const to = Math.min(from + (paginated.data?.length || 0) - 1, totalItems);
-
-    // Buang link "« Previous" dan "Next »" bawaan Laravel dari tengah,
-    // kita render Previous/Next sendiri secara terpisah biar bisa full styling.
-    const pageLinks = paginated.links.slice(1, -1);
-    const prevLink = paginated.links[0];
-    const nextLink = paginated.links[paginated.links.length - 1];
 
     return (
         <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
@@ -396,7 +389,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                     </Table>
                 </div>
 
-                {/* Footer Paginasi (FIXED LOGIC) */}
+                {/* Footer Paginasi */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border p-4 bg-muted/10 text-xs text-muted-foreground">
                     <div>
                         {selected.length > 0 ? (

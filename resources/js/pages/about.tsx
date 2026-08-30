@@ -1,4 +1,3 @@
-import Navbar from "@/components/blocks/navbar";
 import { Marquee } from "@/components/ui/marquee"
 
 export default function AboutUs() {
@@ -12,10 +11,7 @@ export default function AboutUs() {
 
             {/* Bagian Kiri: Teks */}
             <div className="flex-1 flex flex-col justify-center gap-6 max-w-xl">
-              <p className="text-sm font-medium text-muted-foreground">
-                Smell Good, Feel Confident.
-              </p>
-              <h1 className="text-5xl font-semibold capitalize leading-[1.1] sm:text-6xl md:text-7xl">
+              <h1 className="text-5xl font-medium capitalize leading-[1.1] sm:text-6xl md:text-7xl">
                 About <span className="font-heading italic">Perfu.Me</span>
               </h1>
               <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -101,8 +97,8 @@ export default function AboutUs() {
               <div className="my-auto flex flex-col items-center justify-between gap-8 sm:flex-row">
 
                 {/* Teks Deskripsi */}
-                <div className="z-10 flex w-full flex-col gap-3 sm:w-[48%]">
-                  <h3 className="font-heading text-5xl italic sm:text-6xl">Dynamyst</h3>
+                <div className="z-12 flex w-full flex-col gap-3 sm:w-[48%]">
+                  <h3 className="font-heading text-5xl sm:text-6xl">Dynamyst</h3>
                   <p className="text-sm leading-relaxed text-primary-foreground/70 sm:text-base">
                     Hadir untuk mereka yang aktif, percaya diri, dan penuh
                     semangat. Perpaduan aroma fresh, sporty, clean, dengan
@@ -118,8 +114,9 @@ export default function AboutUs() {
                     alt="Dynamyst Perfume"
                     className="h-80 w-auto -rotate-12 object-contain transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] drop-shadow-[0_25px_30px_rgba(0,0,0,0.65)] group-hover:rotate-0 group-hover:-translate-y-5 group-hover:scale-105 group-hover:drop-shadow-[0_40px_40px_rgba(0,0,0,0.85)] sm:h-96 lg:h-[420px]"
                   />
-                  <div className="absolute inset-0 h-full bg-linear-to-t from-primary via-transparent to-transparent z-11" />
                 </div>
+
+                <div className="absolute inset-0 h-full bg-linear-to-t from-primary via-primary/15 to-transparent z-11" />
 
               </div>
             </div>
@@ -131,8 +128,8 @@ export default function AboutUs() {
               <div className="my-auto flex flex-col items-center justify-between gap-8 sm:flex-row">
 
                 {/* Teks Deskripsi */}
-                <div className="z-10 flex w-full flex-col gap-3 sm:w-[48%]">
-                  <h3 className="font-heading text-5xl italic sm:text-6xl">Vannessence</h3>
+                <div className="z-12 flex w-full flex-col gap-3 sm:w-[48%]">
+                  <h3 className="font-heading text-5xl sm:text-6xl">Vannessence</h3>
                   <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
                     Diciptakan untuk mereka yang menyukai kelembutan dan
                     ketenangan. Aroma vanilla yang creamy berpadu dengan nuansa
@@ -147,8 +144,9 @@ export default function AboutUs() {
                     alt="Vannessence Perfume"
                     className="h-80 w-auto rotate-12 object-contain transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] drop-shadow-[0_25px_30px_rgba(0,0,0,0.2)] group-hover:rotate-0 group-hover:-translate-y-5 group-hover:scale-105 group-hover:drop-shadow-[0_40px_40px_rgba(0,0,0,0.38)] sm:h-96 lg:h-[420px]"
                   />
-                  <div className="absolute inset-0 h-full bg-linear-to-t from-secondary via-transparent to-transparent z-11" />
                 </div>
+                
+                <div className="absolute inset-0 h-full bg-linear-to-t from-secondary via-secondary/15 to-transparent z-11" />
 
               </div>
             </div>
@@ -159,7 +157,7 @@ export default function AboutUs() {
         {/* Philosophy Quote */}
         <section className="flex w-full max-w-2xl flex-col items-center gap-3 px-5 py-24 text-center">
           <p className="text-2xl font-medium leading-tight sm:text-3xl md:text-4xl">
-            &ldquo;Bagi kami, parfum <span className="font-heading italic font-normal">bukan sekadar wangi</span>, tetapi juga cara seseorang <span className="font-heading italic font-normal">mengekspresikan dirinya.</span>&rdquo;
+            Bagi kami, parfum bukan sekadar wangi, tetapi juga cara seseorang mengekspresikan dirinya.
           </p>
         </section>
       </main>

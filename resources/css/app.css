@@ -10,6 +10,14 @@
 
 @import "@fontsource-variable/playfair-display";
 
+@font-face {
+    font-family: 'Zaloga';
+    src: url('/public/fonts/Zaloga.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -221,7 +229,7 @@
     --font-sans:
         'Figtree Variable', sans-serif;
     --font-heading:
-        'Playfair Display Variable', serif;
+        'Zaloga', serif;
     --color-sidebar-ring:
         var(--sidebar-ring);
     --color-sidebar-border:

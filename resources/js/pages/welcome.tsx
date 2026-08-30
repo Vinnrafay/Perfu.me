@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/ui/marquee"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const reviews = [
     {
@@ -44,8 +45,7 @@ const reviews = [
     },
 ];
 
-const firstRow = reviews.slice(0, reviews.length / 2)
-const secondRow = reviews.slice(reviews.length / 2)
+const firstRow = reviews.slice(0, reviews.length)
 const ReviewCard = ({
     img,
     name,
@@ -60,11 +60,11 @@ const ReviewCard = ({
     return (
         <figure
             className={cn(
-                "relative h-full w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
+                "relative h-full w-64 cursor-pointer overflow-hidden rounded-2xl border p-4",
                 "border bg-card hover:bg-muted/50",
             )}
         >
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex flex-row items-center text-left gap-2">
                 <img className="rounded-full" width="32" height="32" alt="" src={img} />
                 <div className="flex flex-col">
                     <figcaption className="text-sm font-medium dark:text-white">
@@ -73,7 +73,7 @@ const ReviewCard = ({
                     <p className="text-xs font-medium dark:text-white/40">{username}</p>
                 </div>
             </div>
-            <blockquote className="mt-2 text-sm line-clamp-2">{body}</blockquote>
+            <blockquote className="mt-2 text-sm text-left">{body}</blockquote>
         </figure>
     )
 }
@@ -112,11 +112,11 @@ export default function Welcome() {
 
             <main className="relative -top-16 min-h-screen w-full pb-16 space-y-16">
                 {/* Hero Section */}
-                <section className="md:h-screen 2xl:min-h-fit flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5">
+                <section className="md:h-screen flex flex-col items-center justify-center gap-16 w-full max-w-7xl mx-auto px-5">
                     <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div className="space-y-8">
                             <div className="max-w-5xl space-y-3">
-                                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-semibold">
+                                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-medium">
                                     Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
                                 </h1>
                                 <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
@@ -138,7 +138,7 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="relative aspect-square w-full p-16 rounded-3xl overflow-hidden">
+                        <div className="relative aspect-square w-full md:p-16 2xl:p-0 rounded-3xl overflow-hidden">
                             <img
                                 src="/images/BannerAboutMe.png"
                                 alt="Perfume Bottle"
@@ -168,7 +168,7 @@ export default function Welcome() {
                 </div>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    <h2 className="text-5xl md:text-6xl lg:text-7xl text-center font-semibold tracking-tight leading-[1.1]">
+                    <h2 className="text-5xl md:text-6xl lg:text-7xl text-center font-medium tracking-tight leading-[1.1]">
                         Our <span className="font-heading italic">Signature</span> Scent
                     </h2>
 
@@ -285,18 +285,91 @@ export default function Welcome() {
                         </div>
                     </div>
                     <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-                        <Marquee pauseOnHover className="[--duration:30s]">
+                        <Marquee pauseOnHover className="[--duration:030s]">
                             {firstRow.map((review) => (
-                                <ReviewCard key={review.username} {...review} />
-                            ))}
-                        </Marquee>
-                        <Marquee reverse pauseOnHover className="[--duration:30s]">
-                            {secondRow.map((review) => (
                                 <ReviewCard key={review.username} {...review} />
                             ))}
                         </Marquee>
                         <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/6 bg-linear-to-r"></div>
                         <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/6 bg-linear-to-l"></div>
+                    </div>
+                </section>
+
+                <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <Card className="row-span-2">
+                            <CardHeader>
+                                <CardTitle className="text-3xl font-medium font-sans">
+                                    Langkah Pembelian
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-6">
+                                    {stepPembelian.map((step) => (
+                                        <div key={step.number} className="flex gap-6 items-center">
+                                            <div className="flex items-center justify-center h-10 w-10 aspect-square bg-muted text-primary font-medium rounded-full">
+                                                {step.number}
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <h3 className="text-lg font-medium">{step.title}</h3>
+                                                <p className="text-muted-foreground">
+                                                    {step.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card className="relative justify-between min-h-64 bg-primary text-primary-foreground border-muted-foreground">
+                            <CardHeader className="z-10">
+                                <CardTitle className="text-3xl font-medium font-sans">
+                                    Tersedia Refill Parfum
+                                </CardTitle>
+                                <CardDescription className="max-w-sm text-muted/80">
+                                    Ingin mengisi ulang parfum favoritmu? Refill tersedia untuk pembelian langsung di tempat.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="z-10">
+                                <Button variant="secondary" className="px-4">
+                                    Lihat Refill
+                                    <ArrowRight />
+                                </Button>
+                            </CardContent>
+                            <img
+                                src="https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
+                                alt="Perfume Bottle"
+                                className="absolute -top-12 -right-10 w-42 md:w-52 h-64 object-cover object-center rotate-6 border-6 border-b-24 border-primary-foreground z-2"
+                            />
+                            <img
+                                src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZnJhZ3JhbmNlfGVufDB8fDB8fHww"
+                                alt="Perfume Bottle"
+                                className="absolute -bottom-20 right-6 w-42 md:w-52 h-64 object-cover object-center -rotate-12 border-6 border-b-24 border-primary-foreground"
+                            />
+                            <div className="absolute inset-0 h-full bg-linear-to-t from-primary via-transparent to-transparent z-5" />
+                        </Card>
+                        <Card className="relative justify-between min-h-64 bg-secondary text-secondary-foreground">
+                            <CardHeader className="z-10">
+                                <CardTitle className="text-3xl font-medium font-sans">
+                                    Jadi Reseller/Dropshipper
+                                </CardTitle>
+                                <CardDescription className="max-w-sm">
+                                    Ingin menjual produk kami? Dapatkan informasi mengenai harga partner bisnis dan ketentuan kerja sama.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="z-10">
+                                <Button onClick={() => window.open('https://wa.me/6281383415432?text=Halo, saya ingin menjadi reseller/dropshipper.', '_blank')} className="px-4">
+                                    Hubungi Kami
+                                    <WhatsAppIcon />
+                                </Button>
+                            </CardContent>
+                            <img
+                                src="/images/RawNoShadow.png"
+                                alt="Perfume Bottle"
+                                className="absolute top-12 -right-42 md:-right-36 lg:-right-42 w-full h-fit object-cover object-center"
+                            />
+                            <div className="absolute inset-0 h-full bg-linear-to-t from-secondary md:from-secondary/85 to-transparent z-1" />
+                        </Card>
                     </div>
                 </section>
 
@@ -327,8 +400,8 @@ export default function Welcome() {
                 </section>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
-                    <div className="relative overflow-hidden rounded-3xl bg-foreground bg-grid-dark p-5 md:p-16">
-                        <div className="flex-1 relative z-10 max-w-xl">
+                    <div className="relative flex flex-col justify-center overflow-hidden rounded-3xl bg-foreground bg-grid-dark p-5 md:p-16 w-full min-h-86">
+                        <div className="relative z-10 max-w-xl">
 
                             <h2 className="text-4xl font-medium tracking-tight text-primary-foreground sm:text-5xl lg:text-6xl">
                                 Sudah menemukan{" "} <br />
@@ -377,6 +450,39 @@ export default function Welcome() {
         </>
     );
 }
+
+const stepPembelian = [
+    {
+        number: "01",
+        title: "Pilih Produk",
+        description:
+            "Telusuri koleksi parfum kami dan pilih aroma yang paling sesuai dengan preferensimu.",
+    },
+    {
+        number: "02",
+        title: "Masukkan ke Keranjang",
+        description:
+            "Tambahkan parfum yang kamu inginkan ke keranjang dan tentukan jumlah yang ingin dipesan.",
+    },
+    {
+        number: "03",
+        title: "Checkout via WhatsApp",
+        description:
+            "Periksa pesananmu lalu lanjutkan checkout untuk mengirimkan daftar pesanan langsung ke WhatsApp kami.",
+    },
+    {
+        number: "04",
+        title: "Konfirmasi Pesanan",
+        description:
+            "Hubungi admin melalui WhatsApp untuk mengonfirmasi pesanan, ketersediaan produk, total pembayaran, dan detail pengiriman.",
+    },
+    {
+        number: "05",
+        title: "Pesanan Diproses",
+        description:
+            "Setelah pembayaran dikonfirmasi, pesananmu akan segera diproses dan dikirim ke alamat tujuan.",
+    },
+];
 
 const faqs = [
     {
