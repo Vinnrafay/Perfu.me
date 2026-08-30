@@ -112,40 +112,38 @@ export default function Welcome() {
 
             <main className="relative -top-16 min-h-screen w-full pt-24 md:pt-0 pb-16 space-y-16">
                 {/* Hero Section */}
-                <section className="md:h-screen flex flex-col gap-10 w-full h-full max-w-7xl mx-auto px-5">
-                    <div className="flex flex-col md:flex-row items-center h-full">
-                        <div className="md:flex-1 space-y-8">
-                            <div className="max-w-5xl space-y-3">
-                                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-medium">
-                                    Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
-                                </h1>
-                                <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg text-balance">
-                                    Temukan parfum-mu, formula bersih, dan paduan aroma khas yang dirancang untukmu, tahan dari pagi hingga malam.
-                                </p>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-3">
-                                <Button asChild size="lg" className="w-full md:w-fit">
-                                    <Link href="/products">
-                                        Lihat Koleksi Kami
-                                        <ArrowRight className="size-4" />
-                                    </Link>
-                                </Button>
-                                <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')} variant="outline" size="lg" className="w-full md:w-fit">
-                                    Chat Via WhatsApp
-                                    <WhatsAppIcon />
-                                </Button>
-                            </div>
+                <section className="md:h-screen flex flex-col md:flex-row items-center gap-10 w-full h-full max-w-7xl mx-auto px-5">
+                    <div className="md:flex-1 space-y-6">
+                        <div className="max-w-5xl space-y-3">
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight text-balance text-foreground font-medium">
+                                Wangi Gak Harus <span className="font-heading italic">Mahal</span>.
+                            </h1>
+                            <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg text-balance">
+                                Temukan parfum-mu, formula bersih, dan paduan aroma khas yang dirancang untukmu, tahan dari pagi hingga malam.
+                            </p>
                         </div>
 
-                        <div className="md:flex-1 w-full h-full flex flex-col items-center justify-center md:py-18">
-                            <div className="relative aspect-square w-full rounded-3xl overflow-hidden">
-                                <img
-                                    src="/images/BannerAboutMe.png"
-                                    alt="Perfume Bottle"
-                                    className="absolute bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-                                />
-                            </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <Button asChild size="lg" className="w-full md:w-fit">
+                                <Link href="/products">
+                                    Lihat Koleksi Kami
+                                    <ArrowRight className="size-4" />
+                                </Link>
+                            </Button>
+                            <Button onClick={() => window.open('https://wa.me/6281383415432', '_blank')} variant="outline" size="lg" className="w-full md:w-fit">
+                                Chat Via WhatsApp
+                                <WhatsAppIcon />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="md:flex-1 w-full h-full flex flex-col items-center justify-center md:py-18">
+                        <div className="relative aspect-square w-full rounded-3xl overflow-hidden">
+                            <img
+                                src="/images/BannerAboutMe.png"
+                                alt="Perfume Bottle"
+                                className="absolute bg-muted w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+                            />
                         </div>
                     </div>
                 </section>

@@ -87,7 +87,7 @@ function Login({ status, canResetPassword }: Props) {
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
-                                    className="rounded-none"
+                                    className="rounded-full"
                                 />
                                 <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground">
                                     Ingat saya
@@ -119,8 +119,8 @@ function Login({ status, canResetPassword }: Props) {
 
 Login.layout = (page: ReactElement) => (
     <AuthSimpleLayout
-        title="Masuk ke Akun Kamu"
-        description="Masukkan email dan password kamu untuk melanjutkan"
+        title="Selamat datang kembali!"
+        description="Masuk ke akun Anda untuk melanjutkan."
     >
         {page}
     </AuthSimpleLayout>

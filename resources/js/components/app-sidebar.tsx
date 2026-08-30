@@ -21,7 +21,7 @@ import {
     SidebarGroupLabel,
     SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { index as dashboard } from '@/routes/dashboard';
 import { index as productsIndex } from '@/routes/products';
 import { index as testimoniIndex } from '@/routes/testimoni';
 import type { NavItem } from '@/types';
@@ -47,9 +47,9 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset" className="border-r border-sidebar-border/60">
+        <Sidebar collapsible="icon" variant="inset">
             {/* Header: Logo & Identity */}
-            <SidebarHeader className="border-b border-sidebar-border/40 pb-2">
+            <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50 transition-colors">
@@ -65,7 +65,7 @@ export function AppSidebar() {
             <SidebarContent className="gap-0 py-2">
                 {/* Grup Menu Utama */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">
+                    <SidebarGroupLabel className="text-sm text-muted-foreground">
                         Manajemen
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -75,7 +75,7 @@ export function AppSidebar() {
 
                 {/* Grup Akses Cepat / Pintas (Didorong ke bawah dengan mt-auto) */}
                 <SidebarGroup className="mt-auto pt-4">
-                    <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">
+                    <SidebarGroupLabel className="text-sm text-muted-foreground">
                         Akses Cepat
                     </SidebarGroupLabel>
                     <SidebarGroupContent>

@@ -152,28 +152,28 @@ export default function AddProductSheet({ onCreated }: Props) {
                     Tambah Produk
                 </Button>
             </SheetTrigger>
-            
-            <SheetContent 
-                side="bottom" 
+
+            <SheetContent
+                side="bottom"
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
-                    
+
                     {/* STICKY HEADER */}
                     <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
                         <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                             Tambah Produk Baru
                         </SheetTitle>
-                        
+
                         <div className="flex items-center gap-3">
                             <SheetClose asChild>
                                 <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs h-9">
                                     Batal
                                 </Button>
                             </SheetClose>
-                            <Button 
-                                type="submit" 
-                                disabled={processing} 
+                            <Button
+                                type="submit"
+                                disabled={processing}
                                 className="rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9 min-w-[120px]"
                             >
                                 {processing ? (
@@ -215,7 +215,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 </div>
                                 {errors.original && <span className="text-[10px] text-destructive">{errors.original}</span>}
                             </div>
-                            
+
                             {/* Nama */}
                             <div className="grid gap-2">
                                 <Label htmlFor="nama" className="text-sm font-medium">Nama Produk <span className="text-destructive">*</span></Label>
@@ -246,7 +246,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
-                                    <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)}>
+                                    <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)} modal={false}>
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Pilih kategori" />
                                         </SelectTrigger>
@@ -261,7 +261,7 @@ export default function AddProductSheet({ onCreated }: Props) {
 
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Gender <span className="text-destructive">*</span></Label>
-                                    <Select value={data.gender} onValueChange={(val) => setData('gender', val)}>
+                                    <Select value={data.gender} onValueChange={(val) => setData('gender', val)} modal={false}>
                                         <SelectTrigger className="w-full capitalize">
                                             <SelectValue placeholder="Pilih target" />
                                         </SelectTrigger>
@@ -457,7 +457,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                         onChange={(e) => setData('Tanggal_launch', e.target.value)}
                                     />
                                 </div>
-                                
+
                                 <div className="flex-1 border border-border rounded-lg p-4 flex items-center justify-between bg-card">
                                     <div className="space-y-0.5">
                                         <Label htmlFor="best_seller" className="text-sm font-medium cursor-pointer">
