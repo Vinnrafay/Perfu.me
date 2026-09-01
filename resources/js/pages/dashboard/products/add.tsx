@@ -23,6 +23,7 @@ import {
 import {
     Loader2,
     Plus,
+    Trash2,
     UploadCloud,
     X,
 } from 'lucide-react';
@@ -42,7 +43,16 @@ interface Props {
     onCreated?: () => void;
 }
 
-// Helper untuk memformat angka dengan pemisah ribuan (contoh: 199000 -> 199.000)
+interface SizeForm {
+    id?: number;
+    Ukuran: string;
+    Harga: string;
+    Diskon: string;
+    Stok: string;
+}
+
+const emptySize = (): SizeForm => ({ Ukuran: '', Harga: '', Diskon: '', Stok: '' });
+
 const formatNumber = (val: string | number | null | undefined): string => {
     if (val === null || val === undefined || val === '') return '';
     const raw = val.toString().replace(/\D/g, '');
@@ -55,8 +65,6 @@ const parseRawNumber = (val: string): string => val.replace(/\D/g, '');
 export default function AddProductSheet({ onCreated }: Props) {
     const [open, setOpen] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [displayHarga, setDisplayHarga] = useState<string>('');
-    const [displayDiskon, setDisplayDiskon] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -70,46 +78,24 @@ export default function AddProductSheet({ onCreated }: Props) {
         Base_Note: '',
         Komposisi: '',
         Kemasan: '',
-        Ukuran: '',
-        Harga: '',
-        Diskon: '',
-        Stok: '',
         Tanggal_launch: '',
         Deskripsi: '',
         Foto: null as File | null,
         Best_Seller: false,
         signature: false,
+        sizes: [emptySize()] as SizeForm[],
     });
 
+    const fieldError = (key: string) => (errors as Record<string, string>)[key];
+
     const isRefill = data.original === 'Refill';
-
-    // Harga akhir dihitung live di frontend cuma buat preview,
-    // perhitungan yang beneran dipakai tetap dari backend (accessor harga_akhir di model).
-    const hargaAkhirPreview = Math.max(
-        0,
-        (Number(data.Harga) || 0) - (Number(data.Diskon) || 0)
-    );
-
-    const handleHargaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = parseRawNumber(e.target.value);
-        setData('Harga', raw);
-        setDisplayHarga(formatNumber(raw));
-    };
-
-    const handleDiskonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = parseRawNumber(e.target.value);
-        setData('Diskon', raw);
-        setDisplayDiskon(formatNumber(raw));
-    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setData('Foto', file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
+            reader.onloadend = () => setImagePreview(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
@@ -117,18 +103,32 @@ export default function AddProductSheet({ onCreated }: Props) {
     const removeImage = () => {
         setData('Foto', null);
         setImagePreview(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const selectOriginal = (val: 'Original' | 'Refill') => {
         setData((prev) => ({
             ...prev,
             original: val,
-            // Signature cuma berlaku buat Original — reset kalau pindah ke Refill
             signature: val === 'Refill' ? false : prev.signature,
         }));
+    };
+
+    // --- Varian ukuran ---
+    const addSize = () => {
+        setData('sizes', [...data.sizes, emptySize()]);
+    };
+
+    const removeSize = (index: number) => {
+        if (data.sizes.length <= 1) return;
+        setData('sizes', data.sizes.filter((_, i) => i !== index));
+    };
+
+    const updateSize = (index: number, field: keyof SizeForm, value: string) => {
+        setData(
+            'sizes',
+            data.sizes.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
+        );
     };
 
     const submitProduct = (e: React.FormEvent) => {
@@ -137,8 +137,6 @@ export default function AddProductSheet({ onCreated }: Props) {
             forceFormData: true,
             onSuccess: () => {
                 reset();
-                setDisplayHarga('');
-                setDisplayDiskon('');
                 setImagePreview(null);
                 setOpen(false);
                 onCreated?.();
@@ -161,7 +159,6 @@ export default function AddProductSheet({ onCreated }: Props) {
             >
                 <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
 
-                    {/* STICKY HEADER */}
                     <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
                         <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                             Tambah Produk Baru
@@ -190,11 +187,9 @@ export default function AddProductSheet({ onCreated }: Props) {
                         </div>
                     </div>
 
-                    {/* SCROLLABLE AREA */}
                     <div className="flex-1 min-h-0 overflow-y-auto w-full custom-scrollbar" data-lenis-prevent>
                         <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
 
-                            {/* Tipe Produk */}
                             <div className="grid gap-2">
                                 <Label className="text-sm font-medium">
                                     Tipe Produk <span className="text-destructive">*</span>
@@ -218,7 +213,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 {errors.original && <span className="text-[10px] text-destructive">{errors.original}</span>}
                             </div>
 
-                            {/* Nama */}
                             <div className="grid gap-2">
                                 <Label htmlFor="nama" className="text-sm font-medium">Nama Produk <span className="text-destructive">*</span></Label>
                                 <Input
@@ -230,7 +224,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 {errors.nama && <span className="text-[10px] text-destructive">{errors.nama}</span>}
                             </div>
 
-                            {/* Brand — cuma muncul kalau Refill */}
                             {isRefill && (
                                 <div className="grid gap-2">
                                     <Label htmlFor="brand" className="text-sm font-medium">Brand Original <span className="text-destructive">*</span></Label>
@@ -244,7 +237,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 </div>
                             )}
 
-                            {/* Baris 2: Kategori & Gender */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
@@ -279,7 +271,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 </div>
                             </div>
 
-                            {/* Notes Aroma — sekarang selalu muncul, Original maupun Refill */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label htmlFor="top_note" className="text-sm font-medium">Top Note <span className="text-destructive">*</span></Label>
@@ -313,7 +304,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 </div>
                             </div>
 
-                            {/* Komposisi & Deskripsi */}
                             <div className="grid gap-2">
                                 <Label htmlFor="komposisi" className="text-sm font-medium">Komposisi Bahan</Label>
                                 <Textarea
@@ -337,83 +327,144 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 />
                             </div>
 
-                            {/* Ukuran & Kemasan */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="ukuran" className="text-sm font-medium">Ukuran (ml) <span className="text-destructive">*</span></Label>
-                                    <Input
-                                        id="ukuran"
-                                        type="number"
-                                        placeholder="50"
-                                        value={data.Ukuran}
-                                        onChange={(e) => setData('Ukuran', e.target.value)}
-                                    />
-                                    {errors.Ukuran && <span className="text-[10px] text-destructive">{errors.Ukuran}</span>}
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="kemasan" className="text-sm font-medium">Tipe Kemasan</Label>
-                                    <Input
-                                        id="kemasan"
-                                        placeholder="Botol Kaca"
-                                        value={data.Kemasan}
-                                        onChange={(e) => setData('Kemasan', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Harga & Diskon */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="harga" className="text-sm font-medium">Harga Jual (Rp) <span className="text-destructive">*</span></Label>
-                                    <Input
-                                        id="harga"
-                                        type="text"
-                                        inputMode="numeric"
-                                        placeholder="199.000"
-                                        value={displayHarga}
-                                        onChange={handleHargaChange}
-                                    />
-                                    {errors.Harga && <span className="text-[10px] text-destructive">{errors.Harga}</span>}
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="diskon" className="text-sm font-medium">Diskon (Rp, opsional)</Label>
-                                    <Input
-                                        id="diskon"
-                                        type="text"
-                                        inputMode="numeric"
-                                        placeholder="0"
-                                        value={displayDiskon}
-                                        onChange={handleDiskonChange}
-                                    />
-                                    {errors.Diskon && <span className="text-[10px] text-destructive">{errors.Diskon}</span>}
-                                </div>
-                            </div>
-
-                            {/* Harga Akhir — preview otomatis, bukan input */}
-                            <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium">Harga Akhir</p>
-                                    <p className="text-xs text-muted-foreground">Harga setelah dikurangi diskon</p>
-                                </div>
-                                <span className="text-base font-semibold text-foreground">
-                                    Rp {formatNumber(hargaAkhirPreview)}
-                                </span>
-                            </div>
-
-                            {/* Stok */}
                             <div className="grid gap-2">
-                                <Label htmlFor="stok" className="text-sm font-medium">Stok Awal <span className="text-destructive">*</span></Label>
+                                <Label htmlFor="kemasan" className="text-sm font-medium">Tipe Kemasan</Label>
                                 <Input
-                                    id="stok"
-                                    type="number"
-                                    placeholder="100"
-                                    value={data.Stok}
-                                    onChange={(e) => setData('Stok', e.target.value)}
+                                    id="kemasan"
+                                    placeholder="Botol Kaca"
+                                    value={data.Kemasan}
+                                    onChange={(e) => setData('Kemasan', e.target.value)}
                                 />
-                                {errors.Stok && <span className="text-[10px] text-destructive">{errors.Stok}</span>}
                             </div>
 
-                            {/* File Upload Dropzone */}
+                            {/* Varian Ukuran — bisa lebih dari satu */}
+                            <div className="grid gap-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-medium">
+                                        Varian Ukuran <span className="text-destructive">*</span>
+                                    </Label>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addSize}
+                                        className="h-8 text-xs rounded-lg"
+                                    >
+                                        <Plus className="w-3.5 h-3.5 mr-1" />
+                                        Tambah Ukuran
+                                    </Button>
+                                </div>
+                                {typeof errors.sizes === 'string' && (
+                                    <span className="text-[10px] text-destructive">{errors.sizes}</span>
+                                )}
+
+                                <div className="grid gap-4">
+                                    {data.sizes.map((size, index) => {
+                                        const hargaAkhir = Math.max(
+                                            0,
+                                            (Number(size.Harga) || 0) - (Number(size.Diskon) || 0),
+                                        );
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="rounded-lg border border-border p-4 grid gap-4 bg-card relative"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs font-medium text-muted-foreground">
+                                                        Ukuran #{index + 1}
+                                                    </span>
+                                                    {data.sizes.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeSize(index)}
+                                                            className="text-destructive hover:opacity-70 transition-opacity"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                                    <div className="grid gap-2">
+                                                        <Label className="text-xs font-medium">Ukuran (ml)</Label>
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="50"
+                                                            value={size.Ukuran}
+                                                            onChange={(e) => updateSize(index, 'Ukuran', e.target.value)}
+                                                        />
+                                                        {fieldError(`sizes.${index}.Ukuran`) && (
+                                                            <span className="text-[10px] text-destructive">
+                                                                {fieldError(`sizes.${index}.Ukuran`)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="grid gap-2">
+                                                        <Label className="text-xs font-medium">Harga (Rp)</Label>
+                                                        <Input
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            placeholder="199.000"
+                                                            value={formatNumber(size.Harga)}
+                                                            onChange={(e) =>
+                                                                updateSize(index, 'Harga', parseRawNumber(e.target.value))
+                                                            }
+                                                        />
+                                                        {fieldError(`sizes.${index}.Harga`) && (
+                                                            <span className="text-[10px] text-destructive">
+                                                                {fieldError(`sizes.${index}.Harga`)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="grid gap-2">
+                                                        <Label className="text-xs font-medium">Diskon (Rp)</Label>
+                                                        <Input
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            placeholder="0"
+                                                            value={formatNumber(size.Diskon)}
+                                                            onChange={(e) =>
+                                                                updateSize(index, 'Diskon', parseRawNumber(e.target.value))
+                                                            }
+                                                        />
+                                                        {fieldError(`sizes.${index}.Diskon`) && (
+                                                            <span className="text-[10px] text-destructive">
+                                                                {fieldError(`sizes.${index}.Diskon`)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="grid gap-2">
+                                                        <Label className="text-xs font-medium">Stok</Label>
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="100"
+                                                            value={size.Stok}
+                                                            onChange={(e) => updateSize(index, 'Stok', e.target.value)}
+                                                        />
+                                                        {fieldError(`sizes.${index}.Stok`) && (
+                                                            <span className="text-[10px] text-destructive">
+                                                                {fieldError(`sizes.${index}.Stok`)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="rounded-md bg-muted/30 px-3 py-2 flex items-center justify-between">
+                                                    <span className="text-xs text-muted-foreground">Harga Akhir</span>
+                                                    <span className="text-sm font-semibold">
+                                                        Rp {formatNumber(hargaAkhir)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
                             <div className="grid gap-2">
                                 <Label className="text-sm font-medium">Foto Produk</Label>
                                 <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px]">
@@ -448,7 +499,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 {errors.Foto && <span className="text-[10px] text-destructive">{errors.Foto}</span>}
                             </div>
 
-                            {/* Options */}
                             <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10">
                                 <div className="grid gap-2 flex-1">
                                     <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
@@ -475,7 +525,6 @@ export default function AddProductSheet({ onCreated }: Props) {
                                     />
                                 </div>
 
-                                {/* Signature — cuma muncul kalau Original */}
                                 {!isRefill && (
                                     <div className="flex-1 border border-border rounded-lg p-4 flex items-center justify-between bg-card">
                                         <div className="space-y-0.5">

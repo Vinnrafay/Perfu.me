@@ -4,20 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProductsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $search = trim($request->string('search')->toString());
 
         $products = Product::query()
+            ->with('sizes')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
@@ -31,111 +30,105 @@ class ProductsController extends Controller
 
         return Inertia::render('dashboard/products/index', [
             'products' => $products,
-            'filters' => [
-                'search' => $search,
-            ],
+            'filters' => ['search' => $search],
         ]);
     }
 
-    /**
-     * Display the public listing of products.
-     *
-     * @return Response
-     */
     public function catalog()
     {
-        $products = Product::latest()->get();
+        $products = Product::with('sizes')->latest()->get();
 
         return Inertia::render('products/index', [
             'products' => $products,
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $this->normalizeToggles($request);
 
         $validated = $request->validate($this->validationRules());
+        $sizes = $validated['sizes'];
+        unset($validated['sizes']);
 
         if ($request->hasFile('Foto')) {
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
         }
 
-        Product::create($validated);
+        DB::transaction(function () use ($validated, $sizes) {
+            $product = Product::create($validated);
+            $product->sizes()->createMany($sizes);
+        });
 
-        return redirect()
-            ->back()
-            ->with('success', 'Produk berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Produk berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Product $product)
     {
         return Inertia::render('products/detail', [
-            'product' => $product,
+            'product' => $product->load('sizes'),
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Product $product)
     {
         return Inertia::render('dashboard/products/edit', [
-            'product' => $product,
+            'product' => $product->load('sizes'),
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Product $product)
     {
         $this->normalizeToggles($request);
 
         $validated = $request->validate($this->validationRules($product->id));
+        $sizes = $validated['sizes'];
+        unset($validated['sizes']);
 
         if ($request->hasFile('Foto')) {
-            // Hapus gambar lama dari storage jika ada gambar baru
             if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
                 Storage::disk('public')->delete($product->Foto);
             }
-
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
         }
 
-        $product->update($validated);
+        DB::transaction(function () use ($product, $validated, $sizes) {
+            $product->update($validated);
 
-        return redirect()
-            ->back()
-            ->with('success', 'Produk berhasil diperbarui.');
+            // ukuran yang id-nya nggak dikirim lagi dari frontend berarti dihapus user
+            $incomingIds = collect($sizes)->pluck('id')->filter()->all();
+            $product->sizes()->whereNotIn('id', $incomingIds)->delete();
+
+            foreach ($sizes as $size) {
+                $payload = [
+                    'Ukuran' => $size['Ukuran'],
+                    'Harga'  => $size['Harga'],
+                    'Diskon' => $size['Diskon'] ?? 0,
+                    'Stok'   => $size['Stok'],
+                ];
+
+                if (!empty($size['id'])) {
+                    $product->sizes()->where('id', $size['id'])->update($payload);
+                } else {
+                    $product->sizes()->create($payload);
+                }
+            }
+        });
+
+        return redirect()->back()->with('success', 'Produk berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Product $product)
     {
-        // Hapus file gambar terkait dari storage
         if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
             Storage::disk('public')->delete($product->Foto);
         }
 
-        $product->delete();
+        $product->delete(); // product_sizes ikut kehapus lewat cascadeOnDelete()
 
-        return redirect()
-            ->back()
-            ->with('success', 'Produk berhasil dihapus.');
+        return redirect()->back()->with('success', 'Produk berhasil dihapus.');
     }
 
-    /**
-     *
-     */
     public function bulkDestroy(Request $request)
     {
         $request->validate([
@@ -152,43 +145,28 @@ class ProductsController extends Controller
             $product->delete();
         }
 
-        return redirect()
-            ->back()
-            ->with('success', count($request->ids).' produk berhasil dihapus.');
+        return redirect()->back()->with('success', count($request->ids).' produk berhasil dihapus.');
     }
 
-    /**
-     * Normalisasi field sebelum divalidasi:
-     * - Best_Seller: checkbox -> 'yes'/'no'
-     * - signature: checkbox -> 'yes'/'no', tapi dipaksa 'no' kalau produknya Refill
-     *   (karena toggle Signature nggak ditampilkan sama sekali di form Refill)
-     * - brand: dikosongin (null) kalau produknya Original, karena field brand
-     *   nggak ditampilkan di form Original dan nggak relevan buat tipe itu
-     * - Diskon: kalau dikosongin di form, default-in ke 0 (bukan null),
-     *   biar perhitungan harga akhir di model selalu aman
-     */
     private function normalizeToggles(Request $request): void
     {
         $isRefill = $request->input('original') === 'Refill';
+
+        $sizes = collect($request->input('sizes', []))
+            ->map(function ($size) {
+                $size['Diskon'] = $size['Diskon'] ?? 0;
+                return $size;
+            })
+            ->all();
 
         $request->merge([
             'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
             'signature'   => $isRefill ? 'no' : ($request->boolean('signature') ? 'yes' : 'no'),
             'brand'       => $isRefill ? $request->input('brand') : null,
-            'Diskon'      => $request->input('Diskon') === null || $request->input('Diskon') === ''
-                ? 0
-                : $request->input('Diskon'),
+            'sizes'       => $sizes,
         ]);
     }
 
-    /**
-     * Helper Aturan Validasi Produk
-     *
-     * - Top_Note, Middle_Note, Base_Note selalu wajib, baik Original maupun Refill.
-     * - brand cuma wajib kalau produknya Refill.
-     * - Diskon nullable secara input, tapi selalu di-normalize ke angka (default 0)
-     *   sebelum masuk sini lewat normalizeToggles(), jadi validasinya numeric biasa.
-     */
     private function validationRules(?int $productId = null): array
     {
         return [
@@ -202,15 +180,18 @@ class ProductsController extends Controller
             'Base_Note'      => 'required|string|max:255',
             'Komposisi'      => 'required|string|max:255',
             'Kemasan'        => 'nullable|string|max:255',
-            'Ukuran'         => 'required|integer|min:1',
-            'Harga'          => 'required|numeric|min:0|max:999999999999.99',
-            'Diskon'         => 'nullable|numeric|min:0|max:999999999999.99|lte:Harga',
-            'Stok'           => 'required|integer|min:0',
             'Tanggal_launch' => 'nullable|date',
             'Deskripsi'      => 'required|string',
             'Foto'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'Best_Seller'    => 'required|in:yes,no',
             'signature'      => 'required|in:yes,no',
+
+            'sizes'          => 'required|array|min:1',
+            'sizes.*.id'     => 'nullable|integer|exists:product_sizes,id',
+            'sizes.*.Ukuran' => 'required|integer|min:1',
+            'sizes.*.Harga'  => 'required|numeric|min:0|max:999999999999.99',
+            'sizes.*.Diskon' => 'nullable|numeric|min:0|max:999999999999.99|lte:sizes.*.Harga',
+            'sizes.*.Stok'   => 'required|integer|min:0',
         ];
     }
 }

@@ -63,6 +63,29 @@ const formatPrice = (val: number) =>
         minimumFractionDigits: 0,
     }).format(val);
 
+// Total stok dari seluruh varian ukuran sebuah produk
+const totalStok = (product: Product): number =>
+    (product.sizes ?? []).reduce((sum, s) => sum + (s.Stok ?? 0), 0);
+
+// Daftar ukuran (ml) sebuah produk, dipisah koma, contoh: "30ml, 50ml, 100ml"
+const daftarUkuran = (product: Product): string => {
+    const sizes = product.sizes ?? [];
+    if (sizes.length === 0) return '-';
+    return sizes.map((s) => `${s.Ukuran}ml`).join(', ');
+};
+
+// Rentang harga akhir termurah - termahal dari seluruh varian ukuran
+const rentangHarga = (product: Product): string => {
+    const sizes = product.sizes ?? [];
+    if (sizes.length === 0) return '-';
+    const hargaAkhirList = sizes.map(
+        (s) => s.harga_akhir ?? Math.max(0, (s.Harga ?? 0) - (s.Diskon ?? 0)),
+    );
+    const min = Math.min(...hargaAkhirList);
+    const max = Math.max(...hargaAkhirList);
+    return min === max ? formatPrice(min) : `${formatPrice(min)} - ${formatPrice(max)}`;
+};
+
 export default function ProductsList({ products: paginated, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selected, setSelected] = useState<number[]>([]);
@@ -288,6 +311,8 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                             {/* Data Rows */}
                             {rows.map((product) => {
                                 const isSelected = selected.includes(product.id);
+                                const stok = totalStok(product);
+
                                 return (
                                     <TableRow
                                         key={product.id}
@@ -316,28 +341,28 @@ export default function ProductsList({ products: paginated, filters }: Props) {
 
                                         {visibleColumns.Ukuran && (
                                             <TableCell className="text-muted-foreground text-sm">
-                                                {product.Ukuran} ml
+                                                {daftarUkuran(product)}
                                             </TableCell>
                                         )}
 
                                         {visibleColumns.Harga && (
-                                            <TableCell className="font-semibold text-muted-foreground text-sm">
-                                                {formatPrice(product.Harga)}
+                                            <TableCell className="font-semibold text-muted-foreground text-sm whitespace-nowrap">
+                                                {rentangHarga(product)}
                                             </TableCell>
                                         )}
 
                                         {visibleColumns.Stok && (
                                             <TableCell>
-                                                {product.Stok === 0 ? (
+                                                {stok === 0 ? (
                                                     <Badge variant="destructive" className="text-[10px] px-2 py-0">
                                                         Habis
                                                     </Badge>
-                                                ) : product.Stok <= 5 ? (
+                                                ) : stok <= 5 ? (
                                                     <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] px-2 py-0">
-                                                        Sisa {product.Stok}
+                                                        Sisa {stok}
                                                     </Badge>
                                                 ) : (
-                                                    <span className="text-sm text-muted-foreground">{product.Stok}</span>
+                                                    <span className="text-sm text-muted-foreground">{stok}</span>
                                                 )}
                                             </TableCell>
                                         )}
