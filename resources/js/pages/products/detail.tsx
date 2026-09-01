@@ -16,11 +16,21 @@ import {
   Wallet,
   Headphones,
   RotateCcw,
-  MessageSquare,
   Sparkles,
   Check,
+  ShoppingCart,
 } from "lucide-react";
-import { useState, useRef, UIEvent } from "react";
+import { useState, useRef, UIEvent, useMemo, useEffect } from "react";
+
+interface ProductSize {
+  id?: number;
+  product_id?: number;
+  Ukuran: number;
+  Harga: number;
+  Diskon?: number | null;
+  Stok: number;
+  harga_akhir?: number | null;
+}
 
 interface Product {
   id: number;
@@ -36,9 +46,9 @@ interface Product {
   Base_Note?: string;
   Komposisi: string;
   Kemasan: string | null;
-  Ukuran: number;
-  Harga: number;
-  Stok: number;
+  Ukuran?: number;
+  Harga?: number;
+  Stok?: number;
   "Tanggal launch"?: string | null;
   Tanggal_launch?: string | null;
   Deskripsi: string;
@@ -47,6 +57,7 @@ interface Product {
   BPOM?: string;
   "Best Seller"?: "yes" | "no";
   Best_Seller?: "yes" | "no";
+  sizes?: ProductSize[];
 }
 
 interface Props {
@@ -79,8 +90,6 @@ const dummyProduct: Product = {
   "Best Seller": "yes",
 };
 
-const sizeOptions = [30, 50, 100];
-
 const trustBadges = [
   { icon: Truck, label: "Gratis Ongkir" },
   { icon: ShieldCheck, label: "Garansi 100% Original" },
@@ -90,12 +99,65 @@ const trustBadges = [
 ];
 
 export default function ProductDetail({ product = dummyProduct }: Props) {
-  const [selectedSize, setSelectedSize] = useState(product.Ukuran);
+  const availableSizes = useMemo(() => {
+    const sizes = Array.isArray(product?.sizes) ? product.sizes : [];
+
+    if (sizes.length > 0) {
+      return [...sizes]
+        .filter((size) => Number.isFinite(Number(size?.Ukuran)))
+        .sort((a, b) => Number(a.Ukuran) - Number(b.Ukuran));
+    }
+
+    const legacySize = Number(product?.Ukuran ?? 0);
+    const legacyPrice = Number(product?.Harga ?? 0);
+    const legacyStock = Number(product?.Stok ?? 0);
+
+    if (!legacySize) {
+      return [];
+    }
+
+    return [
+      {
+        Ukuran: legacySize,
+        Harga: legacyPrice,
+        Diskon: 0,
+        Stok: legacyStock,
+        harga_akhir: legacyPrice,
+      },
+    ];
+  }, [product]);
+
+  const [selectedSize, setSelectedSize] = useState<number>(() => {
+    const firstSize = availableSizes[0];
+    return firstSize ? Number(firstSize.Ukuran) : Number(product?.Ukuran ?? 0);
+  });
   const [qty, setQty] = useState(1);
   const [copied, setCopied] = useState(false);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
+  useEffect(() => {
+    if (!availableSizes.length) {
+      return;
+    }
+
+    setSelectedSize((current) => {
+      const hasCurrentSize = availableSizes.some(
+        (size) => Number(size.Ukuran) === Number(current)
+      );
+
+      return hasCurrentSize ? Number(current) : Number(availableSizes[0].Ukuran);
+    });
+  }, [availableSizes]);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const selectedSizeData = useMemo(
+    () =>
+      availableSizes.find(
+        (size) => Number(size.Ukuran) === Number(selectedSize)
+      ) ?? availableSizes[0] ?? null,
+    [availableSizes, selectedSize]
+  );
 
   const images: string[] = [
     product.Foto
@@ -151,13 +213,30 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
     }
   };
 
-  const inStock = product.Stok > 0;
+  const activePrice = selectedSizeData
+    ? Number(selectedSizeData.harga_akhir ?? selectedSizeData.Harga ?? 0)
+    : Number(product.Harga ?? 0);
+  const activeStock = selectedSizeData
+    ? Number(selectedSizeData.Stok ?? 0)
+    : Number(product.Stok ?? 0);
+  const inStock = activeStock > 0;
+
+  useEffect(() => {
+    if (!inStock && qty > 1) {
+      setQty(1);
+      return;
+    }
+
+    if (inStock && qty > activeStock) {
+      setQty(activeStock);
+    }
+  }, [activeStock, inStock, qty]);
 
   const formattedPrice = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
-  }).format(product.Harga);
+  }).format(activePrice);
 
   const waMessage = encodeURIComponent(
     `Halo Perfu.me, saya ingin memesan ${product.nama} (${product.Varian}, ${selectedSize}ml) sebanyak ${qty} pcs.`
@@ -186,7 +265,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                   images.map((img, idx) => (
                     <div
                       key={idx}
-                      className="relative h-full w-full flex-shrink-0 snap-center overflow-hidden"
+                      className="relative h-full w-full shrink-0 snap-center overflow-hidden"
                     >
                       <img
                         src={img}
@@ -293,7 +372,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
 
             <div className="h-px w-full bg-border" />
 
-            <p className="text-xs sm:text-sm leading-relaxed text-foreground/80 font-normal">
+            <p className="whitespace-pre-line wrap-break-word text-xs sm:text-sm leading-relaxed text-foreground/80 font-normal">
               {product.Deskripsi}
             </p>
 
@@ -328,19 +407,25 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                 <span className="text-muted-foreground">{selectedSize} ML</span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {sizeOptions.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`rounded-xl border px-4 py-2 text-xs font-semibold tracking-wider transition-all ${selectedSize === size
-                      ? "border-primary bg-primary text-primary-foreground shadow-xs"
-                      : "border-border bg-background text-foreground hover:bg-muted"
-                      }`}
-                  >
-                    {size} ML
-                  </button>
-                ))}
+                {availableSizes.length > 0 ? (
+                  availableSizes.map((size) => (
+                    <button
+                      key={size.id ?? `${size.Ukuran}-${size.Harga}`}
+                      type="button"
+                      onClick={() => setSelectedSize(Number(size.Ukuran))}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-wider transition-all ${selectedSize === Number(size.Ukuran)
+                        ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                        : "border-border bg-background text-foreground hover:bg-muted"
+                        }`}
+                    >
+                      {Number(size.Ukuran)} ML
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-xs font-medium text-muted-foreground">
+                    Ukuran tidak tersedia
+                  </div>
+                )}
               </div>
             </div>
 
@@ -349,7 +434,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
               {inStock ? (
                 <span className="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Stok Tersedia ({product.Stok} pcs)
+                  Stok Tersedia ({activeStock} pcs)
                 </span>
               ) : (
                 <span className="text-destructive">Stok Habis</span>
@@ -358,7 +443,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
 
             {/* Quantity Counter + WhatsApp Button (Mobile Responsive Fix) */}
             <div className="flex flex-col gap-3 pt-1">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-1.5">
                 {/* Quantity Selector Row */}
                 <ButtonGroup>
                   <Button
@@ -401,6 +486,23 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                     Stok Habis
                   </Button>
                 )}
+
+                {inStock ? (
+                  <Button
+                    size="icon-lg"
+                    onClick={() => window.open(`https://wa.me/6281383415432?text=${waMessage}`, '_blank')}
+                  >
+                    <ShoppingCart />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon-lg"
+                    disabled
+                  >
+                    <ShoppingCart />
+                  </Button>
+                )}
+
               </div>
             </div>
 

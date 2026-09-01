@@ -57,6 +57,33 @@ test('guests can visit the public product details page', function () {
     );
 });
 
+test('product detail includes the size variants from the database', function () {
+    $product = Product::create([
+        'nama' => 'Perfume Variant',
+        'kategori' => 'EDP',
+        'gender' => 'male',
+        'Top_Note' => 'Lemon',
+        'Middle_Note' => 'Rose',
+        'Base_Note' => 'Musk',
+        'Komposisi' => 'Alcohol, Perfume',
+        'Deskripsi' => "Line one\nLine two",
+        'Best_Seller' => 'yes',
+    ]);
+
+    $product->sizes()->createMany([
+        ['Ukuran' => 30, 'Harga' => 120000, 'Diskon' => 10000, 'Stok' => 5],
+        ['Ukuran' => 50, 'Harga' => 180000, 'Diskon' => 15000, 'Stok' => 12],
+    ]);
+
+    $response = $this->get(route('products.detail', $product));
+
+    $response->assertOk();
+    $response->assertJsonPath('product.sizes.0.Ukuran', 30);
+    $response->assertJsonPath('product.sizes.1.Ukuran', 50);
+    $response->assertJsonPath('product.sizes.0.Stok', 5);
+    $response->assertJsonPath('product.sizes.1.Stok', 12);
+});
+
 test('guests are redirected to the login page when trying to access admin dashboard products', function () {
     $response = $this->get(route('products.index'));
     $response->assertRedirect(route('login'));
