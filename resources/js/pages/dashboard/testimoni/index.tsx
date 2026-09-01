@@ -174,11 +174,11 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
     const to = Math.min(from + (paginated.data?.length || 0) - 1, totalItems);
 
     return (
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
+        <div className="flex w-full flex-col gap-3 p-5">
             {/* Header Section */}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                         Daftar Testimoni
                     </h1>
                     <p className="text-sm text-muted-foreground">
@@ -189,7 +189,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
             </div>
 
             {/* Table Card Container */}
-            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
                 {/* Toolbar */}
                 <div className="flex flex-col items-center justify-between gap-3 border-b border-border bg-muted/20 p-4 sm:flex-row">
                     {/* Search Form */}
@@ -199,7 +199,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Cari ulasan atau nama..."
-                            className="h-9 rounded-lg bg-background pl-9 text-sm"
+                            className="bg-background pl-9"
                         />
                     </form>
 
@@ -220,7 +220,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                         {/* Column Toggle Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg text-xs font-medium">
+                                <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-medium">
                                     <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
                                     Kolom
                                     <ChevronDown className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
@@ -266,7 +266,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                         variant="ghost"
                                         size="sm"
                                         onClick={cycleNameSort}
-                                        className="-ml-3 h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                                        className="-ml-3 h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                                     >
                                         Nama
                                         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -278,22 +278,22 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                     </Button>
                                 </TableHead>
                                 {visibleColumns.Email && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Email
                                     </TableHead>
                                 )}
                                 {visibleColumns.Komentar && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Komentar
                                     </TableHead>
                                 )}
                                 {visibleColumns.Rating && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Rating
                                     </TableHead>
                                 )}
                                 {visibleColumns.Tanggal && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Tanggal
                                     </TableHead>
                                 )}

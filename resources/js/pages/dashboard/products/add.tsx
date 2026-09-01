@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import {
     Loader2,
+    Plus,
     UploadCloud,
     X,
 } from 'lucide-react';
@@ -148,7 +149,7 @@ export default function AddProductSheet({ onCreated }: Props) {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button className="bg-black hover:bg-black/90 text-white rounded-lg">
+                <Button>
                     Tambah Produk
                 </Button>
             </SheetTrigger>
@@ -162,6 +163,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                     {/* STICKY HEADER */}
                     <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
                         <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                            <Plus />
                             Tambah Produk Baru
                         </SheetTitle>
 

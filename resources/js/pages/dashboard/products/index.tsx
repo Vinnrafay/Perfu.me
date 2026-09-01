@@ -139,11 +139,11 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     const to = Math.min(from + (paginated.data?.length || 0) - 1, totalItems);
 
     return (
-        <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col gap-3 p-5 w-full">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                         Daftar Produk
                     </h1>
                     <p className="text-sm text-muted-foreground">
@@ -154,7 +154,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
             </div>
 
             {/* Table Card Container */}
-            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
                 {/* Toolbar */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-b border-border bg-muted/20">
                     {/* Search Form */}
@@ -164,7 +164,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Cari nama produk..."
-                            className="h-9 pl-9 text-sm rounded-lg bg-background"
+                            className="pl-9 bg-background"
                         />
                     </form>
 
@@ -185,7 +185,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                         {/* Column Toggle Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg text-xs font-medium">
+                                <Button variant="outline" size="sm">
                                     <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
                                     Kolom
                                     <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
@@ -231,34 +231,34 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => setSortAsc((v) => !v)}
-                                        className="-ml-3 h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                                        className="-ml-3 h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                                     >
                                         Nama
                                         <ArrowUpDown className="h-3.5 w-3.5" />
                                     </Button>
                                 </TableHead>
                                 {visibleColumns.Kategori && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Kategori
                                     </TableHead>
                                 )}
                                 {visibleColumns.Ukuran && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Ukuran
                                     </TableHead>
                                 )}
                                 {visibleColumns.Harga && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Harga
                                     </TableHead>
                                 )}
                                 {visibleColumns.Stok && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Stok
                                     </TableHead>
                                 )}
                                 {visibleColumns['Best Seller'] && (
-                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <TableHead className="text-xs text-muted-foreground">
                                         Best Seller
                                     </TableHead>
                                 )}
@@ -321,7 +321,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                         )}
 
                                         {visibleColumns.Harga && (
-                                            <TableCell className="font-semibold text-foreground text-sm">
+                                            <TableCell className="font-semibold text-muted-foreground text-sm">
                                                 {formatPrice(product.Harga)}
                                             </TableCell>
                                         )}

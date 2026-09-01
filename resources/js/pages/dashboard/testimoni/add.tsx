@@ -50,8 +50,8 @@ export default function AddTestimoniSheet({ onCreated }: Props) {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button className="flex items-center gap-2 rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9">
-                    <Plus className="h-4 w-4" />
+                <Button>
+                    <Plus />
                     Tambah Testimoni
                 </Button>
             </SheetTrigger>
