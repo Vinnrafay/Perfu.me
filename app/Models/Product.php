@@ -17,10 +17,6 @@ class Product extends Model
         'Base_Note',
         'Komposisi',
         'Kemasan',
-        'Ukuran',
-        'Harga',
-        'Diskon',
-        'Stok',
         'Tanggal_launch',
         'Deskripsi',
         'Foto',
@@ -30,33 +26,15 @@ class Product extends Model
 
     protected $casts = [
         'Tanggal_launch' => 'date',
-        'Harga' => 'decimal:2',
-        'Diskon' => 'decimal:2',
-        'Ukuran' => 'integer',
-        'Stok' => 'integer',
     ];
 
     /**
-     * Harga akhir setelah dikurangi diskon.
-     * Ini dihitung otomatis (bukan disimpan manual di database),
-     * jadi selalu sinkron begitu Harga atau Diskon diubah.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * Varian ukuran produk (dulu Ukuran/Harga/Diskon/Stok ada di tabel ini,
+     * sekarang dipecah ke tabel product_sizes supaya 1 produk bisa punya
+     * beberapa ukuran, masing-masing dengan harga/diskon/stok sendiri).
      */
-    protected function hargaAkhir(): \Illuminate\Database\Eloquent\Casts\Attribute
+    public function sizes()
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn () => max(0, (float) $this->Harga - (float) ($this->Diskon ?? 0)),
-        );
+        return $this->hasMany(ProductSize::class)->orderBy('Ukuran');
     }
-
-    /**
-     * Otomatis ikut ke-include tiap kali model di-convert ke array/JSON
-     * (misal dikirim ke frontend lewat Inertia::render).
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'harga_akhir',
-    ];
 }

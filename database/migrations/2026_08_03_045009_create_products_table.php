@@ -23,10 +23,6 @@ return new class extends Migration
             $table->string('Base_Note');
             $table->string('Komposisi');
             $table->string('Kemasan')->nullable();
-            $table->integer('Ukuran');
-            $table->decimal('Harga', 15, 2);
-            $table->decimal('Diskon', 15, 2)->nullable()->default(0);
-            $table->integer('Stok');
             $table->date('Tanggal_launch')->nullable();
             $table->text('Deskripsi');
             $table->string('Foto', 255)->nullable();
