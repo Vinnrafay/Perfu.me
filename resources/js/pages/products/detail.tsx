@@ -1,5 +1,9 @@
 import Navbar from "@/components/blocks/navbar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
+import { Card, CardContent } from "@/components/ui/card";
+import WhatsAppIcon from "@/components/whatsapp-icon";
 import {
   ChevronRight,
   ChevronLeft,
@@ -163,31 +167,16 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
     <>
       <Navbar />
 
-      <main className="flex min-h-screen flex-col items-center bg-background text-foreground pt-20 sm:pt-24 pb-16">
-        
-        {/* Breadcrumb */}
-        <div className="flex w-full max-w-6xl items-center gap-2 px-5 pb-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          <a href="/" className="hover:text-foreground transition-colors">
-            Home
-          </a>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <a href="/products" className="hover:text-foreground transition-colors">
-            {product.kategori} Collection
-          </a>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="truncate text-foreground font-bold">
-            {product.nama}
-          </span>
-        </div>
+      <main className="flex min-h-screen flex-col items-center bg-background text-foreground">
 
         {/* Product Main Container */}
-        <section className="grid w-full max-w-6xl grid-cols-1 gap-8 px-5 pb-12 lg:grid-cols-12 lg:gap-12 items-start">
-          
+        <section className="grid w-full max-w-7xl grid-cols-1 gap-8 px-5 pb-12 lg:grid-cols-12 lg:gap-12 items-start">
+
           {/* Gallery View */}
           <div className="lg:col-span-6 flex flex-col gap-3 w-full max-w-md mx-auto lg:max-w-none">
-            
-            <div className="relative aspect-[4/5] w-full max-h-[460px] sm:max-h-[520px] overflow-hidden rounded-2xl border border-border bg-muted/20 shadow-sm group">
-              
+
+            <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-border bg-muted group">
+
               <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
@@ -208,7 +197,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                     </div>
                   ))
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted-foreground">
                     Foto belum tersedia
                   </div>
                 )}
@@ -217,13 +206,10 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
               {/* Floating Badges */}
               <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start z-10 pointer-events-none">
                 {(product["Best Seller"] === "yes" || product.Best_Seller === "yes") && (
-                  <Badge className="bg-foreground text-background font-semibold uppercase text-[11px] tracking-wider px-2.5 py-0.5 shadow-sm">
-                    <Sparkles className="h-3 w-3 mr-1" /> Best Seller
+                  <Badge>
+                    <Sparkles /> Best Seller
                   </Badge>
                 )}
-                <Badge variant="secondary" className="bg-background/90 backdrop-blur-md border border-border text-foreground uppercase text-[11px] tracking-wider px-2.5 py-0.5 font-semibold">
-                  {product.kategori}
-                </Badge>
               </div>
 
               {/* Desktop Arrow Controls */}
@@ -248,11 +234,10 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                     {images.map((_, idx) => (
                       <span
                         key={idx}
-                        className={`h-1.5 rounded-full transition-all ${
-                          currentImgIndex === idx
-                            ? "w-4 bg-white"
-                            : "w-1.5 bg-white/50"
-                        }`}
+                        className={`h-1.5 rounded-full transition-all ${currentImgIndex === idx
+                          ? "w-4 bg-white"
+                          : "w-1.5 bg-white/50"
+                          }`}
                       />
                     ))}
                   </div>
@@ -268,11 +253,10 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                     key={idx}
                     type="button"
                     onClick={() => scrollToImage(idx)}
-                    className={`relative aspect-square h-14 shrink-0 overflow-hidden rounded-xl border transition-all ${
-                      currentImgIndex === idx
-                        ? "border-primary ring-2 ring-primary/20 scale-95 opacity-100"
-                        : "border-border/70 opacity-60 hover:opacity-100"
-                    }`}
+                    className={`relative aspect-square h-14 shrink-0 overflow-hidden rounded-xl border transition-all ${currentImgIndex === idx
+                      ? "border-primary ring-2 ring-primary/20 scale-95 opacity-100"
+                      : "border-border/70 opacity-60 hover:opacity-100"
+                      }`}
                   >
                     <img
                       src={img}
@@ -287,16 +271,16 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
 
           {/* Product Details & Actions */}
           <div className="lg:col-span-6 flex flex-col gap-5">
-            
+
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                {product.gender} • {product.Varian}
+              <span className="text-sm font-medium text-muted-foreground capitalize">
+                {product.gender} • {product.kategori}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight capitalize">
+              <h1 className="text-3xl md:text-4xl font-medium tracking-tight capitalize">
                 {product.nama}
               </h1>
               <div className="mt-1 flex items-baseline gap-3">
-                <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                <span className="text-2xl sm:text-3xl font-heading text-foreground">
                   {formattedPrice}
                 </span>
                 {product.BPOM && (
@@ -314,35 +298,32 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
             </p>
 
             {/* Piramida Aroma */}
-            <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/20 p-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Piramida Aroma
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div className="flex flex-col gap-0.5 rounded-lg bg-background p-2.5 border border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Top Notes
-                  </span>
-                  <span className="text-xs font-semibold text-foreground">{product.Top_Note ?? product["Top Note"]}</span>
-                </div>
-                <div className="flex flex-col gap-0.5 rounded-lg bg-background p-2.5 border border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Middle Notes
-                  </span>
-                  <span className="text-xs font-semibold text-foreground">{product.Middle_Note ?? product["Middle Note"]}</span>
-                </div>
-                <div className="flex flex-col gap-0.5 rounded-lg bg-background p-2.5 border border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Base Notes
-                  </span>
-                  <span className="text-xs font-semibold text-foreground">{product.Base_Note ?? product["Base Note"]}</span>
-                </div>
-              </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <Card className="p-3 gap-0">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Top Notes
+                </h4>
+                <p className="text-xs font-medium text-foreground">{product.Top_Note ?? product["Top Note"]}</p>
+              </Card>
+              <Card className="p-3 gap-0">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Middle Notes
+                </h4>
+                <p className="text-xs font-medium text-foreground">{product.Middle_Note ?? product["Middle Note"]}</p>
+              </Card>
+              <Card className="p-3 gap-0">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Base Notes
+                </h4>
+                <p className="text-xs font-medium text-foreground">{product.Base_Note ?? product["Base Note"]}</p>
+              </Card>
             </div>
+
 
             {/* Size Selector */}
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span>Ukuran Botol</span>
                 <span className="text-muted-foreground">{selectedSize} ML</span>
               </div>
@@ -352,11 +333,10 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
                     key={size}
                     type="button"
                     onClick={() => setSelectedSize(size)}
-                    className={`rounded-xl border px-4 py-2 text-xs font-semibold tracking-wider transition-all ${
-                      selectedSize === size
-                        ? "border-primary bg-primary text-primary-foreground shadow-xs"
-                        : "border-border bg-background text-foreground hover:bg-muted"
-                    }`}
+                    className={`rounded-xl border px-4 py-2 text-xs font-semibold tracking-wider transition-all ${selectedSize === size
+                      ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                      }`}
                   >
                     {size} ML
                   </button>
@@ -378,55 +358,54 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
 
             {/* Quantity Counter + WhatsApp Button (Mobile Responsive Fix) */}
             <div className="flex flex-col gap-3 pt-1">
-              
-              {/* Quantity Selector Row */}
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Jumlah
-                </span>
-                <div className="flex h-10 items-center justify-between rounded-xl border border-border bg-background px-3 w-32">
-                  <button
-                    type="button"
+              <div className="flex items-center justify-between gap-3">
+                {/* Quantity Selector Row */}
+                <ButtonGroup>
+                  <Button
+                    size="icon"
+                    variant="outline"
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    className="bg-background"
                   >
                     <Minus className="h-3.5 w-3.5" />
-                  </button>
-                  <span className="text-xs font-bold">{qty}</span>
-                  <button
-                    type="button"
+                  </Button>
+                  <ButtonGroupText className="bg-background">
+                    {qty}
+                  </ButtonGroupText>
+                  <Button
+                    size="icon"
+                    variant="outline"
                     onClick={() => setQty((q) => q + 1)}
-                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    className="bg-background"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </ButtonGroup>
 
-              {/* WhatsApp CTA Button */}
-              {inStock ? (
-                <a
-                  href={`https://wa.me/6281383415432?text=${waMessage}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full h-12 inline-flex items-center justify-center gap-2.5 rounded-xl bg-primary px-6 text-center text-xs sm:text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:opacity-90 active:scale-[0.99] shadow-sm"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Pesan via WhatsApp
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full h-12 cursor-not-allowed rounded-xl bg-muted px-6 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                >
-                  Stok Habis
-                </button>
-              )}
+                {/* WhatsApp CTA Button */}
+                {inStock ? (
+                  <Button
+                    size="lg"
+                    onClick={() => window.open(`https://wa.me/6281383415432?text=${waMessage}`, '_blank')}
+                    className="flex-1"
+                  >
+                    <WhatsAppIcon />
+                    Pesan via WhatsApp
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    disabled
+                    className="flex-1"
+                  >
+                    Stok Habis
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Utility Links */}
-            <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-muted-foreground border-t border-border">
+            <div className="flex items-center gap-6 pt-6 text-xs font-semibold text-muted-foreground border-t border-border">
               <button
                 type="button"
                 onClick={handleShare}
@@ -448,7 +427,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
         </section>
 
         {/* Trust Badges */}
-        <section className="w-full max-w-6xl px-5 py-10 border-t border-border">
+        <section className="w-full max-w-7xl p-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {trustBadges.map(({ icon: Icon, label }) => (
               <div
@@ -463,48 +442,6 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
             ))}
           </div>
         </section>
-
-        {/* Brand Footer Strip */}
-        <section className="w-full border-t border-border bg-muted/30 px-5 py-14">
-          <div className="mx-auto flex max-w-6xl flex-col gap-8">
-            <div className="flex flex-col gap-2">
-              <span className="text-2xl font-semibold tracking-tight">
-                PERFU.ME
-              </span>
-              <p className="max-w-xl text-xs sm:text-sm leading-relaxed text-muted-foreground font-normal">
-                Brand parfum lokal yang menghadirkan aroma berkarakter dengan
-                kualitas yang terasa premium dan harga yang tetap terjangkau —
-                Wangi Gak Harus Mahal.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 text-xs sm:text-sm">
-              <div className="flex flex-col gap-2">
-                <span className="font-semibold text-foreground">Inquiries</span>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Return &amp; Refund</a>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Shipping Information</a>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="font-semibold text-foreground">Customer Care</span>
-                <a
-                  href="https://wa.me/6281383415432"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Reach us on WhatsApp
-                </a>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="font-semibold text-foreground">Get Exclusive Offers</span>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  Ikuti Instagram kami <span className="font-semibold text-foreground">@perfu.mefragrance</span> untuk info promo &amp; restock.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
       </main>
     </>
   );
