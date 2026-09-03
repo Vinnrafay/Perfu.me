@@ -2,68 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\Testimoni;
-use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class HomePageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): Response
     {
-        $testimonials = Testimoni::latest()->get();
+        $testimonials = Testimoni::query()->latest()->get();
+        $signatureProducts = Product::query()
+            ->where('signature', 'yes')
+            ->whereHas('sizes')
+            ->with(['sizes' => fn ($query) => $query->orderBy('Ukuran')])
+            ->latest()
+            ->get();
 
-        return inertia('welcome', [
-            'testimonials' => $testimonials
+        return Inertia::render('welcome', [
+            'testimonials' => $testimonials,
+            'signatureProducts' => $signatureProducts,
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

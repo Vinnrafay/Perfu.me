@@ -1,82 +1,87 @@
 import { Head, Link } from '@inertiajs/react';
 import { Star, ArrowRight, ArrowUpRight, Compass } from 'lucide-react';
+import { detail as productDetail } from '@/routes/products';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/ui/marquee"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-const reviews = [
-    {
-        name: "Bagas",
-        username: "@bagas_pratama",
-        body: "Wanginya enak banget dan tahan lama seharian. Parfum lokal terfavorit!",
-        img: "https://avatar.vercel.sh/bagas",
-    },
-    {
-        name: "Siti",
-        username: "@sitinur",
-        body: "Kualitasnya juara padahal harganya terjangkau. Auto reorder lagi sih ini.",
-        img: "https://avatar.vercel.sh/siti",
-    },
-    {
-        name: "Dimas",
-        username: "@dimas_a",
-        body: "Baru pertama coba langsung suka. Banyak yang nanyain pakenya parfum apa.",
-        img: "https://avatar.vercel.sh/dimas",
-    },
-    {
-        name: "Clara",
-        username: "@clara_sella",
-        body: "Aromanya mewah dan pas banget buat dipake harian. Keren banget brand lokal satu ini!",
-        img: "https://avatar.vercel.sh/clara",
-    },
-    {
-        name: "Rian",
-        username: "@rian_feb",
-        body: "Blend-nya rapi dan gak nyengat di hidung. Luar biasa mantap!",
-        img: "https://avatar.vercel.sh/rian",
-    },
-    {
-        name: "Nabila",
-        username: "@nabilart",
-        body: "Packaging rapi, spray-nya halus, dan aromanya tahan lama. Rekomended!",
-        img: "https://avatar.vercel.sh/nabila",
-    },
-];
+type ProductSize = {
+    id: number;
+    Ukuran: number;
+    Harga: number | string;
+    Diskon: number | string | null;
+    harga_akhir: number | string;
+};
 
-const firstRow = reviews.slice(0, reviews.length)
+type SignatureProduct = {
+    id: number;
+    nama: string;
+    Deskripsi: string;
+    Foto: string | null;
+    sizes: ProductSize[];
+};
+
+type Testimonial = {
+    id: number;
+    nama: string;
+    email: string;
+    komentar: string;
+    rating: number;
+};
+
+type WelcomeProps = {
+    testimonials: Testimonial[];
+    signatureProducts: SignatureProduct[];
+};
+
 const ReviewCard = ({
-    img,
-    name,
-    username,
-    body,
-}: {
-    img: string
-    name: string
-    username: string
-    body: string
-}) => {
+    testimonial,
+}: { testimonial: Testimonial }) => {
+
     return (
         <figure
             className={cn(
-                "relative h-full w-64 cursor-pointer overflow-hidden rounded-2xl border p-4",
+                "relative flex flex-col justify-between gap-4 h-full w-72 overflow-hidden rounded-2xl border p-4",
                 "border bg-card hover:bg-muted/50",
             )}
         >
+            <div className="space-y-2">
+                <div className="flex items-center gap-1" aria-label={`${testimonial.rating} dari 5 bintang`}>
+                    <div className="flex items-center gap-0.5">
+                        {[...Array(testimonial.rating)].map((_, index) => (
+                            <Star key={index} className="size-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                    </div>
+                    <span className="text-sm text-muted-foreground font-medium">({testimonial.rating}/5)</span>
+                </div>
+                <blockquote className="text-sm text-left">{testimonial.komentar}</blockquote>
+            </div>
+
             <div className="flex flex-row items-center text-left gap-2">
-                <img className="rounded-full" width="32" height="32" alt="" src={img} />
+                <Avatar>
+                    <AvatarFallback>{testimonial.nama.charAt(0)}</AvatarFallback>
+                </Avatar>
                 <div className="flex flex-col">
-                    <figcaption className="text-sm font-medium dark:text-white">
-                        {name}
+                    <figcaption className="text-sm font-medium truncate">
+                        {testimonial.nama}
                     </figcaption>
-                    <p className="text-xs font-medium dark:text-white/40">{username}</p>
+                    <p className="text-xs font-medium text-muted-foreground truncate">
+                        {testimonial.email}
+                    </p>
                 </div>
             </div>
-            <blockquote className="mt-2 text-sm text-left">{body}</blockquote>
         </figure>
     )
 }
+
+const formatPrice = (price: number | string): string =>
+    `Rp${Number(price).toLocaleString('id-ID')}`;
+
+const productImage = (foto: string | null): string =>
+    foto ? (foto.startsWith('http') || foto.startsWith('/images') ? foto : `/storage/${foto}`) : '/images/FotoEnchancedParfum.svg';
 
 const benefits = [
     {
@@ -105,7 +110,7 @@ const benefits = [
     },
 ];
 
-export default function Welcome() {
+export default function Welcome({ testimonials, signatureProducts }: WelcomeProps) {
     return (
         <>
             <Head title="Welcome" />
@@ -163,8 +168,8 @@ export default function Welcome() {
                             </div>
                         </div>
                     </Marquee>
-                    <div className="from-background/50 pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r"></div>
-                    <div className="from-background/50 pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
+                    <div className="from-background/50 pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-linear-to-r"></div>
+                    <div className="from-background/50 pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-linear-to-l"></div>
                 </div>
 
                 <section className="w-full max-w-7xl mx-auto px-5 space-y-6">
@@ -173,47 +178,48 @@ export default function Welcome() {
                     </h2>
 
                     <div className="space-y-12 md:space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <img src="\images\Vannessence.svg"
-                                alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
-
-                            <div className="flex flex-col justify-center gap-6">
-                                <div className="space-y-3">
-                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold">Vanessence</h3>
-                                    <p className="text-base text-muted-foreground">
-                                        Aroma vanilla yang lembut, creamy, dan elegan dengan nuansa hangat yang menenangkan. Cocok untuk penggunaan sehari-hari maupun momen spesial.
-                                    </p>
+                        {signatureProducts.map((product, index) => {
+                            const smallestSize = product.sizes[0];
+                            const hasDiscount = Number(smallestSize?.Diskon ?? 0) > 0;
+                            const productDetails = (
+                                <div className="flex flex-col justify-center h-full gap-6">
+                                    <div className="space-y-3">
+                                        <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold">{product.nama}</h3>
+                                        <p className="text-base text-muted-foreground line-clamp-2">{product.Deskripsi}</p>
+                                    </div>
+                                    <div>
+                                        <div className="flex flex-wrap items-baseline gap-3 text-2xl md:text-3xl lg:text-4xl font-medium">
+                                            {hasDiscount ?
+                                                <span>{formatPrice(smallestSize.harga_akhir)}</span> : null}
+                                            <span className="text-muted-foreground line-through">{formatPrice(smallestSize.Harga)}</span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-muted-foreground">Mulai dari {smallestSize.Ukuran} ml</p>
+                                    </div>
+                                    <Button asChild className="md:w-fit">
+                                        <Link href={productDetail(product.id).url}>
+                                            Lihat Detail Produk
+                                            <ArrowUpRight className="size-4" />
+                                        </Link>
+                                    </Button>
                                 </div>
+                            );
 
-                                <p className="text-2xl md:text-3xl lg:text-4xl font-medium">Rp199.000</p>
-
-                                <Button className="md:w-fit">
-                                    Lihat Detail Produk
-                                    <ArrowUpRight className="size-4" />
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="flex flex-col justify-center gap-6 order-last md:order-first">
-                                <div className="space-y-3">
-                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold">Dynamyst</h3>
-                                    <p className="text-base text-muted-foreground">
-                                        Aroma fresh, sporty, dan clean dengan sentuhan hangat yang memberikan kesan maskulin, energik, dan percaya diri. Cocok digunakan untuk aktivitas sehari-hari.
-                                    </p>
+                            return (
+                                <div key={product.id} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {index % 2 === 0 ? (
+                                        <>
+                                            <img src={productImage(product.Foto)} alt={product.nama} className="bg-muted w-full aspect-square object-cover rounded-3xl" />
+                                            {productDetails}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="order-last md:order-first">{productDetails}</div>
+                                            <img src={productImage(product.Foto)} alt={product.nama} className="bg-muted w-full aspect-square object-cover rounded-3xl" />
+                                        </>
+                                    )}
                                 </div>
-
-                                <p className="text-2xl md:text-3xl lg:text-4xl font-medium">Rp199.000</p>
-
-                                <Button className="md:w-fit">
-                                    Lihat Detail Produk
-                                    <ArrowUpRight className="size-4" />
-                                </Button>
-                            </div>
-
-                            <img src="\images\Dynamist.svg"
-                                alt="" className="bg-muted w-full aspect-square object-cover rounded-3xl" />
-                        </div>
+                            );
+                        })}
                     </div>
                 </section>
 
@@ -222,12 +228,12 @@ export default function Welcome() {
                     <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
 
                         {/* Section Heading */}
-                        <div className="lg:sticky lg:top-32 lg:self-start">
+                        <div>
                             <h2 className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight sm:text-6xl">
                                 Lebih dari sekadar <span className="font-heading italic">wangi.</span>
                             </h2>
 
-                            <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
+                            <p className="mt-6 max-w-md text-lg text-muted-foreground">
                                 Kami percaya parfum bukan hanya tentang aroma,
                                 tetapi tentang karakter, kesan, dan momen yang
                                 ingin kamu tinggalkan.
@@ -262,33 +268,20 @@ export default function Welcome() {
 
                 {/* Testimonials Section */}
                 <section className="w-full max-w-7xl mx-auto text-center flex flex-col items-center p-5 space-y-6">
-                    <div className="bg-background w-14 h-14 rounded-full rotate-3 border border-border overflow-hidden">
-                        <img
-                            src="https://i.pravatar.cc/100?img=8"
-                            alt="Mini"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl leading-tight font-medium max-w-3xl">
-                        "Saya menjadi lebih percaya diri dari sebelumnya. Rasanya saya memakai aroma yang benar-benar mencerminkan diri saya!"
-                    </h2>
-
                     <div className="space-y-3">
-                        <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            ))}
-                        </div>
-                        <div>
-                            <p className="font-semibold text-sm">Bang Aris</p>
-                            <p className="text-xs text-muted-foreground">Verified Buyer</p>
-                        </div>
+                        <h2 className="text-5xl md:text-6xl lg:text-7xl text-center font-medium tracking-tight">
+                            Apa kata mereka?
+                        </h2>
+
+                        <p className="text-lg text-muted-foreground">
+                            Mereka telah mempercayai kami dalam memberikan wangi terbaik.
+                        </p>
                     </div>
+
                     <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
                         <Marquee pauseOnHover className="[--duration:030s]">
-                            {firstRow.map((review) => (
-                                <ReviewCard key={review.username} {...review} />
+                            {testimonials.map((testimonial) => (
+                                <ReviewCard key={testimonial.id} testimonial={testimonial} />
                             ))}
                         </Marquee>
                         <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/6 bg-linear-to-r"></div>
