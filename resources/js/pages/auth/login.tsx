@@ -1,6 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
 import InputError from '@/components/input-error';
-import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -35,8 +34,6 @@ function Login({ status, canResetPassword }: Props) {
     return (
         <>
             <Head title="Log in" />
-
-            <PasskeyVerify />
 
             <form onSubmit={submit} className="flex flex-col gap-6">
                 <div className="grid gap-6">
