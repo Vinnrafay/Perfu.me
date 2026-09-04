@@ -5,6 +5,7 @@ import {
     Star,
     Store,
     ExternalLink,
+    ShoppingCart,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -24,6 +25,7 @@ import {
 import { index as dashboard } from '@/routes/dashboard';
 import { index as productsIndex } from '@/routes/products';
 import { index as testimoniIndex } from '@/routes/testimoni';
+import { index as orderIndex } from '@/routes/order';
 import type { NavItem } from '@/types';
 
 // Menu Navigasi Utama
@@ -42,6 +44,11 @@ const mainNavItems: NavItem[] = [
         title: 'Testimoni',
         href: testimoniIndex(),
         icon: Star,
+    },
+    {
+        title: 'Pesanan',
+        href: orderIndex(),
+        icon: ShoppingCart,
     },
 ];
 
@@ -66,7 +73,7 @@ export function AppSidebar() {
                 {/* Grup Menu Utama */}
                 <SidebarGroup>
                     <SidebarGroupLabel className="text-sm text-muted-foreground">
-                        Manajemen
+                        Manajemen Toko
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <NavMain items={mainNavItems} />

@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\TestimoniController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomePageController::class, 'index'])->name('home');
@@ -24,6 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('dashboard/testimoni', TestimoniController::class)
         ->parameters(['testimoni' => 'testimoni'])
         ->names('testimoni');
+    
+    Route::resource('dashboard/order', OrderController::class)
+        ->parameters(['order' => 'order'])
+        ->names('order');
 });
 
 require __DIR__.'/settings.php';
