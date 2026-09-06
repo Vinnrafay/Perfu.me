@@ -12,6 +12,7 @@ Route::get('/products', [ProductsController::class, 'catalog'])->name('products'
 Route::get('/products/{product}', [ProductsController::class, 'show'])->name('products.detail');
 Route::inertia('/about', 'about')->name('about');
 Route::inertia('/contact', 'contact')->name('contact');
+Route::inertia('/checkout', 'checkout')->name('checkout');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('dashboard', DashboardController::class)
