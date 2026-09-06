@@ -25,7 +25,7 @@ import {
 import { index as dashboard } from '@/routes/dashboard';
 import { index as productsIndex } from '@/routes/products';
 import { index as testimoniIndex } from '@/routes/testimoni';
-import { index as orderIndex } from '@/routes/order';
+import { index as pesananIndex } from '@/routes/pesanan';
 import type { NavItem } from '@/types';
 
 // Menu Navigasi Utama
@@ -47,7 +47,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Pesanan',
-        href: orderIndex(),
+        href: pesananIndex(),
         icon: ShoppingCart,
     },
 ];
