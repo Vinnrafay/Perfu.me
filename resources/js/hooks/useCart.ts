@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 export interface CartItem {
     id: number;
@@ -9,68 +9,101 @@ export interface CartItem {
     quantity: number;
 }
 
+const CART_KEY = 'perfume_cart';
+const CART_EVENT = 'cart-updated';
+
+function readCart(): CartItem[] {
+    if (typeof window === 'undefined') return [];
+    try {
+        const raw = localStorage.getItem(CART_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch {
+        return [];
+    }
+}
+
+function writeCart(cart: CartItem[]) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    window.dispatchEvent(new Event(CART_EVENT));
+}
+
 export const useCart = () => {
     const [cart, setCart] = useState<CartItem[]>([]);
 
-    const loadCart = () => {
-        const savedCart = localStorage.getItem('perfume_cart');
-        if (savedCart) {
-            setCart(JSON.parse(savedCart));
-        }
-    };
-
-    useEffect(() => {
-        // Load pertama kali
-        loadCart();
-        // Listener jika ada perubahan keranjang dari komponen lain
-        window.addEventListener('cart-updated', loadCart);
-        return () => window.removeEventListener('cart-updated', loadCart);
+    const loadCart = useCallback(() => {
+        setCart(readCart());
     }, []);
 
-    const addToCart = (product: Omit<CartItem, 'quantity'>, qty: number = 1) => {
-        const savedCart = JSON.parse(localStorage.getItem('perfume_cart') || '[]');
-        const existingItem = savedCart.find((item: CartItem) => item.id === product.id);
+    useEffect(() => {
+        loadCart();
+        window.addEventListener(CART_EVENT, loadCart);
+        window.addEventListener('storage', loadCart);
+        return () => {
+            window.removeEventListener(CART_EVENT, loadCart);
+            window.removeEventListener('storage', loadCart);
+        };
+    }, [loadCart]);
 
-        if (existingItem) {
-            existingItem.quantity += qty;
+    const addToCart = useCallback((product: Omit<CartItem, 'quantity'>, qty: number = 1) => {
+        const current = readCart();
+        const existingIndex = current.findIndex((item) => item.id === product.id);
+
+        const safeProduct = {
+            ...product,
+            Harga: Number(product.Harga) || 0,
+        };
+
+        // Vite pake import.meta.env, bukan process.env (yang itu punya Node.js)
+        if (import.meta.env.DEV && safeProduct.Harga === 0) {
+            console.warn('[useCart] addToCart dipanggil dengan Harga 0/invalid untuk produk:', product);
+        }
+
+        if (existingIndex !== -1) {
+            current[existingIndex] = {
+                ...current[existingIndex],
+                quantity: current[existingIndex].quantity + qty,
+            };
         } else {
-            savedCart.push({ ...product, quantity: qty });
+            current.push({ ...safeProduct, quantity: qty });
         }
 
-        localStorage.setItem('perfume_cart', JSON.stringify(savedCart));
-        window.dispatchEvent(new Event('cart-updated')); // Trigger update Navbar
-    };
+        writeCart(current);
+    }, []);
 
-    const updateQuantity = (id: number, qty: number) => {
-        let savedCart = JSON.parse(localStorage.getItem('perfume_cart') || '[]');
-        const index = savedCart.findIndex((item: CartItem) => item.id === id);
-        
-        if (index !== -1) {
-            if (qty <= 0) {
-                savedCart.splice(index, 1); // Hapus jika qty 0
-            } else {
-                savedCart[index].quantity = qty;
-            }
-            localStorage.setItem('perfume_cart', JSON.stringify(savedCart));
-            window.dispatchEvent(new Event('cart-updated'));
-        }
-    };
+    const updateQuantity = useCallback((id: number, qty: number) => {
+        const current = readCart();
+        const index = current.findIndex((item) => item.id === id);
 
-    const removeFromCart = (id: number) => {
-        const savedCart = JSON.parse(localStorage.getItem('perfume_cart') || '[]');
-        const updated = savedCart.filter((item: CartItem) => item.id !== id);
-        localStorage.setItem('perfume_cart', JSON.stringify(updated));
-        window.dispatchEvent(new Event('cart-updated'));
-    };
+        if (index === -1) return;
 
-    const clearCart = () => {
-        localStorage.removeItem('perfume_cart');
-        window.dispatchEvent(new Event('cart-updated'));
-    };
+        const updated = qty <= 0
+            ? current.filter((item) => item.id !== id)
+            : current.map((item) => (item.id === id ? { ...item, quantity: qty } : item));
 
-    // Hitung total item dan total harga
-    const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-    const totalPrice = cart.reduce((total, item) => total + (item.Harga * item.quantity), 0);
+        writeCart(updated);
+    }, []);
+
+    const removeFromCart = useCallback((id: number) => {
+        const current = readCart();
+        writeCart(current.filter((item) => item.id !== id));
+    }, []);
+
+    const clearCart = useCallback(() => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem(CART_KEY);
+        window.dispatchEvent(new Event(CART_EVENT));
+    }, []);
+
+    const totalItems = useMemo(
+        () => cart.reduce((total, item) => total + item.quantity, 0),
+        [cart]
+    );
+
+    const totalPrice = useMemo(
+        () => cart.reduce((total, item) => total + item.Harga * item.quantity, 0),
+        [cart]
+    );
 
     return { cart, addToCart, updateQuantity, removeFromCart, clearCart, totalItems, totalPrice };
 };
