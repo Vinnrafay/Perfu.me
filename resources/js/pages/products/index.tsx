@@ -7,12 +7,10 @@ import {
     Sparkles,
     SlidersHorizontal,
     X,
-    ShoppingBag,
     ArrowUpDown,
     CheckCircle2,
     RefreshCw,
 } from 'lucide-react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -40,19 +38,29 @@ import {
 } from '@/components/ui/sheet';
 import { useCart } from '@/hooks/useCart';
 
+import ProductCard from '@/components/cards/product-card';
+
+export interface ProductSize {
+    id?: number;
+    Ukuran: number;
+    Harga: number;
+    Diskon?: number;
+    Stok: number;
+}
+
 export interface Product {
     id: number;
     nama: string;
     kategori?: string;
     gender: string;
     Varian: string;
-    Harga: number;
-    Ukuran: number;
     Deskripsi: string;
     Foto: string | null;
     Best_Seller?: string;
     'Best Seller'?: string;
-    original?: string;
+    original?: string;   // 'Original' | 'Refill' — field ini yang nentuin tab, bukan kategori (EDP/EDT/dll)
+    signature?: string;
+    sizes?: ProductSize[];
 }
 
 interface Props {
@@ -64,6 +72,28 @@ const GENDER_OPTIONS = [
     { value: 'female', label: 'Wanita' },
     { value: 'unisex', label: 'Unisex' },
 ];
+
+function getDefaultSize(product: Product): ProductSize {
+    const sizes = product.sizes ?? [];
+    if (sizes.length === 0) {
+        return { Ukuran: 0, Harga: 0, Diskon: 0, Stok: 0 };
+    }
+    return [...sizes].sort((a, b) => Number(a.Ukuran) - Number(b.Ukuran))[0];
+}
+
+function getPricing(product: Product) {
+    const size = getDefaultSize(product);
+    const originalPrice = Number(size.Harga) || 0;
+    const discountNominal = Number(size.Diskon) || 0;
+    const finalPrice = discountNominal > 0 ? originalPrice - discountNominal : originalPrice;
+    return { originalPrice, discountNominal, finalPrice, size };
+}
+
+// FIX: klasifikasi Original/Refill berdasarkan field `original`, BUKAN `kategori`.
+// `kategori` (EDP/EDT/Roll-On/Body Mist) itu jenis parfum, beda konsep sama status original/refill.
+function isOriginalType(product: Product): boolean {
+    return product.original !== 'Refill';
+}
 
 export default function Catalog({ products }: Props) {
     const { addToCart } = useCart();
@@ -82,12 +112,15 @@ export default function Catalog({ products }: Props) {
     const [bestSellerOnly, setBestSellerOnly] = useState<boolean>(false);
     const [sortBy, setSortBy] = useState<string>('default');
 
-    const maxDataPrice = useMemo(() => {
-        if (!productList.length) return 1000000;
-        return Math.max(...productList.map((p) => Number(p.Harga) || 0));
-    }, [productList]);
+    const productsOfCurrentType = useMemo(() => {
+        return productList.filter((product) =>
+            productType === 'original' ? isOriginalType(product) : !isOriginalType(product)
+        );
+    }, [productList, productType]);
 
-    const [priceRange, setPriceRange] = useState<number>(maxDataPrice || 1000000);
+    const maxDataPrice = 1000000;
+
+    const [priceRange, setPriceRange] = useState<number>(maxDataPrice);
 
     const handleToggleItem = (
         item: string,
@@ -116,17 +149,14 @@ export default function Catalog({ products }: Props) {
     };
 
     const filteredProducts = useMemo(() => {
-        return productList.filter((product) => {
-            const isOriginal = product.kategori === 'EDP' || product.kategori === 'EDT';
-            const matchType = productType === 'original' ? isOriginal : !isOriginal;
-
+        return productsOfCurrentType.filter((product) => {
             const isBestSeller =
                 product.Best_Seller === 'yes' || product['Best Seller'] === 'yes';
 
             const matchSearch =
                 !searchTerm ||
                 product.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.Varian.toLowerCase().includes(searchTerm.toLowerCase());
+                (product.Varian ?? '').toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchGender =
                 selectedGenders.length === 0 ||
@@ -134,19 +164,20 @@ export default function Catalog({ products }: Props) {
 
             const matchBestSeller = !bestSellerOnly || isBestSeller;
 
-            const matchPrice = Number(product.Harga) <= priceRange;
+            const { finalPrice } = getPricing(product);
+            const matchPrice = finalPrice <= priceRange;
 
-            return matchType && matchSearch && matchGender && matchBestSeller && matchPrice;
+            return matchSearch && matchGender && matchBestSeller && matchPrice;
         });
-    }, [productList, productType, searchTerm, selectedGenders, bestSellerOnly, priceRange]);
+    }, [productsOfCurrentType, searchTerm, selectedGenders, bestSellerOnly, priceRange]);
 
     const sortedProducts = useMemo(() => {
         const items = [...filteredProducts];
         switch (sortBy) {
             case 'price-asc':
-                return items.sort((a, b) => Number(a.Harga) - Number(b.Harga));
+                return items.sort((a, b) => getPricing(a).finalPrice - getPricing(b).finalPrice);
             case 'price-desc':
-                return items.sort((a, b) => Number(b.Harga) - Number(a.Harga));
+                return items.sort((a, b) => getPricing(b).finalPrice - getPricing(a).finalPrice);
             case 'name-asc':
                 return items.sort((a, b) => a.nama.localeCompare(b.nama));
             case 'best-seller':
@@ -201,8 +232,7 @@ export default function Catalog({ products }: Props) {
                     </AccordionTrigger>
                     <AccordionContent className="pt-4 pb-2 px-1 space-y-4">
                         <Slider
-                            defaultValue={[maxDataPrice]}
-                            max={maxDataPrice || 1000000}
+                            max={maxDataPrice}
                             min={10000}
                             step={10000}
                             value={[priceRange]}
@@ -244,7 +274,7 @@ export default function Catalog({ products }: Props) {
             </section>
 
             <div className="container max-w-7xl w-full mx-auto px-4 sm:px-6 pt-10 flex flex-col md:flex-row gap-8">
-                
+
                 <aside className="hidden md:block w-64 shrink-0">
                     <div className="sticky top-24 p-5 rounded-2xl border border-border space-y-6">
                         <div className="flex items-center justify-between border-b border-border pb-3">
@@ -272,7 +302,7 @@ export default function Catalog({ products }: Props) {
 
                 <main className="flex-1 space-y-6">
                     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
-                        
+
                         <div className="inline-flex h-10 p-1 bg-muted/40 backdrop-blur-md rounded-xl border border-border/80 items-center gap-1 shrink-0 self-start sm:self-auto">
                             <button
                                 type="button"
@@ -442,99 +472,26 @@ export default function Catalog({ products }: Props) {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {sortedProducts.map((product) => {
-                                const isBestSeller =
-                                    product.Best_Seller === 'yes' || product['Best Seller'] === 'yes';
+                                const { finalPrice, size } = getPricing(product);
 
                                 return (
-                                    <Card
+                                    <ProductCard
                                         key={product.id}
-                                        className="group border-border/80 bg-card/60 backdrop-blur-sm overflow-hidden hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 rounded-2xl flex flex-col justify-between"
-                                    >
-                                        <CardContent className="p-0 relative aspect-[4/5] bg-muted overflow-hidden">
-                                            {product.Foto ? (
-                                                <img
-                                                    src={`/storage/${product.Foto}`}
-                                                    alt={product.nama}
-                                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-muted/60 text-muted-foreground text-xs uppercase tracking-widest font-medium">
-                                                    No Image
-                                                </div>
-                                            )}
-
-                                            <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10 pointer-events-none">
-                                                <div className="flex flex-col gap-1.5 items-start">
-                                                    {isBestSeller && (
-                                                        <Badge className="bg-foreground text-background hover:bg-foreground rounded-lg px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest shadow-md gap-1">
-                                                            <Sparkles className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                                                            Best Seller
-                                                        </Badge>
-                                                    )}
-                                                </div>
-
-                                                <Badge variant="outline" className="bg-background/80 backdrop-blur-md text-[9px] font-semibold uppercase text-muted-foreground border-border/60">
-                                                    {product.gender}
-                                                </Badge>
-                                            </div>
-
-                                            <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10 flex gap-2">
-                                                <Button
-                                                    asChild
-                                                    variant="outline"
-                                                    className="flex-1 bg-background/95 backdrop-blur-md text-foreground hover:bg-muted border border-border rounded-xl h-9 text-[10px] font-semibold uppercase tracking-wider shadow-lg"
-                                                >
-                                                    <Link href={`/products/${product.id}`}>
-                                                        Detail
-                                                    </Link>
-                                                </Button>
-
-                                                <Button
-                                                    onClick={() => addToCart({
-                                                        id: product.id,
-                                                        nama: product.nama,
-                                                        Varian: product.Varian,
-                                                        Harga: Number(product.Harga),
-                                                        Foto: product.Foto
-                                                    })}
-                                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-9 text-[10px] font-semibold uppercase tracking-wider shadow-lg gap-1.5"
-                                                >
-                                                    <ShoppingBag className="w-3.5 h-3.5" />
-                                                    + Cart
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-
-                                        <CardFooter className="p-4 flex flex-col items-start gap-1.5 bg-card">
-                                            <div className="w-full flex justify-between items-start gap-2">
-                                                <h3 className="font-bold text-sm text-foreground tracking-tight line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    <Link href={`/products/${product.id}`}>
-                                                        {product.nama}
-                                                    </Link>
-                                                </h3>
-                                                <span className="text-[11px] font-medium text-muted-foreground uppercase shrink-0 pt-0.5">
-                                                    {product.Ukuran} ml
-                                                </span>
-                                            </div>
-
-                                            <p className="text-xs text-muted-foreground line-clamp-1 font-normal">
-                                                {product.Varian}
-                                            </p>
-
-                                            <div className="w-full pt-2 flex items-center justify-between border-t border-border/40 mt-1">
-                                                <span className="font-extrabold text-sm text-foreground">
-                                                    {formatPrice(Number(product.Harga))}
-                                                </span>
-                                                <span className="text-[10px] text-indigo-500 font-semibold group-hover:underline">
-                                                    Detail &rarr;
-                                                </span>
-                                            </div>
-                                        </CardFooter>
-                                    </Card>
+                                        product={product}
+                                        formatPrice={formatPrice}
+                                        onAddToCart={() => addToCart({
+                                            id: product.id,
+                                            nama: product.nama,
+                                            Varian: size.Ukuran ? `${size.Ukuran}ml` : (product.Varian || '-'),
+                                            Harga: finalPrice,
+                                            Foto: product.Foto,
+                                        })}
+                                    />
                                 );
                             })}
                         </div>
                     )}
+
                 </main>
             </div>
         </div>
