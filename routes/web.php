@@ -49,6 +49,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('dashboard/pesanan/{pesanan}/status', [PesananController::class, 'updateStatus'])
         ->name('pesanan.update-status');
+
+    // Invoice: halaman preview (struk) dulu, download PDF terpisah.
+    Route::get('dashboard/pesanan/{pesanan}/invoice', [PesananController::class, 'invoice'])
+        ->name('pesanan.invoice');
+
+    Route::get('dashboard/pesanan/{pesanan}/invoice/download', [PesananController::class, 'downloadInvoice'])
+        ->name('pesanan.invoice.download');
 });
 
 require __DIR__.'/settings.php';
