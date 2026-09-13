@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 
 export interface CartItem {
     id: number;
+    product_size_id?: number;
     nama: string;
     Varian: string;
     Harga: number;

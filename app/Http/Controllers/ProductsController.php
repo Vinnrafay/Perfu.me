@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -19,8 +20,8 @@ class ProductsController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
-                      ->orWhere('brand', 'like', "%{$search}%")
-                      ->orWhere('kategori', 'like', "%{$search}%");
+                        ->orWhere('brand', 'like', "%{$search}%")
+                        ->orWhere('kategori', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -51,9 +52,10 @@ class ProductsController extends Controller
         if ($request->source === 'direct' && $request->has('product_id')) {
             $product = Product::with('sizes')->findOrFail($request->product_id);
             $ukuran = $request->ukuran;
-            
+            $sizeData = null;
+
             $hargaFinal = $product->Harga ?? 0;
-            
+
             // Hitung harga spesifik berdasarkan ukuran yang dipilih
             if ($ukuran && $product->sizes) {
                 $sizeData = $product->sizes->where('Ukuran', $ukuran)->first();
@@ -65,8 +67,9 @@ class ProductsController extends Controller
             // Susun data untuk dilempar ke frontend
             $items[] = [
                 'id' => $product->id,
+                'product_size_id' => $sizeData?->id,
                 'nama' => $product->nama,
-                'Varian' => $ukuran ? $ukuran . 'ml' : ($product->Varian ?? '-'),
+                'Varian' => $ukuran ? $ukuran.'ml' : ($product->Varian ?? '-'),
                 'Harga' => (int) $hargaFinal,
                 'qty' => (int) $request->qty,
                 'Foto' => $product->Foto,
@@ -75,7 +78,7 @@ class ProductsController extends Controller
 
         return Inertia::render('products/checkout', [
             'initialItems' => $items, // Kita kasih nama initialItems
-            'source' => $request->source ?? 'cart' // Kasih tahu frontend darimana asalnya
+            'source' => $request->source ?? 'cart', // Kasih tahu frontend darimana asalnya
         ]);
     }
     // ----------------------------------------
@@ -97,12 +100,12 @@ class ProductsController extends Controller
         $galleryPaths = [];
         if ($request->hasFile('Gallery')) {
             foreach ($request->file('Gallery') as $file) {
-                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                if ($file instanceof UploadedFile) {
                     $galleryPaths[] = $file->store('products/gallery', 'public');
                 }
             }
         }
-        $validated['Gallery'] = json_encode($galleryPaths); 
+        $validated['Gallery'] = json_encode($galleryPaths);
 
         DB::transaction(function () use ($validated, $sizes) {
             $product = Product::create($validated);
@@ -127,75 +130,75 @@ class ProductsController extends Controller
     }
 
     public function update(Request $request, Product $product)
-        {
-            $this->normalizeToggles($request);
+    {
+        $this->normalizeToggles($request);
 
-            $validated = $request->validate($this->validationRules($product->id));
-            $sizes = $validated['sizes'];
-            unset($validated['sizes']);
+        $validated = $request->validate($this->validationRules($product->id));
+        $sizes = $validated['sizes'];
+        unset($validated['sizes']);
 
-            // FIX UTAMA: Jika ada file foto baru, simpan & hapus yang lama. 
-            // Jika tidak ada, unset 'Foto' agar data foto lama di database tidak tertimpa jadi null.
-            if ($request->hasFile('Foto')) {
-                if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
-                    Storage::disk('public')->delete($product->Foto);
-                }
-                $validated['Foto'] = $request->file('Foto')->store('products', 'public');
-            } else {
-                unset($validated['Foto']);
+        // FIX UTAMA: Jika ada file foto baru, simpan & hapus yang lama.
+        // Jika tidak ada, unset 'Foto' agar data foto lama di database tidak tertimpa jadi null.
+        if ($request->hasFile('Foto')) {
+            if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
+                Storage::disk('public')->delete($product->Foto);
             }
-
-            $galleryPaths = [];
-            $existingGalleryFromDB = $product->Gallery ? json_decode($product->Gallery, true) : [];
-            if (!is_array($existingGalleryFromDB)) {
-                $existingGalleryFromDB = [];
-            }
-
-            $galleryItems = $request->all()['Gallery'] ?? [];
-
-            foreach ($galleryItems as $item) {
-                if ($item instanceof \Illuminate\Http\UploadedFile) {
-                    $galleryPaths[] = $item->store('products/gallery', 'public');
-                } elseif (is_string($item)) {
-                    $cleanPath = str_replace(url('/storage') . '/', '', $item);
-                    $cleanPath = str_replace('/storage/', '', $cleanPath);
-                    $galleryPaths[] = $cleanPath;
-                }
-            }
-
-            $removedFiles = array_diff($existingGalleryFromDB, $galleryPaths);
-            foreach ($removedFiles as $removedFile) {
-                if (Storage::disk('public')->exists($removedFile)) {
-                    Storage::disk('public')->delete($removedFile);
-                }
-            }
-
-            $validated['Gallery'] = json_encode(array_values($galleryPaths));
-
-            DB::transaction(function () use ($product, $validated, $sizes) {
-                $product->update($validated);
-
-                $incomingIds = collect($sizes)->pluck('id')->filter()->all();
-                $product->sizes()->whereNotIn('id', $incomingIds)->delete();
-
-                foreach ($sizes as $size) {
-                    $payload = [
-                        'Ukuran' => $size['Ukuran'],
-                        'Harga'  => $size['Harga'],
-                        'Diskon' => $size['Diskon'] ?? 0,
-                        'Stok'   => $size['Stok'],
-                    ];
-
-                    if (!empty($size['id'])) {
-                        $product->sizes()->where('id', $size['id'])->update($payload);
-                    } else {
-                        $product->sizes()->create($payload);
-                    }
-                }
-            });
-
-            return redirect()->back()->with('success', 'Produk berhasil diperbarui.');
+            $validated['Foto'] = $request->file('Foto')->store('products', 'public');
+        } else {
+            unset($validated['Foto']);
         }
+
+        $galleryPaths = [];
+        $existingGalleryFromDB = $product->Gallery ? json_decode($product->Gallery, true) : [];
+        if (! is_array($existingGalleryFromDB)) {
+            $existingGalleryFromDB = [];
+        }
+
+        $galleryItems = $request->all()['Gallery'] ?? [];
+
+        foreach ($galleryItems as $item) {
+            if ($item instanceof UploadedFile) {
+                $galleryPaths[] = $item->store('products/gallery', 'public');
+            } elseif (is_string($item)) {
+                $cleanPath = str_replace(url('/storage').'/', '', $item);
+                $cleanPath = str_replace('/storage/', '', $cleanPath);
+                $galleryPaths[] = $cleanPath;
+            }
+        }
+
+        $removedFiles = array_diff($existingGalleryFromDB, $galleryPaths);
+        foreach ($removedFiles as $removedFile) {
+            if (Storage::disk('public')->exists($removedFile)) {
+                Storage::disk('public')->delete($removedFile);
+            }
+        }
+
+        $validated['Gallery'] = json_encode(array_values($galleryPaths));
+
+        DB::transaction(function () use ($product, $validated, $sizes) {
+            $product->update($validated);
+
+            $incomingIds = collect($sizes)->pluck('id')->filter()->all();
+            $product->sizes()->whereNotIn('id', $incomingIds)->delete();
+
+            foreach ($sizes as $size) {
+                $payload = [
+                    'Ukuran' => $size['Ukuran'],
+                    'Harga' => $size['Harga'],
+                    'Diskon' => $size['Diskon'] ?? 0,
+                    'Stok' => $size['Stok'],
+                ];
+
+                if (! empty($size['id'])) {
+                    $product->sizes()->where('id', $size['id'])->update($payload);
+                } else {
+                    $product->sizes()->create($payload);
+                }
+            }
+        });
+
+        return redirect()->back()->with('success', 'Produk berhasil diperbarui.');
+    }
 
     public function destroy(Product $product)
     {
@@ -215,6 +218,7 @@ class ProductsController extends Controller
         }
 
         $product->delete();
+
         return redirect()->back()->with('success', 'Produk berhasil dihapus.');
     }
 
@@ -231,7 +235,7 @@ class ProductsController extends Controller
             if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
                 Storage::disk('public')->delete($product->Foto);
             }
-            
+
             if ($product->Gallery) {
                 $gallery = json_decode($product->Gallery, true);
                 if (is_array($gallery)) {
@@ -255,43 +259,44 @@ class ProductsController extends Controller
         $sizes = collect($request->input('sizes', []))
             ->map(function ($size) {
                 $size['Diskon'] = $size['Diskon'] ?? 0;
+
                 return $size;
             })
             ->all();
 
         $request->merge([
             'Best_Seller' => $request->boolean('Best_Seller') ? 'yes' : 'no',
-            'signature'   => $isRefill ? 'no' : ($request->boolean('signature') ? 'yes' : 'no'),
-            'brand'       => $isRefill ? $request->input('brand') : null,
-            'sizes'       => $sizes,
+            'signature' => $isRefill ? 'no' : ($request->boolean('signature') ? 'yes' : 'no'),
+            'brand' => $isRefill ? $request->input('brand') : null,
+            'sizes' => $sizes,
         ]);
     }
 
     private function validationRules(?int $productId = null): array
     {
         return [
-            'nama'           => 'required|string|max:255',
-            'kategori'       => 'required|in:EDP,EDT,EDC',
-            'gender'         => 'required|in:male,female,unisex',
-            'original'       => 'required|in:Original,Refill',
-            'brand'          => 'nullable|required_if:original,Refill|string|max:255',
-            'Top_Note'       => 'required|string|max:255',
-            'Middle_Note'    => 'required|string|max:255',
-            'Base_Note'      => 'required|string|max:255',
-            'Komposisi'      => 'required|string|max:255',
-            'Kemasan'        => 'nullable|string|max:255',
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|in:EDP,EDT,EDC',
+            'gender' => 'required|in:male,female,unisex',
+            'original' => 'required|in:Original,Refill',
+            'brand' => 'nullable|required_if:original,Refill|string|max:255',
+            'Top_Note' => 'required|string|max:255',
+            'Middle_Note' => 'required|string|max:255',
+            'Base_Note' => 'required|string|max:255',
+            'Komposisi' => 'required|string|max:255',
+            'Kemasan' => 'nullable|string|max:255',
             'Tanggal_launch' => 'nullable|date',
-            'Deskripsi'      => 'required|string',
-            'Foto'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'Gallery'        => 'nullable|array', 
-            'Best_Seller'    => 'required|in:yes,no',
-            'signature'      => 'required|in:yes,no',
-            'sizes'          => 'required|array|min:1',
-            'sizes.*.id'     => 'nullable|integer|exists:product_sizes,id',
+            'Deskripsi' => 'required|string',
+            'Foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'Gallery' => 'nullable|array',
+            'Best_Seller' => 'required|in:yes,no',
+            'signature' => 'required|in:yes,no',
+            'sizes' => 'required|array|min:1',
+            'sizes.*.id' => 'nullable|integer|exists:product_sizes,id',
             'sizes.*.Ukuran' => 'required|integer|min:1',
-            'sizes.*.Harga'  => 'required|numeric|min:0|max:999999999999.99',
+            'sizes.*.Harga' => 'required|numeric|min:0|max:999999999999.99',
             'sizes.*.Diskon' => 'nullable|numeric|min:0|max:999999999999.99|lte:sizes.*.Harga',
-            'sizes.*.Stok'   => 'required|integer|min:0',
+            'sizes.*.Stok' => 'required|integer|min:0',
         ];
     }
 }

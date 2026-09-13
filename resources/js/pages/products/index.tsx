@@ -480,6 +480,7 @@ export default function Catalog({ products }: Props) {
                                         formatPrice={formatPrice}
                                         onAddToCart={() => addToCart({
                                             id: product.id,
+                                            product_size_id: size.id,
                                             nama: product.nama,
                                             Varian: size.Ukuran ? `${size.Ukuran}ml` : (product.Varian || '-'),
                                             Harga: finalPrice,

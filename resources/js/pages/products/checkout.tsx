@@ -1,6 +1,8 @@
 import { Banknote, Landmark, Wallet, MapPin, ReceiptText, ShoppingBag, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { router } from "@inertiajs/react";
+import { store } from "@/actions/App/Http/Controllers/PesananController";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +13,7 @@ import { useCart } from "@/hooks/useCart";
 // Struktur data item dinamis dari backend/props
 export interface CheckoutItem {
     id?: number;
+    product_size_id?: number;
     nama: string;
     Varian?: string;
     Harga: number;
@@ -25,7 +28,7 @@ interface Props {
 }
 
 const paymentMethods = [
-    { value: "bank-transfer", label: "Transfer Bank", icon: Landmark },
+    { value: "transfer", label: "Transfer Bank", icon: Landmark },
     { value: "e-wallet", label: "E-Wallet/QRIS", icon: Wallet },
     { value: "cod", label: "Cash on Delivery", icon: Banknote },
 ] as const;
@@ -72,11 +75,11 @@ function ProductCard({ nama, Varian, Harga, qty, quantity, Foto }: CheckoutItem)
 
 // Komponen Utama
 export default function CheckoutForm({ initialItems = [], source = 'cart' }: Props) {
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("bank-transfer");
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("transfer");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Ambil data dari hook keranjang
-    const { cart } = useCart() as { cart?: CheckoutItem[] };
+    const { cart, clearCart } = useCart() as { cart?: CheckoutItem[]; clearCart: () => void };
 
     // Tentukan item yang akan dirender: Kalau source 'direct' pakai dari props backend, kalau bukan pakai dari keranjang
     const items = source === 'direct' ? initialItems : (cart || []);
@@ -91,6 +94,16 @@ export default function CheckoutForm({ initialItems = [], source = 'cart' }: Pro
 
         const formData = new FormData(event.currentTarget);
         const selectedPaymentMethod = paymentMethods.find(({ value }) => value === paymentMethod);
+
+        const orderItems = items.map((item) => ({
+            product_size_id: item.product_size_id,
+            jumlah: item.qty ?? item.quantity ?? 1,
+        }));
+
+        if (orderItems.some(({ product_size_id }) => !product_size_id)) {
+            setIsSubmitting(false);
+            return;
+        }
 
         const productDetails = items
             .map((item, index) => {
@@ -118,10 +131,25 @@ Total Pembayaran : *${formatRupiah(totalPrice)}*
 
 Mohon informasi selanjutnya untuk proses pembayaran dan pengiriman. Terima kasih!`;
 
-        const waNumber = "6281383415432";
-        window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`, "_blank");
+        router.post(store().url, {
+            nama_pembeli: String(formData.get("name") ?? ""),
+            no_wa: String(formData.get("phone") ?? ""),
+            alamat: String(formData.get("address") ?? ""),
+            catatan: String(formData.get("note") ?? ""),
+            metode_pembayaran: paymentMethod,
+            items: orderItems,
+        }, {
+            onSuccess: () => {
+                if (source !== 'direct') {
+                    clearCart();
+                }
 
-        setTimeout(() => setIsSubmitting(false), 1000);
+                const waNumber = "6281383415432";
+                window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`, "_blank");
+                setIsSubmitting(false);
+            },
+            onError: () => setIsSubmitting(false),
+        });
     }
 
     return (

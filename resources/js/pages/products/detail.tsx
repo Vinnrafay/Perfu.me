@@ -279,6 +279,7 @@ export default function ProductDetail({ product = dummyProduct }: Props) {
     addToCart(
       {
         id: product.id,
+        product_size_id: selectedSizeData?.id,
         nama: product.nama,
         Varian: selectedSize ? `${selectedSize}ml` : product.Varian || "-",
         Harga: activePrice,

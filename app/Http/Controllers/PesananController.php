@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
 use App\Models\ProductSize;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PesananController extends Controller
 {
@@ -84,7 +84,7 @@ class PesananController extends Controller
         $statusMatch = $statusMap[$searchLower] ?? null;
 
         return $query->where(function ($q) use (
-            $search,
+
             $searchLower,
             $numericSearch,
             $metodeMatch,
@@ -138,9 +138,30 @@ class PesananController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $this->validateOrder($request);
+        $validated = $request->validate([
+            'nama_pembeli' => 'required|string|max:255',
+            'no_wa' => 'required|string|max:20',
+            'alamat' => 'required|string',
+            'catatan' => 'nullable|string',
+            'metode_pembayaran' => 'required|in:transfer,e-wallet,qris,cod',
+            'items' => 'required|array|min:1',
+            'items.*.product_size_id' => 'required|exists:product_sizes,id',
+            'items.*.jumlah' => 'required|integer|min:1',
+        ]);
 
-        $this->createOrderAndDeductStock($validated, verifikasi: 'pending');
+        DB::transaction(function () use ($validated): void {
+            foreach ($validated['items'] as $item) {
+                $this->createOrderAndDeductStock([
+                    'nama_pembeli' => $validated['nama_pembeli'],
+                    'no_wa' => $validated['no_wa'],
+                    'alamat' => $validated['alamat'],
+                    'catatan' => $validated['catatan'] ?? null,
+                    'metode_pembayaran' => $validated['metode_pembayaran'],
+                    'product_size_id' => $item['product_size_id'],
+                    'jumlah' => $item['jumlah'],
+                ], verifikasi: 'pending');
+            }
+        });
 
         return redirect()
             ->back()
@@ -306,7 +327,9 @@ class PesananController extends Controller
      */
     private function createOrderAndDeductStock(array $validated, string $verifikasi): Pesanan
     {
-        $productSize = ProductSize::findOrFail($validated['product_size_id']);
+        $productSize = ProductSize::query()
+            ->lockForUpdate()
+            ->findOrFail($validated['product_size_id']);
 
         if ($productSize->Stok < $validated['jumlah']) {
             throw ValidationException::withMessages([
