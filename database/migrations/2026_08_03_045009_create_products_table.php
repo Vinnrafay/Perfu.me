@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->enum('kategori', ['EDP', 'EDT', 'Roll-On', 'Body Mist']);
+            $table->enum('kategori', ['EDP', 'EDT', 'EDC']);
             $table->enum('gender', ['male', 'female', 'unisex']);
             $table->enum('original', ['Original', 'Refill']);
             $table->string('brand')->nullable();
@@ -26,6 +26,7 @@ return new class extends Migration
             $table->date('Tanggal_launch')->nullable();
             $table->text('Deskripsi');
             $table->string('Foto', 255)->nullable();
+            $table->text('Gallery')->nullable();
             $table->enum('Best_Seller', ['yes', 'no'])->default('no');
             $table->enum('signature', ['yes', 'no'])->default('no');
             $table->timestamps();

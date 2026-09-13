@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class ProductsController extends Controller
 {
@@ -43,6 +42,44 @@ class ProductsController extends Controller
         ]);
     }
 
+    // --- TAMBAHAN BARU: FUNGSI CHECKOUT ---
+    public function checkout(Request $request)
+    {
+        $items = [];
+
+        // Kalau usernya klik "Checkout Sekarang" (Beli Langsung)
+        if ($request->source === 'direct' && $request->has('product_id')) {
+            $product = Product::with('sizes')->findOrFail($request->product_id);
+            $ukuran = $request->ukuran;
+            
+            $hargaFinal = $product->Harga ?? 0;
+            
+            // Hitung harga spesifik berdasarkan ukuran yang dipilih
+            if ($ukuran && $product->sizes) {
+                $sizeData = $product->sizes->where('Ukuran', $ukuran)->first();
+                if ($sizeData) {
+                    $hargaFinal = $sizeData->Harga - ($sizeData->Diskon ?? 0);
+                }
+            }
+
+            // Susun data untuk dilempar ke frontend
+            $items[] = [
+                'id' => $product->id,
+                'nama' => $product->nama,
+                'Varian' => $ukuran ? $ukuran . 'ml' : ($product->Varian ?? '-'),
+                'Harga' => (int) $hargaFinal,
+                'qty' => (int) $request->qty,
+                'Foto' => $product->Foto,
+            ];
+        }
+
+        return Inertia::render('products/checkout', [
+            'initialItems' => $items, // Kita kasih nama initialItems
+            'source' => $request->source ?? 'cart' // Kasih tahu frontend darimana asalnya
+        ]);
+    }
+    // ----------------------------------------
+
     public function store(Request $request)
     {
         $this->normalizeToggles($request);
@@ -51,9 +88,21 @@ class ProductsController extends Controller
         $sizes = $validated['sizes'];
         unset($validated['sizes']);
 
+        // Upload Foto Utama
         if ($request->hasFile('Foto')) {
             $validated['Foto'] = $request->file('Foto')->store('products', 'public');
         }
+
+        // Upload Banyak Foto (Gallery)
+        $galleryPaths = [];
+        if ($request->hasFile('Gallery')) {
+            foreach ($request->file('Gallery') as $file) {
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    $galleryPaths[] = $file->store('products/gallery', 'public');
+                }
+            }
+        }
+        $validated['Gallery'] = json_encode($galleryPaths); 
 
         DB::transaction(function () use ($validated, $sizes) {
             $product = Product::create($validated);
@@ -78,45 +127,75 @@ class ProductsController extends Controller
     }
 
     public function update(Request $request, Product $product)
-    {
-        $this->normalizeToggles($request);
+        {
+            $this->normalizeToggles($request);
 
-        $validated = $request->validate($this->validationRules($product->id));
-        $sizes = $validated['sizes'];
-        unset($validated['sizes']);
+            $validated = $request->validate($this->validationRules($product->id));
+            $sizes = $validated['sizes'];
+            unset($validated['sizes']);
 
-        if ($request->hasFile('Foto')) {
-            if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
-                Storage::disk('public')->delete($product->Foto);
+            // FIX UTAMA: Jika ada file foto baru, simpan & hapus yang lama. 
+            // Jika tidak ada, unset 'Foto' agar data foto lama di database tidak tertimpa jadi null.
+            if ($request->hasFile('Foto')) {
+                if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
+                    Storage::disk('public')->delete($product->Foto);
+                }
+                $validated['Foto'] = $request->file('Foto')->store('products', 'public');
+            } else {
+                unset($validated['Foto']);
             }
-            $validated['Foto'] = $request->file('Foto')->store('products', 'public');
-        }
 
-        DB::transaction(function () use ($product, $validated, $sizes) {
-            $product->update($validated);
+            $galleryPaths = [];
+            $existingGalleryFromDB = $product->Gallery ? json_decode($product->Gallery, true) : [];
+            if (!is_array($existingGalleryFromDB)) {
+                $existingGalleryFromDB = [];
+            }
 
-            // ukuran yang id-nya nggak dikirim lagi dari frontend berarti dihapus user
-            $incomingIds = collect($sizes)->pluck('id')->filter()->all();
-            $product->sizes()->whereNotIn('id', $incomingIds)->delete();
+            $galleryItems = $request->all()['Gallery'] ?? [];
 
-            foreach ($sizes as $size) {
-                $payload = [
-                    'Ukuran' => $size['Ukuran'],
-                    'Harga'  => $size['Harga'],
-                    'Diskon' => $size['Diskon'] ?? 0,
-                    'Stok'   => $size['Stok'],
-                ];
-
-                if (!empty($size['id'])) {
-                    $product->sizes()->where('id', $size['id'])->update($payload);
-                } else {
-                    $product->sizes()->create($payload);
+            foreach ($galleryItems as $item) {
+                if ($item instanceof \Illuminate\Http\UploadedFile) {
+                    $galleryPaths[] = $item->store('products/gallery', 'public');
+                } elseif (is_string($item)) {
+                    $cleanPath = str_replace(url('/storage') . '/', '', $item);
+                    $cleanPath = str_replace('/storage/', '', $cleanPath);
+                    $galleryPaths[] = $cleanPath;
                 }
             }
-        });
 
-        return redirect()->back()->with('success', 'Produk berhasil diperbarui.');
-    }
+            $removedFiles = array_diff($existingGalleryFromDB, $galleryPaths);
+            foreach ($removedFiles as $removedFile) {
+                if (Storage::disk('public')->exists($removedFile)) {
+                    Storage::disk('public')->delete($removedFile);
+                }
+            }
+
+            $validated['Gallery'] = json_encode(array_values($galleryPaths));
+
+            DB::transaction(function () use ($product, $validated, $sizes) {
+                $product->update($validated);
+
+                $incomingIds = collect($sizes)->pluck('id')->filter()->all();
+                $product->sizes()->whereNotIn('id', $incomingIds)->delete();
+
+                foreach ($sizes as $size) {
+                    $payload = [
+                        'Ukuran' => $size['Ukuran'],
+                        'Harga'  => $size['Harga'],
+                        'Diskon' => $size['Diskon'] ?? 0,
+                        'Stok'   => $size['Stok'],
+                    ];
+
+                    if (!empty($size['id'])) {
+                        $product->sizes()->where('id', $size['id'])->update($payload);
+                    } else {
+                        $product->sizes()->create($payload);
+                    }
+                }
+            });
+
+            return redirect()->back()->with('success', 'Produk berhasil diperbarui.');
+        }
 
     public function destroy(Product $product)
     {
@@ -124,8 +203,18 @@ class ProductsController extends Controller
             Storage::disk('public')->delete($product->Foto);
         }
 
-        $product->delete(); // product_sizes ikut kehapus lewat cascadeOnDelete()
+        if ($product->Gallery) {
+            $gallery = json_decode($product->Gallery, true);
+            if (is_array($gallery)) {
+                foreach ($gallery as $path) {
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+            }
+        }
 
+        $product->delete();
         return redirect()->back()->with('success', 'Produk berhasil dihapus.');
     }
 
@@ -141,6 +230,17 @@ class ProductsController extends Controller
         foreach ($products as $product) {
             if ($product->Foto && Storage::disk('public')->exists($product->Foto)) {
                 Storage::disk('public')->delete($product->Foto);
+            }
+            
+            if ($product->Gallery) {
+                $gallery = json_decode($product->Gallery, true);
+                if (is_array($gallery)) {
+                    foreach ($gallery as $path) {
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        }
+                    }
+                }
             }
             $product->delete();
         }
@@ -171,7 +271,7 @@ class ProductsController extends Controller
     {
         return [
             'nama'           => 'required|string|max:255',
-            'kategori'       => 'required|in:EDP,EDT,Roll-On,Body Mist',
+            'kategori'       => 'required|in:EDP,EDT,EDC',
             'gender'         => 'required|in:male,female,unisex',
             'original'       => 'required|in:Original,Refill',
             'brand'          => 'nullable|required_if:original,Refill|string|max:255',
@@ -183,9 +283,9 @@ class ProductsController extends Controller
             'Tanggal_launch' => 'nullable|date',
             'Deskripsi'      => 'required|string',
             'Foto'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'Gallery'        => 'nullable|array', 
             'Best_Seller'    => 'required|in:yes,no',
             'signature'      => 'required|in:yes,no',
-
             'sizes'          => 'required|array|min:1',
             'sizes.*.id'     => 'nullable|integer|exists:product_sizes,id',
             'sizes.*.Ukuran' => 'required|integer|min:1',

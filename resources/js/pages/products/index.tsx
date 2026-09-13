@@ -90,7 +90,6 @@ function getPricing(product: Product) {
 }
 
 // FIX: klasifikasi Original/Refill berdasarkan field `original`, BUKAN `kategori`.
-// `kategori` (EDP/EDT/Roll-On/Body Mist) itu jenis parfum, beda konsep sama status original/refill.
 function isOriginalType(product: Product): boolean {
     return product.original !== 'Refill';
 }

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from '@inertiajs/react';
 import {
     LayoutDashboard,
@@ -28,7 +29,7 @@ import { index as testimoniIndex } from '@/routes/testimoni';
 import { index as pesananIndex } from '@/routes/pesanan';
 import type { NavItem } from '@/types';
 
-// Menu Navigasi Utama
+// Konstan diletakkan di luar komponen agar stabil secara memori
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -52,14 +53,14 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-export function AppSidebar() {
+export const AppSidebar = memo(function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="inset" className="border-r border-sidebar-border/60">
             {/* Header: Logo & Identity */}
-            <SidebarHeader>
+            <SidebarHeader className="border-b border-sidebar-border/40 pb-3">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50 transition-colors">
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/60 transition-all duration-200">
                             <Link href={dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
@@ -69,10 +70,10 @@ export function AppSidebar() {
             </SidebarHeader>
 
             {/* Content: Main Navigation */}
-            <SidebarContent className="gap-0 py-2">
+            <SidebarContent className="gap-2 py-3">
                 {/* Grup Menu Utama */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-sm text-muted-foreground">
+                    <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 px-2 mb-1">
                         Manajemen Toko
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -80,9 +81,9 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* Grup Akses Cepat / Pintas (Didorong ke bawah dengan mt-auto) */}
+                {/* Grup Akses Cepat / Pintas */}
                 <SidebarGroup className="mt-auto pt-4">
-                    <SidebarGroupLabel className="text-sm text-muted-foreground">
+                    <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 px-2 mb-1">
                         Akses Cepat
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -93,7 +94,7 @@ export function AppSidebar() {
                                         href="/"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                                        className="flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors duration-200"
                                     >
                                         <Store className="h-4 w-4" />
                                         <span>Lihat Website</span>
@@ -107,9 +108,9 @@ export function AppSidebar() {
             </SidebarContent>
 
             {/* Footer: Profile & Account */}
-            <SidebarFooter className="border-t border-sidebar-border/40 pt-2">
+            <SidebarFooter className="border-t border-sidebar-border/40 pt-3">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
     );
-}
+});

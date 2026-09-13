@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/ProductsController';
 import { Button } from '@/components/ui/button';
@@ -26,9 +26,10 @@ import {
     Trash2,
     UploadCloud,
     X,
+    ImagePlus
 } from 'lucide-react';
 
-const kategoriOptions = ['EDP', 'EDT', 'Roll-On', 'Body Mist'];
+const kategoriOptions = ['EDP', 'EDT', 'EDC'];
 const genderOptions = [
     { value: 'male', label: 'Pria' },
     { value: 'female', label: 'Wanita' },
@@ -64,10 +65,15 @@ const parseRawNumber = (val: string): string => val.replace(/\D/g, '');
 
 export default function AddProductSheet({ onCreated }: Props) {
     const [open, setOpen] = useState(false);
+    
+    // State Previews
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         nama: '',
         kategori: '',
         gender: '',
@@ -81,15 +87,27 @@ export default function AddProductSheet({ onCreated }: Props) {
         Tanggal_launch: '',
         Deskripsi: '',
         Foto: null as File | null,
+        Gallery: [] as File[],
         Best_Seller: false,
         signature: false,
         sizes: [emptySize()] as SizeForm[],
     });
 
     const fieldError = (key: string) => (errors as Record<string, string>)[key];
-
     const isRefill = data.original === 'Refill';
 
+    // Bersihkan memory saat sheet ditutup
+    useEffect(() => {
+        if (!open) {
+            reset();
+            clearErrors();
+            setImagePreview(null);
+            galleryPreviews.forEach(url => URL.revokeObjectURL(url));
+            setGalleryPreviews([]);
+        }
+    }, [open]);
+
+    // --- Handler Foto Utama ---
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -104,6 +122,30 @@ export default function AddProductSheet({ onCreated }: Props) {
         setData('Foto', null);
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    // --- Handler Foto Gallery ---
+    // Selalu APPEND file baru ke data.Gallery yang lama (bukan replace), dan
+    // preview blob URL-nya juga cuma ditambahkan ke belakang array yang lama.
+    const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            const updatedGallery = [...data.Gallery, ...files];
+            setData('Gallery', updatedGallery);
+            
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setGalleryPreviews(prev => [...prev, ...newPreviews]);
+        }
+        if (galleryInputRef.current) galleryInputRef.current.value = '';
+    };
+
+    const removeGalleryImage = (indexToRemove: number) => {
+        const newGallery = data.Gallery.filter((_, idx) => idx !== indexToRemove);
+        setData('Gallery', newGallery);
+
+        URL.revokeObjectURL(galleryPreviews[indexToRemove]);
+        const newPreviews = galleryPreviews.filter((_, idx) => idx !== indexToRemove);
+        setGalleryPreviews(newPreviews);
     };
 
     const selectOriginal = (val: 'Original' | 'Refill') => {
@@ -134,10 +176,8 @@ export default function AddProductSheet({ onCreated }: Props) {
     const submitProduct = (e: React.FormEvent) => {
         e.preventDefault();
         post(store().url, {
-            forceFormData: true,
+            forceFormData: true, // WAJIB untuk mengirim File & File[] ke Laravel
             onSuccess: () => {
-                reset();
-                setImagePreview(null);
                 setOpen(false);
                 onCreated?.();
             },
@@ -148,7 +188,7 @@ export default function AddProductSheet({ onCreated }: Props) {
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
                 <Button>
-                    <Plus />
+                    <Plus className="w-4 h-4 mr-2" />
                     Tambah Produk
                 </Button>
             </SheetTrigger>
@@ -240,7 +280,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
-                                    <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)} modal={false}>
+                                    <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)}>
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Pilih kategori" />
                                         </SelectTrigger>
@@ -255,7 +295,7 @@ export default function AddProductSheet({ onCreated }: Props) {
 
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Gender <span className="text-destructive">*</span></Label>
-                                    <Select value={data.gender} onValueChange={(val) => setData('gender', val)} modal={false}>
+                                    <Select value={data.gender} onValueChange={(val) => setData('gender', val)}>
                                         <SelectTrigger className="w-full capitalize">
                                             <SelectValue placeholder="Pilih target" />
                                         </SelectTrigger>
@@ -315,6 +355,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                     className="resize-none"
                                 />
                             </div>
+                            
                             <div className="grid gap-2">
                                 <Label htmlFor="deskripsi" className="text-sm font-medium">Deskripsi Singkat</Label>
                                 <Textarea
@@ -465,12 +506,13 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 </div>
                             </div>
 
+                            {/* Foto Utama */}
                             <div className="grid gap-2">
-                                <Label className="text-sm font-medium">Foto Produk</Label>
+                                <Label className="text-sm font-medium">Foto Produk Utama</Label>
                                 <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px]">
                                     {imagePreview ? (
                                         <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-md overflow-hidden border border-border bg-white">
-                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <img src={imagePreview} alt="Preview Utama" className="w-full h-full object-contain" />
                                             <button
                                                 type="button"
                                                 onClick={removeImage}
@@ -482,7 +524,7 @@ export default function AddProductSheet({ onCreated }: Props) {
                                     ) : (
                                         <div className="text-center py-6">
                                             <UploadCloud className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                                            <p className="text-sm font-medium">Klik untuk mengunggah foto</p>
+                                            <p className="text-sm font-medium">Klik untuk mengunggah foto utama</p>
                                             <p className="text-xs text-muted-foreground mt-1">Format: JPG, PNG, WebP (Maks. 2MB)</p>
                                         </div>
                                     )}
@@ -499,7 +541,49 @@ export default function AddProductSheet({ onCreated }: Props) {
                                 {errors.Foto && <span className="text-[10px] text-destructive">{errors.Foto}</span>}
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10">
+                            {/* Gallery / Banyak Foto */}
+                            <div className="grid gap-2 border-t pt-6">
+                                <Label className="text-sm font-medium">Gallery Produk (Opsional)</Label>
+                                <p className="text-xs text-muted-foreground mb-2">Tambahkan foto lain untuk ditampilkan sebagai slide (bisa pilih lebih dari satu).</p>
+                                
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {/* Preview Gallery
+                                        FIX: key dipakai `preview` (blob URL unik per file), BUKAN `idx`.
+                                        Dengan key berbasis index, React nge-reuse DOM node lama saat
+                                        array preview berubah (nambah/hapus foto) — akibatnya gambar
+                                        yang sudah ada bisa "ketuker"/hilang karena node-nya dipakai
+                                        ulang untuk foto yang berbeda. Key unik per-file mencegah ini. */}
+                                    {galleryPreviews.map((preview, idx) => (
+                                        <div key={preview} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-white group">
+                                            <img src={preview} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeGalleryImage(idx)}
+                                                className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white p-1 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {/* Tombol Add Gallery */}
+                                    <div className="relative aspect-square rounded-lg border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center cursor-pointer">
+                                        <ImagePlus className="w-6 h-6 text-muted-foreground mb-1" />
+                                        <span className="text-[11px] font-medium text-muted-foreground">Tambah Foto</span>
+                                        <Input
+                                            ref={galleryInputRef}
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            multiple
+                                            onChange={handleGalleryChange}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+                                {errors.Gallery && <span className="text-[10px] text-destructive">{errors.Gallery}</span>}
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-6 mt-6 pb-10 border-t pt-6">
                                 <div className="grid gap-2 flex-1">
                                     <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
                                     <Input
