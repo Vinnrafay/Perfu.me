@@ -8,7 +8,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Sheet,
+    SheetClose,
     SheetContent,
+    SheetFooter,
+    SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
 import {
@@ -26,6 +29,7 @@ import {
     X,
     ImagePlus
 } from 'lucide-react';
+import { ButtonGroup } from '@/components/ui/button-group';
 
 const kategoriOptions = ['EDP', 'EDT', 'EDC'];
 const genderOptions = [
@@ -304,42 +308,16 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
-                side="bottom"
+                side="right"
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
 
-                    <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
-                        <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    <SheetHeader>
+                        <SheetTitle>
                             Edit Produk: {product.nama}
                         </SheetTitle>
-
-                        <div className="flex items-center gap-3">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="rounded-lg text-xs h-9"
-                                onClick={() => onOpenChange(false)}
-                            >
-                                Batal
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9 min-w-[130px]"
-                            >
-                                {processing ? (
-                                    <>
-                                        <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
-                                        Menyimpan...
-                                    </>
-                                ) : (
-                                    'Simpan Perubahan'
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+                    </SheetHeader>
 
                     <div className="flex-1 min-h-0 overflow-y-auto w-full custom-scrollbar" data-lenis-prevent>
                         <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
@@ -349,20 +327,19 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                     Tipe Produk <span className="text-destructive">*</span>
                                 </Label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {originalOptions.map((opt) => (
-                                        <button
-                                            key={opt.value}
-                                            type="button"
-                                            onClick={() => selectOriginal(opt.value)}
-                                            className={`h-10 rounded-lg border text-sm font-medium transition-colors ${
-                                                data.original === opt.value
-                                                    ? 'bg-black text-white border-black'
-                                                    : 'bg-background text-foreground border-border hover:bg-muted/50'
-                                            }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
+                                    <ButtonGroup className="w-full">
+                                        {originalOptions.map((opt) => (
+                                            <Button
+                                                key={opt.value}
+                                                type="button"
+                                                variant={data.original === opt.value ? 'default' : 'outline'}
+                                                onClick={() => selectOriginal(opt.value)}
+                                                className="w-full"
+                                            >
+                                                {opt.label}
+                                            </Button>
+                                        ))}
+                                    </ButtonGroup>
                                 </div>
                                 {errors.original && <span className="text-[10px] text-destructive">{errors.original}</span>}
                             </div>
@@ -389,7 +366,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gap-3">
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
                                     <Select value={data.kategori} onValueChange={(val) => setData('kategori', val)}>
@@ -423,7 +400,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="grid gap-6">
                                 <div className="grid gap-2">
                                     <Label htmlFor="top_note" className="text-sm font-medium">Top Note <span className="text-destructive">*</span></Label>
                                     <Input
@@ -442,7 +419,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                     />
                                     {errors.Middle_Note && <span className="text-[10px] text-destructive">{errors.Middle_Note}</span>}
                                 </div>
-                                <div className="grid gap-2 sm:col-span-2">
+                                <div className="grid gap-2">
                                     <Label htmlFor="base_note" className="text-sm font-medium">Base Note <span className="text-destructive">*</span></Label>
                                     <Input
                                         id="base_note"
@@ -493,7 +470,6 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                         variant="outline"
                                         size="sm"
                                         onClick={addSize}
-                                        className="h-8 text-xs rounded-lg"
                                     >
                                         <Plus className="w-3.5 h-3.5 mr-1" />
                                         Tambah Ukuran
@@ -531,7 +507,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                                     )}
                                                 </div>
 
-                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                                <div className="grid grid-cols-2 gap-4">
                                                     <div className="grid gap-2">
                                                         <Label className="text-xs font-medium">Ukuran (ml)</Label>
                                                         <Input
@@ -539,6 +515,19 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                                             placeholder="50"
                                                             value={size.Ukuran}
                                                             onChange={(e) => updateSize(index, 'Ukuran', e.target.value)}
+                                                        />
+                                                    </div>
+
+                                                    <div className="grid gap-2">
+                                                        <Label className="text-xs font-medium">Stok</Label>
+                                                        <Input
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            placeholder="0"
+                                                            value={formatNumber(size.Stok)}
+                                                            onChange={(e) =>
+                                                                updateSize(index, 'Stok', parseRawNumber(e.target.value))
+                                                            }
                                                         />
                                                     </div>
 
@@ -567,19 +556,6 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                                             }
                                                         />
                                                     </div>
-
-                                                    <div className="grid gap-2">
-                                                        <Label className="text-xs font-medium">Stok</Label>
-                                                        <Input
-                                                            type="text"
-                                                            inputMode="numeric"
-                                                            placeholder="0"
-                                                            value={formatNumber(size.Stok)}
-                                                            onChange={(e) =>
-                                                                updateSize(index, 'Stok', parseRawNumber(e.target.value))
-                                                            }
-                                                        />
-                                                    </div>
                                                 </div>
 
                                                 <div className="rounded-md bg-muted/30 px-3 py-2 flex items-center justify-between">
@@ -599,7 +575,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                 <Label className="text-sm font-medium">Foto Produk Utama</Label>
                                 <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px] cursor-pointer">
                                     {imagePreview ? (
-                                        <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-md overflow-hidden border border-border bg-white z-10">
+                                        <div className="relative w-full max-w-60 aspect-4/5 rounded-md overflow-hidden border border-border bg-white z-10">
                                             <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                                             <button
                                                 type="button"
@@ -663,17 +639,17 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                 {errors.Gallery && <span className="text-[10px] text-destructive">{errors.Gallery}</span>}
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10 border-t pt-6">
-                                <div className="grid gap-2 flex-1">
-                                    <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
-                                    <Input
-                                        id="tanggal_launch"
-                                        type="date"
-                                        value={data.Tanggal_launch}
-                                        onChange={(e) => setData('Tanggal_launch', e.target.value)}
-                                    />
-                                </div>
+                            <div className="grid gap-2 flex-1">
+                                <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
+                                <Input
+                                    id="tanggal_launch"
+                                    type="date"
+                                    value={data.Tanggal_launch}
+                                    onChange={(e) => setData('Tanggal_launch', e.target.value)}
+                                />
+                            </div>
 
+                            <div className="flex flex-col gap-3 border-t pt-6">
                                 <div className="flex-1 border border-border rounded-lg p-4 flex items-center justify-between bg-card">
                                     <div className="space-y-0.5">
                                         <Label htmlFor="best_seller" className="text-sm font-medium cursor-pointer">
@@ -695,7 +671,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                             <Label htmlFor="signature" className="text-sm font-medium cursor-pointer">
                                                 Signature
                                             </Label>
-                                            <p className="text-xs text-muted-foreground">Tandai sebagai racikan signature</p>
+                                            <p className="text-xs text-muted-foreground">Tandai sebagai racikan signature (produk juga akan muncul di halaman depan)</p>
                                         </div>
                                         <Checkbox
                                             id="signature"
@@ -709,6 +685,33 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
 
                         </div>
                     </div>
+
+                    <SheetFooter>
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            onClick={() => onOpenChange(false)}
+                            className="w-full"
+                        >
+                            {processing ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                'Simpan Perubahan'
+                            )}
+                        </Button>
+                        <SheetClose>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full"
+                            >
+                                Batal
+                            </Button>
+                        </SheetClose>
+                    </SheetFooter>
                 </form>
             </SheetContent>
         </Sheet>

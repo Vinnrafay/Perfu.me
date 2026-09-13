@@ -201,7 +201,7 @@ export default function Catalog({ products }: Props) {
         <div className="space-y-6">
             <Accordion type="multiple" defaultValue={['gender', 'harga']} className="w-full space-y-2">
                 <AccordionItem value="gender" className="border-border">
-                    <AccordionTrigger className="hover:no-underline text-xs font-bold uppercase tracking-wider text-foreground py-3">
+                    <AccordionTrigger className="hover:no-underline text-xs font-medium text-foreground py-3">
                         Target Gender
                     </AccordionTrigger>
                     <AccordionContent className="space-y-2.5 pt-1 pb-3">
@@ -226,7 +226,7 @@ export default function Catalog({ products }: Props) {
                 </AccordionItem>
 
                 <AccordionItem value="harga" className="border-border border-b-0">
-                    <AccordionTrigger className="hover:no-underline text-xs font-bold uppercase tracking-wider text-foreground py-3">
+                    <AccordionTrigger className="hover:no-underline text-xs font-medium text-foreground py-3">
                         Harga Maksimum
                     </AccordionTrigger>
                     <AccordionContent className="pt-4 pb-2 px-1 space-y-4">
@@ -238,8 +238,8 @@ export default function Catalog({ products }: Props) {
                             onValueChange={(vals) => setPriceRange(vals[0])}
                             className="cursor-pointer"
                         />
-                        <div className="flex justify-between items-center text-xs font-medium text-foreground bg-muted/50 py-2 px-3 rounded-lg border border-border/50">
-                            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">
+                        <div className="flex justify-between items-center text-xs font-medium text-foreground">
+                            <span className="text-muted-foreground">
                                 Batas Atas
                             </span>
                             <span className="font-semibold text-sm">{formatPrice(priceRange)}</span>
@@ -275,11 +275,11 @@ export default function Catalog({ products }: Props) {
             <div className="container max-w-7xl w-full mx-auto px-4 sm:px-6 pt-10 flex flex-col md:flex-row gap-8">
 
                 <aside className="hidden md:block w-64 shrink-0">
-                    <div className="sticky top-24 p-5 rounded-2xl border border-border space-y-6">
+                    <div className="sticky top-24 p-5 rounded-3xl border border-border space-y-6">
                         <div className="flex items-center justify-between border-b border-border pb-3">
                             <div className="flex items-center gap-2">
                                 <Filter className="w-4 h-4 text-500" />
-                                <h2 className="text-xs font-bold tracking-widest uppercase text-foreground">
+                                <h2 className="text-xs font-semibold text-foreground">
                                     Filter Produk
                                 </h2>
                             </div>
@@ -302,30 +302,30 @@ export default function Catalog({ products }: Props) {
                 <main className="flex-1 space-y-6">
                     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
 
-                        <div className="inline-flex h-10 p-1 bg-muted/40 backdrop-blur-md rounded-xl border border-border/80 items-center gap-1 shrink-0 self-start sm:self-auto">
+                        <div className="inline-flex h-10 p-1 bg-muted/40 backdrop-blur-md rounded-full border border-border/80 items-center gap-1 shrink-0 self-start sm:self-auto">
                             <button
                                 type="button"
                                 onClick={() => setProductType('original')}
-                                className={`flex items-center gap-1.5 px-4 h-8 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                                className={`flex items-center gap-1.5 px-4 h-8 rounded-full text-xs font-semibold transition-all duration-200 ${
                                     productType === 'original'
                                         ? 'bg-background text-foreground shadow-xs border border-border/60'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
                                 }`}
                             >
-                                <CheckCircle2 className={`w-3.5 h-3.5 ${productType === 'original' ? 'text-indigo-500' : 'text-muted-foreground'}`} />
+                                <CheckCircle2 className={`w-3.5 h-3.5 ${productType === 'original' ? 'text-primary' : 'text-muted-foreground'}`} />
                                 Original
                             </button>
 
                             <button
                                 type="button"
                                 onClick={() => setProductType('refill')}
-                                className={`flex items-center gap-1.5 px-4 h-8 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                                className={`flex items-center gap-1.5 px-4 h-8 rounded-full text-xs font-semibold transition-all duration-200 ${
                                     productType === 'refill'
                                         ? 'bg-background text-foreground shadow-xs border border-border/60'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
                                 }`}
                             >
-                                <RefreshCw className={`w-3.5 h-3.5 ${productType === 'refill' ? 'text-indigo-500' : 'text-muted-foreground'}`} />
+                                <RefreshCw className={`w-3.5 h-3.5 ${productType === 'refill' ? 'text-primary' : 'text-muted-foreground'}`} />
                                 Refill
                             </button>
                         </div>
@@ -336,7 +336,7 @@ export default function Catalog({ products }: Props) {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder={`Cari ${productType === 'original' ? 'original' : 'refill'}...`}
-                                className="pl-10 h-10 w-full text-sm rounded-xl bg-background border-border/80"
+                                className="pl-10 h-10 w-full text-sm rounded-full bg-background border-border/80"
                             />
                             {searchTerm && (
                                 <button
@@ -355,7 +355,7 @@ export default function Catalog({ products }: Props) {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="md:hidden h-10 text-sm gap-2 rounded-xl px-4"
+                                        className="md:hidden h-10 text-sm gap-2 rounded-full px-4"
                                     >
                                         <SlidersHorizontal className="w-4 h-4" />
                                         Filter {isFiltered && '(Aktif)'}
@@ -365,7 +365,7 @@ export default function Catalog({ products }: Props) {
                                     <SheetHeader className="pb-4 border-b border-border">
                                         <div className="flex items-center justify-between">
                                             <SheetTitle className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                                                <Filter className="w-4 h-4 text-indigo-500" />
+                                                <Filter className="w-4 h-4" />
                                                 Filter Katalog
                                             </SheetTitle>
                                             {isFiltered && (
@@ -387,7 +387,7 @@ export default function Catalog({ products }: Props) {
                             </Sheet>
 
                             <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="h-10 w-[150px] text-sm rounded-xl bg-background border-border/80">
+                                <SelectTrigger className="h-10 w-[150px] text-sm rounded-full bg-background border-border/80">
                                     <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
                                     <SelectValue placeholder="Urutkan" />
                                 </SelectTrigger>
@@ -449,7 +449,7 @@ export default function Catalog({ products }: Props) {
                         </div>
                     )}
 
-                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground pt-1">
+                    <div className="text-sm font-medium text-muted-foreground pt-1">
                         Menampilkan <span className="text-foreground font-bold">{sortedProducts.length}</span> produk {productType}
                     </div>
 

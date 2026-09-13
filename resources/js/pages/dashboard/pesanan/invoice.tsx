@@ -32,35 +32,21 @@ const formatDate = (val: string) =>
 
 export default function PesananInvoice({ pesanan, appName }: Props) {
     return (
-        <div className="flex flex-col items-center gap-4 p-5 w-full">
+        <div className="flex flex-col items-center gap-3 p-5 w-full">
             {/* Toolbar atas, di luar "kertas struk" */}
             <div className="w-full max-w-md flex items-center justify-between">
-                <Button variant="outline" size="sm" asChild className="rounded-lg gap-1.5">
-                    <Link href="/dashboard/pesanan">
-                        <ArrowLeft className="h-3.5 w-3.5" />
-                        Kembali
-                    </Link>
-                </Button>
-
-                <Button asChild size="sm" className="rounded-lg gap-1.5 bg-black hover:bg-black/90 text-white">
-                    {/*
-                      Ini bukan navigasi Inertia — dia beneran nge-trigger
-                      download file dari server, jadi pakai <a> biasa, bukan
-                      <Link>. target="_blank" biar SPA-nya gak keganggu.
-                    */}
-                    <a href={downloadInvoice(pesanan.id).url} target="_blank" rel="noopener noreferrer">
-                        <Download className="h-3.5 w-3.5" />
-                        Download PDF
-                    </a>
-                </Button>
+                <Link href="/dashboard/pesanan" className="flex items-center gap-1 text-sm text-primary hover:underline">
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Kembali
+                </Link>
             </div>
 
             {/* "Kertas" struk — dibikin sempit & monospace biar kesan struk kasir */}
-            <div className="w-full max-w-md bg-card border border-border rounded-lg shadow-sm font-mono text-sm">
+            <div className="w-full max-w-md bg-card border border-border font-mono text-sm">
                 <div className="p-6">
                     {/* Header toko */}
                     <div className="text-center pb-4 border-b-2 border-dashed border-border">
-                        <h1 className="text-base font-heading tracking-wide uppercase">
+                        <h1 className="text-base font-heading tracking-wide">
                             {appName}
                         </h1>
                         <p className="text-xs text-muted-foreground mt-1">Invoice Pesanan</p>
@@ -115,6 +101,20 @@ export default function PesananInvoice({ pesanan, appName }: Props) {
                     </div>
                 </div>
             </div>
+
+            <div className="border-t-2 border-dashed w-full max-w-md mx-auto" />
+
+            <Button asChild size="lg" className="w-full max-w-md rounded-none border border-primary">
+                {/*
+                      Ini bukan navigasi Inertia — dia beneran nge-trigger
+                      download file dari server, jadi pakai <a> biasa, bukan
+                      <Link>. target="_blank" biar SPA-nya gak keganggu.
+                    */}
+                <a href={downloadInvoice(pesanan.id).url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3">
+                    <Download />
+                    Download PDF Invoice
+                </a>
+            </Button>
         </div>
     );
 }

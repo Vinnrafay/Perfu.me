@@ -34,6 +34,7 @@ import {
     User,
     ChevronLeft,
     ChevronRight,
+    SquarePen,
 } from 'lucide-react';
 import AddTestimoniSheet from './add';
 import EditTestimoniSheet from './edit';
@@ -384,6 +385,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                                         onUpdated={refreshList}
                                                         trigger={
                                                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                                                <SquarePen />
                                                                 Edit
                                                             </DropdownMenuItem>
                                                         }
@@ -392,6 +394,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                                                         onClick={() => handleDelete(item.id)}
                                                         className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
                                                     >
+                                                        <Trash2 />
                                                         Hapus
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>

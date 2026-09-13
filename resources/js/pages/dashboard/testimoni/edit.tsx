@@ -9,6 +9,8 @@ import {
     Sheet,
     SheetClose,
     SheetContent,
+    SheetFooter,
+    SheetHeader,
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
@@ -54,77 +56,53 @@ export default function EditTestimoniSheet({ testimoni, trigger, onUpdated }: Pr
                 {trigger ?? <Button variant="outline" className="rounded-lg">Edit</Button>}
             </SheetTrigger>
 
-            <SheetContent 
-                side="right" 
+            <SheetContent
+                side="right"
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={handleSubmit} className="flex flex-col h-full w-full overflow-hidden">
-                    
+
                     {/* STICKY HEADER */}
-                    <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
-                        <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                            Edit Testimoni: {testimoni.nama}
+                    <SheetHeader>
+                        <SheetTitle>
+                            Edit Testimoni
                         </SheetTitle>
-                        
-                        <div className="flex items-center gap-3">
-                            <SheetClose asChild>
-                                <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs h-9">
-                                    Batal
-                                </Button>
-                            </SheetClose>
-                            <Button 
-                                type="submit" 
-                                disabled={processing} 
-                                className="rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9 min-w-[130px]"
-                            >
-                                {processing ? (
-                                    <>
-                                        <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
-                                        Menyimpan...
-                                    </>
-                                ) : (
-                                    'Simpan Perubahan'
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+                    </SheetHeader>
 
                     {/* SCROLLABLE FORM CONTENT */}
                     <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
-                        <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
-                            
-                            {/* Baris 1: Nama & Email */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="edit-nama" className="text-sm font-medium">
-                                        Nama Lengkap <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="edit-nama"
-                                        value={data.nama}
-                                        onChange={(e) => setData('nama', e.target.value)}
-                                        placeholder="Contoh: John Doe"
-                                    />
-                                    {errors.nama && (
-                                        <span className="text-[10px] text-destructive">{errors.nama}</span>
-                                    )}
-                                </div>
+                        <div className="w-full px-6 grid gap-6">
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="edit-email" className="text-sm font-medium">
-                                        Email <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="edit-email"
-                                        type="email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
-                                        placeholder="john@example.com"
-                                    />
-                                    {errors.email && (
-                                        <span className="text-[10px] text-destructive">{errors.email}</span>
-                                    )}
-                                </div>
+                            {/* Baris 1: Nama & Email */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-nama" className="text-sm font-medium">
+                                    Nama Lengkap <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="edit-nama"
+                                    value={data.nama}
+                                    onChange={(e) => setData('nama', e.target.value)}
+                                    placeholder="Contoh: John Doe"
+                                />
+                                {errors.nama && (
+                                    <span className="text-[10px] text-destructive">{errors.nama}</span>
+                                )}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-email" className="text-sm font-medium">
+                                    Email <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="edit-email"
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    placeholder="john@example.com"
+                                />
+                                {errors.email && (
+                                    <span className="text-[10px] text-destructive">{errors.email}</span>
+                                )}
                             </div>
 
                             {/* Rating */}
@@ -141,11 +119,10 @@ export default function EditTestimoniSheet({ testimoni, trigger, onUpdated }: Pr
                                             className="p-0.5 focus:outline-none transition-transform hover:scale-110"
                                         >
                                             <Star
-                                                className={`h-7 w-7 transition-colors ${
-                                                    star <= data.rating
-                                                        ? 'fill-yellow-400 text-yellow-400'
-                                                        : 'text-muted-foreground/30'
-                                                }`}
+                                                className={`h-7 w-7 transition-colors ${star <= data.rating
+                                                    ? 'fill-yellow-400 text-yellow-400'
+                                                    : 'text-muted-foreground/30'
+                                                    }`}
                                             />
                                         </button>
                                     ))}
@@ -175,6 +152,32 @@ export default function EditTestimoniSheet({ testimoni, trigger, onUpdated }: Pr
 
                         </div>
                     </div>
+
+                    <SheetFooter>
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full"
+                        >
+                            {processing ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                'Simpan Perubahan'
+                            )}
+                        </Button>
+                        <SheetClose>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full"
+                            >
+                                Batal
+                            </Button>
+                        </SheetClose>
+                    </SheetFooter>
                 </form>
             </SheetContent>
         </Sheet>

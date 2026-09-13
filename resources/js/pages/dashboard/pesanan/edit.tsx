@@ -9,6 +9,8 @@ import {
     Sheet,
     SheetClose,
     SheetContent,
+    SheetFooter,
+    SheetHeader,
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
@@ -24,8 +26,7 @@ import type { Pesanan, ProductSizeOption } from './index';
 
 const metodePembayaranOptions = [
     { value: 'transfer', label: 'Transfer Bank' },
-    { value: 'e-wallet', label: 'E-Wallet' },
-    { value: 'qris', label: 'QRIS' },
+    { value: 'e-wallet', label: 'E-Wallet/QRIS' },
     { value: 'cod', label: 'COD' },
 ] as const;
 
@@ -114,69 +115,46 @@ export default function EditPesananSheet({ pesanan, productSizes, trigger, onUpd
             </SheetTrigger>
 
             <SheetContent
-                side="bottom"
+                side="right"
                 onPointerDownOutside={(e) => e.preventDefault()}
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={submitOrder} className="flex flex-col h-full w-full overflow-hidden">
-                    <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
-                        <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                            Edit Pesanan: {pesanan.nama_pembeli}
+                    <SheetHeader>
+                        <SheetTitle>
+                            Edit Pesanan
                         </SheetTitle>
-
-                        <div className="flex items-center gap-3">
-                            <SheetClose asChild>
-                                <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs h-9">
-                                    Batal
-                                </Button>
-                            </SheetClose>
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="rounded-lg bg-black hover:bg-black/90 text-white text-xs px-4 h-9 min-w-[130px]"
-                            >
-                                {processing ? (
-                                    <>
-                                        <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
-                                        Menyimpan...
-                                    </>
-                                ) : (
-                                    'Simpan Perubahan'
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+                    </SheetHeader>
 
                     <div className="flex-1 min-h-0 overflow-y-auto w-full custom-scrollbar" data-lenis-prevent>
-                        <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
+                        <div className="w-full px-6 grid gap-6">
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="nama_pembeli" className="text-sm font-medium">
-                                        Nama Pembeli <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="nama_pembeli"
-                                        value={data.nama_pembeli}
-                                        onChange={(e) => setData('nama_pembeli', e.target.value)}
-                                    />
-                                    {errors.nama_pembeli && (
-                                        <span className="text-[10px] text-destructive">{errors.nama_pembeli}</span>
-                                    )}
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="no_wa" className="text-sm font-medium">
-                                        No. WhatsApp <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="no_wa"
-                                        value={data.no_wa}
-                                        onChange={(e) => setData('no_wa', e.target.value)}
-                                    />
-                                    {errors.no_wa && (
-                                        <span className="text-[10px] text-destructive">{errors.no_wa}</span>
-                                    )}
-                                </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="nama_pembeli" className="text-sm font-medium">
+                                    Nama Pembeli <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="nama_pembeli"
+                                    value={data.nama_pembeli}
+                                    onChange={(e) => setData('nama_pembeli', e.target.value)}
+                                />
+                                {errors.nama_pembeli && (
+                                    <span className="text-[10px] text-destructive">{errors.nama_pembeli}</span>
+                                )}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="no_wa" className="text-sm font-medium">
+                                    No. WhatsApp <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="no_wa"
+                                    value={data.no_wa}
+                                    onChange={(e) => setData('no_wa', e.target.value)}
+                                />
+                                {errors.no_wa && (
+                                    <span className="text-[10px] text-destructive">{errors.no_wa}</span>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
@@ -329,6 +307,32 @@ export default function EditPesananSheet({ pesanan, productSizes, trigger, onUpd
                             </div>
                         </div>
                     </div>
+
+                    <SheetFooter>
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full"
+                        >
+                            {processing ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                'Simpan Perubahan'
+                            )}
+                        </Button>
+                        <SheetClose>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full"
+                            >
+                                Batal
+                            </Button>
+                        </SheetClose>
+                    </SheetFooter>
                 </form>
             </SheetContent>
         </Sheet>

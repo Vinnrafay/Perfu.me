@@ -35,6 +35,8 @@ import {
     Package,
     ChevronLeft,
     ChevronRight,
+    Eye,
+    SquarePen,
 } from 'lucide-react';
 import AddProductSheet from './add';
 import EditProductSheet, { Product } from './edit';
@@ -259,7 +261,6 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                         className="-ml-3 h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                                     >
                                         Nama
-                                        <ArrowUpDown className="h-3.5 w-3.5" />
                                     </Button>
                                 </TableHead>
                                 {visibleColumns.Kategori && (
@@ -330,7 +331,6 @@ export default function ProductsList({ products: paginated, filters }: Props) {
 
                                         <TableCell className="font-medium text-foreground">
                                             <div className="flex items-center gap-2">
-                                                <Package className="h-4 w-4 text-muted-foreground/70 hidden sm:block" />
                                                 <span>{product.nama}</span>
                                             </div>
                                         </TableCell>
@@ -390,20 +390,25 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-36">
-                                                    {/* Dulu <EditProductSheet /> nempel langsung di sini, di dalam
-                                                       DropdownMenuContent — itu penyebab bug-nya. Sekarang item ini
-                                                       cuma nge-set produk mana yang mau diedit; Sheet-nya sendiri
-                                                       dirender sekali di luar, lihat paling bawah komponen ini. */}
+                                                    <DropdownMenuItem
+                                                        onClick={() => window.open(`/products/${product.id}`)}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        <Eye />
+                                                        Detail Produk
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => setEditingProduct(product)}
                                                         className="cursor-pointer"
                                                     >
+                                                        <SquarePen />
                                                         Edit
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => handleDelete(product.id)}
                                                         className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                                                     >
+                                                        <Trash2 />
                                                         Hapus
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>

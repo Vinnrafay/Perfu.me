@@ -33,6 +33,8 @@ import {
     Search,
     ShieldCheck,
     SlidersHorizontal,
+    SquarePen,
+    Trash2,
 } from 'lucide-react';
 import AddPesananSheet from './add';
 import EditPesananSheet from './edit';
@@ -715,6 +717,7 @@ export default function PesananIndex({
                                                                 }
                                                                 className="cursor-pointer"
                                                             >
+                                                                <SquarePen />
                                                                 Edit
                                                             </DropdownMenuItem>
                                                         }
@@ -726,6 +729,7 @@ export default function PesananIndex({
                                                         }
                                                         className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                                                     >
+                                                        <Trash2 />
                                                         Hapus
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>

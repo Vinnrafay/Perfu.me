@@ -65,7 +65,7 @@ export default function Navbar() {
         router.get('/products/checkout', {
             source: 'cart'
         });
-        
+
         setOpen(false);
     }, [cart]);
 
@@ -120,9 +120,6 @@ export default function Navbar() {
                                 {/* Header */}
                                 <SheetHeader className="p-6 pr-12 border-b border-border/60">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="p-2 bg-muted rounded-lg shrink-0">
-                                            <ShoppingBag className="w-5 h-5 text-foreground" />
-                                        </div>
                                         <div className="flex flex-col gap-0.5">
                                             <SheetTitle className="text-left font-sans leading-none text-foreground">
                                                 Keranjang Belanja
@@ -167,7 +164,7 @@ export default function Navbar() {
                                                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                                                             <div className="flex justify-between items-start gap-2">
                                                                 <div className="min-w-0">
-                                                                    <h4 className="text-sm font-bold leading-tight line-clamp-1">{item.nama}</h4>
+                                                                    <h4 className="text-sm font-semibold leading-tight line-clamp-1">{item.nama}</h4>
                                                                     <p className="text-[11px] font-medium text-muted-foreground mt-0.5 line-clamp-1">
                                                                         {item.Varian}
                                                                     </p>
@@ -186,7 +183,7 @@ export default function Navbar() {
                                                             </div>
 
                                                             <div className="flex items-center justify-between mt-3">
-                                                                <span className="text-sm font-extrabold text-foreground">
+                                                                <span className="text-sm font-semibold text-foreground">
                                                                     {formatIDR(subtotal)}
                                                                 </span>
                                                                 <div className="flex items-center gap-1.5 border border-border/80 rounded-lg p-0.5 bg-muted/30">
@@ -197,11 +194,10 @@ export default function Navbar() {
                                                                                 ? removeFromCart(item.cartKey)
                                                                                 : updateQuantity(item.cartKey, item.quantity - 1)
                                                                         }
-                                                                        className={`w-6 h-6 flex items-center justify-center rounded-md bg-background shadow-sm transition-colors ${
-                                                                            isLastUnit
-                                                                                ? 'text-destructive hover:bg-destructive/10'
-                                                                                : 'text-muted-foreground hover:text-foreground'
-                                                                        }`}
+                                                                        className={`w-6 h-6 flex items-center justify-center rounded-md bg-background shadow-sm transition-colors ${isLastUnit
+                                                                            ? 'text-destructive hover:bg-destructive/10'
+                                                                            : 'text-muted-foreground hover:text-foreground'
+                                                                            }`}
                                                                         aria-label={isLastUnit ? 'Hapus item' : 'Kurangi jumlah'}
                                                                     >
                                                                         {isLastUnit ? <Trash2 className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
@@ -228,23 +224,19 @@ export default function Navbar() {
                                 {/* Bagian Checkout Bawah */}
                                 {cart.length > 0 && (
                                     <div className="border-t border-border p-6 bg-card/80 backdrop-blur-md shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] space-y-4">
-                                        <div className="space-y-1.5">
-                                            <div className="flex justify-between items-center text-xs text-muted-foreground">
-                                                <span>Subtotal ({totalItems} item)</span>
-                                                <span>{formatIDR(totalPrice)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center pt-1.5 border-t border-border/60">
-                                                <span className="text-sm font-semibold text-muted-foreground">Total Pembayaran</span>
-                                                <span className="text-xl font-black text-foreground">
-                                                    {formatIDR(totalPrice)}
-                                                </span>
-                                            </div>
+                                        <div className="flex justify-between items-center pt-1.5 border-t border-border/60">
+                                            <span className="text-sm font-medium text-muted-foreground">Total Pembayaran</span>
+                                            <span className="text-xl font-semibold text-foreground">
+                                                {formatIDR(totalPrice)}
+                                            </span>
                                         </div>
                                         <Button
-                                            className="w-full h-12 text-sm font-bold bg-[#111111] hover:bg-black text-white gap-2.5 rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                                            size="lg"
+                                            className="w-full"
                                             onClick={handleCheckout}
                                         >
-                                            <ShoppingBag className="w-4 h-4" /> Lanjut ke Checkout
+                                            <ShoppingBag className="w-4 h-4" />
+                                            Lanjut ke Checkout
                                         </Button>
                                         <p className="text-[10px] text-center text-muted-foreground">
                                             Pilih metode pembayaran & isi alamat di halaman checkout

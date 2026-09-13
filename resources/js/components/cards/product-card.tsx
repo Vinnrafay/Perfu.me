@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Button } from "../ui/button";
 import { Star, Sparkles } from "lucide-react";
+import { Badge } from '../ui/badge';
 
 interface CartPayload {
     id: number;
@@ -58,39 +59,34 @@ export default function ProductCard({ product, formatPrice, onAddToCart }: Produ
     };
 
     return (
-        <div className="group relative flex flex-col h-full bg-white rounded-[2rem] p-3 border border-neutral-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 ease-out">
+        <div className="group relative flex flex-col gap-3 h-full bg-card rounded-3xl p-3 border hover:shadowsm hover:-translate-y-1 transition-all duration-300 ease-out">
 
             {/* AREA GAMBAR */}
-            <Link href={`/products/${product.id}`} className="relative aspect-square sm:aspect-[4/5] bg-[#f4f5f7] rounded-[1.5rem] overflow-hidden block">
+            <Link href={`/products/${product.id}`} className="relative aspect-square bg-muted rounded-3xl overflow-hidden block">
 
                 {isSoldOut ? (
                     <div className="absolute top-3 left-3 z-10 pointer-events-none">
-                        <span className="inline-flex items-center justify-center bg-neutral-900/90 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold">
+                        <Badge>
                             Sold Out
-                        </span>
+                        </Badge>
                     </div>
                 ) : (
                     <>
                         {/* Kiri: Hemat */}
                         <div className="absolute top-3 left-3 z-10 pointer-events-none">
                             {hasDiscount && (
-                                <span className="inline-flex items-center justify-center bg-neutral-900 text-white px-2.5 py-1.5 rounded-full text-[11px] font-medium shadow-2xs leading-none">
+                                <Badge>
                                     Hemat {formatPrice(discountNominal)}
-                                </span>
+                                </Badge>
                             )}
                         </div>
 
                         {/* Kanan: Best Seller & Signature */}
                         <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none">
                             {isBestSeller && (
-                                <span className="inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm text-neutral-700 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border border-neutral-200 shadow-2xs">
+                                <Badge variant="secondary">
                                     <Sparkles className="w-3 h-3" /> Best Seller
-                                </span>
-                            )}
-                            {isSignature && (
-                                <span className="inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm text-neutral-900 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border border-neutral-200 shadow-2xs">
-                                    <Star className="w-3 h-3 fill-neutral-900" /> Signature
-                                </span>
+                                </Badge>
                             )}
                         </div>
                     </>
@@ -111,23 +107,23 @@ export default function ProductCard({ product, formatPrice, onAddToCart }: Produ
 
             {/* AREA KONTEN - flex-1 + justify-between biar tombol selalu nempel bawah,
                 jadi gap-nya konsisten walau judul produk ada yang 1 baris ada yang 2 baris */}
-            <div className="flex flex-col flex-1 px-2 pb-2 mt-3 justify-between">
+            <div className="flex flex-col gap-3 flex-1 justify-between">
 
                 {/* Kategori, Judul, & Harga */}
                 <div className="space-y-0.5">
                     <div className="flex items-center justify-between gap-2">
-                        <span className="text-[12px] font-semibold text-neutral-500 uppercase tracking-wide">
+                        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
                             {product.kategori || product.brand || 'EDP'}
                         </span>
                         {sizeLabel && (
-                            <span className="text-[12px] font-medium text-neutral-400 text-right">
+                            <span className="text-[12px] font-medium text-muted-foreground text-right">
                                 {sizeLabel}
                             </span>
                         )}
                     </div>
 
                     <Link href={`/products/${product.id}`}>
-                        <h3 className="text-[18px] font-extrabold text-neutral-900 leading-snug line-clamp-2">
+                        <h3 className="text-lg font-semibold leading-snug line-clamp-2">
                             {product.nama}
                         </h3>
                     </Link>
@@ -135,15 +131,15 @@ export default function ProductCard({ product, formatPrice, onAddToCart }: Produ
                     <div className="flex items-center gap-2">
                         {hasDiscount ? (
                             <>
-                                <span className="text-neutral-900 font-bold text-[16px]">
+                                <span className="font-medium text-[16px]">
                                     {formatPrice(finalPrice)}
                                 </span>
-                                <span className="text-neutral-400 line-through font-medium text-[12px]">
+                                <span className="text-muted-foreground line-through font-medium text-[12px]">
                                     {formatPrice(originalPrice)}
                                 </span>
                             </>
                         ) : (
-                            <span className="text-neutral-900 font-bold text-[16px]">
+                            <span className="font-medium text-[16px]">
                                 {formatPrice(originalPrice)}
                             </span>
                         )}
@@ -154,9 +150,8 @@ export default function ProductCard({ product, formatPrice, onAddToCart }: Produ
                 <Button
                     onClick={handleAddToCart}
                     disabled={isSoldOut}
-                    className="w-full bg-[#2a2a2a] hover:bg-black text-white rounded-full h-[44px] text-[13px] font-medium transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-3"
                 >
-                    {isSoldOut ? 'Sold Out' : 'Buy Now'}
+                    {isSoldOut ? 'Sold Out' : 'Tambah ke Keranjang'}
                 </Button>
             </div>
         </div>
