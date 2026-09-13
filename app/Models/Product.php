@@ -20,6 +20,7 @@ class Product extends Model
         'Tanggal_launch',
         'Deskripsi',
         'Foto',
+        'Gallery',
         'Best_Seller',
         'signature',
     ];

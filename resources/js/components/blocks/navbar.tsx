@@ -1,11 +1,10 @@
-import { Link, usePage } from '@inertiajs/react'
-import { useState } from 'react'
+import { Link, usePage, router } from '@inertiajs/react'
+import { useState, useCallback } from 'react'
 import { Menu, X, ShoppingCart, Plus, Minus, Trash2, ShoppingBag, ImageOff } from 'lucide-react'
 import { Button } from '../ui/button'
-import { dashboard, login, register } from '@/routes';
 import AppLogo from '../app-logo';
 import WhatsAppIcon from '../whatsapp-icon';
-import { useCart, CartItem } from '@/hooks/useCart';
+import { useCart } from '@/hooks/useCart';
 import {
     Sheet,
     SheetContent,
@@ -59,26 +58,16 @@ export default function Navbar() {
         return currentPath === href || currentPath.startsWith(`${href}/`);
     };
 
-    const handleCheckoutWA = () => {
+    const handleCheckout = useCallback(() => {
         if (cart.length === 0) return;
 
-        const waNumber = '6281383415432';
-        let message = 'Halo Admin Perfu.me, saya ingin memesan parfum berikut:\n\n';
-
-        cart.forEach((item, index) => {
-            const subtotal = item.Harga * item.quantity;
-            message += `${index + 1}. *${item.nama}*\n`;
-            message += `   Varian: ${item.Varian}\n`;
-            message += `   Jumlah: ${item.quantity} x ${formatIDR(item.Harga)}\n`;
-            message += `   Subtotal: ${formatIDR(subtotal)}\n\n`;
+        // Navigasi ke halaman checkout dengan membawa banyak produk/varian dari keranjang
+        router.get('/products/checkout', {
+            source: 'cart'
         });
-
-        message += `*Total Keseluruhan: ${formatIDR(totalPrice)}*\n\n`;
-        message += 'Mohon informasi ketersediaan stok dan pembayarannya ya. Terima kasih!';
-
-        const encodedMessage = encodeURIComponent(message);
-        window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, '_blank');
-    };
+        
+        setOpen(false);
+    }, [cart]);
 
     return (
         <>
@@ -128,19 +117,23 @@ export default function Navbar() {
                             </SheetTrigger>
                             <SheetContent className="w-full sm:max-w-md flex flex-col p-0 border-l border-border/50 z-1001">
 
-                                {/* Header - badge jumlah item dipindah jadi subtitle, bukan sebaris sama judul, biar gak numpuk sama tombol close bawaan Sheet */}
-                                <SheetHeader className="p-6 pr-12 border-b border-border/60 space-y-1">
-                                    <SheetTitle className="text-left font-sans flex items-center gap-2.5 text-foreground">
+                                {/* Header */}
+                                <SheetHeader className="p-6 pr-12 border-b border-border/60">
+                                    <div className="flex items-center gap-2.5">
                                         <div className="p-2 bg-muted rounded-lg shrink-0">
-                                            <ShoppingBag className="w-5 h-5" />
+                                            <ShoppingBag className="w-5 h-5 text-foreground" />
                                         </div>
-                                        Keranjang Belanja
-                                    </SheetTitle>
-                                    <p className="text-xs text-muted-foreground pl-[42px]">
-                                        {totalItems > 0
-                                            ? `${totalItems} item di keranjang kamu`
-                                            : 'Belum ada item'}
-                                    </p>
+                                        <div className="flex flex-col gap-0.5">
+                                            <SheetTitle className="text-left font-sans leading-none text-foreground">
+                                                Keranjang Belanja
+                                            </SheetTitle>
+                                            <p className="text-xs leading-none text-muted-foreground">
+                                                {totalItems > 0
+                                                    ? `${totalItems} item di keranjang kamu`
+                                                    : 'Belum ada item'}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </SheetHeader>
 
                                 <div className="flex-1 overflow-y-auto bg-background">
@@ -168,7 +161,7 @@ export default function Navbar() {
                                                 const subtotal = item.Harga * item.quantity;
 
                                                 return (
-                                                    <div key={item.id} className="flex gap-3.5 p-5">
+                                                    <div key={item.cartKey} className="flex gap-3.5 p-5">
                                                         <CartItemThumbnail src={item.Foto ? `/storage/${item.Foto}` : null} alt={item.nama} />
 
                                                         <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -184,7 +177,7 @@ export default function Navbar() {
                                                                 </div>
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => removeFromCart(item.id)}
+                                                                    onClick={() => removeFromCart(item.cartKey)}
                                                                     className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-1.5 rounded-lg transition-colors"
                                                                     aria-label={`Hapus ${item.nama} dari keranjang`}
                                                                 >
@@ -201,8 +194,8 @@ export default function Navbar() {
                                                                         type="button"
                                                                         onClick={() =>
                                                                             isLastUnit
-                                                                                ? removeFromCart(item.id)
-                                                                                : updateQuantity(item.id, item.quantity - 1)
+                                                                                ? removeFromCart(item.cartKey)
+                                                                                : updateQuantity(item.cartKey, item.quantity - 1)
                                                                         }
                                                                         className={`w-6 h-6 flex items-center justify-center rounded-md bg-background shadow-sm transition-colors ${
                                                                             isLastUnit
@@ -216,7 +209,7 @@ export default function Navbar() {
                                                                     <span className="text-xs font-bold w-5 text-center tabular-nums">{item.quantity}</span>
                                                                     <button
                                                                         type="button"
-                                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                                        onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
                                                                         className="w-6 h-6 flex items-center justify-center rounded-md bg-background text-muted-foreground hover:text-foreground shadow-sm"
                                                                         aria-label="Tambah jumlah"
                                                                     >
@@ -248,13 +241,13 @@ export default function Navbar() {
                                             </div>
                                         </div>
                                         <Button
-                                            className="w-full h-12 text-sm font-bold bg-[#25D366] hover:bg-[#20bd5a] text-white gap-2.5 rounded-xl shadow-lg shadow-[#25D366]/20 transition-all active:scale-[0.98]"
-                                            onClick={handleCheckoutWA}
+                                            className="w-full h-12 text-sm font-bold bg-[#111111] hover:bg-black text-white gap-2.5 rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                                            onClick={handleCheckout}
                                         >
-                                            <WhatsAppIcon /> Checkout via WhatsApp
+                                            <ShoppingBag className="w-4 h-4" /> Lanjut ke Checkout
                                         </Button>
                                         <p className="text-[10px] text-center text-muted-foreground">
-                                            Pesanan akan dikonfirmasi lewat WhatsApp sebelum diproses
+                                            Pilih metode pembayaran & isi alamat di halaman checkout
                                         </p>
                                     </div>
                                 )}

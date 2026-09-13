@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/ProductsController';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Sheet,
-    SheetClose,
     SheetContent,
     SheetTitle,
-    SheetTrigger,
 } from '@/components/ui/sheet';
 import {
     Select,
@@ -26,9 +24,10 @@ import {
     Trash2,
     UploadCloud,
     X,
+    ImagePlus
 } from 'lucide-react';
 
-const kategoriOptions = ['EDP', 'EDT', 'Roll-On', 'Body Mist'];
+const kategoriOptions = ['EDP', 'EDT', 'EDC'];
 const genderOptions = [
     { value: 'male', label: 'Pria' },
     { value: 'female', label: 'Wanita' },
@@ -63,6 +62,7 @@ export interface Product {
     Tanggal_launch: string | null;
     Deskripsi: string;
     Foto: string | null;
+    Gallery?: string | string[];
     'Best Seller'?: string;
     Best_Seller: 'yes' | 'no';
     signature: 'yes' | 'no';
@@ -70,8 +70,9 @@ export interface Product {
 }
 
 interface Props {
-    product: Product;
-    trigger?: React.ReactNode;
+    product: Product | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     onUpdated?: () => void;
 }
 
@@ -85,54 +86,103 @@ interface SizeForm {
 
 const emptySize = (): SizeForm => ({ Ukuran: '', Harga: '', Diskon: '', Stok: '' });
 
+// FIX: Parsing angka dari DB dibulatkan dulu untuk mencegah bug desimal .00 nambahin nol
 const sizesFromProduct = (product: Product): SizeForm[] => {
     if (!product.sizes || product.sizes.length === 0) return [emptySize()];
     return product.sizes.map((s) => ({
         id: s.id,
         Ukuran: s.Ukuran?.toString() ?? '',
-        Harga: s.Harga?.toString() ?? '',
-        Diskon: s.Diskon?.toString() ?? '',
+        Harga: s.Harga !== null && s.Harga !== undefined ? Math.round(Number(s.Harga)).toString() : '',
+        Diskon: s.Diskon !== null && s.Diskon !== undefined ? Math.round(Number(s.Diskon)).toString() : '',
         Stok: s.Stok?.toString() ?? '',
     }));
 };
 
+// FIX: Format number yang aman dari angka desimal
 const formatNumber = (val: string | number | null | undefined): string => {
     if (val === null || val === undefined || val === '') return '';
-    const numericValue = val.toString().replace(/\D/g, '');
-    if (!numericValue) return '';
-    return new Intl.NumberFormat('id-ID').format(Number(numericValue));
+    const num = typeof val === 'number' ? val : parseFloat(val.toString().replace(',', '.'));
+    if (isNaN(num)) {
+        const numericValue = val.toString().replace(/\D/g, '');
+        if (!numericValue) return '';
+        return new Intl.NumberFormat('id-ID').format(Number(numericValue));
+    }
+    return new Intl.NumberFormat('id-ID').format(Math.round(num));
 };
 
 const parseRawNumber = (val: string): string => val.replace(/\D/g, '');
 
-export default function EditProductSheet({ product, trigger, onUpdated }: Props) {
-    const [open, setOpen] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(
-        product.Foto ? `/storage/${product.Foto}` : null
-    );
+const parseGallery = (gallery: Product['Gallery']): string[] => {
+    if (!gallery) return [];
+    if (Array.isArray(gallery)) {
+        return gallery.filter(item => typeof item === 'string');
+    }
+    if (typeof gallery === 'string') {
+        const trimmed = gallery.trim();
+        if (!trimmed) return [];
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) {
+                return parsed.filter(item => typeof item === 'string');
+            }
+            if (typeof parsed === 'string') {
+                return [parsed];
+            }
+        } catch {
+            if (trimmed.includes(',')) {
+                return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+            }
+            return [trimmed];
+        }
+    }
+    return [];
+};
+
+const blankForm = () => ({
+    nama: '',
+    kategori: '',
+    gender: '',
+    original: 'Original' as 'Original' | 'Refill',
+    brand: '',
+    Top_Note: '',
+    Middle_Note: '',
+    Base_Note: '',
+    Komposisi: '',
+    Kemasan: '',
+    Tanggal_launch: '',
+    Deskripsi: '',
+    Foto: null as File | null,
+    Gallery: [] as (File | string)[],
+    Best_Seller: false,
+    signature: false,
+    sizes: [emptySize()] as SizeForm[],
+});
+
+export default function EditProductSheet({ product, open, onOpenChange, onUpdated }: Props) {
+    const imagePreviewFromProduct = (p: Product | null) => (p?.Foto ? `/storage/${p.Foto}` : null);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
 
-    const { data, setData, post, processing, errors, transform } = useForm({
-        nama: product.nama ?? '',
-        kategori: product.kategori ?? '',
-        gender: product.gender ?? '',
-        original: (product.original ?? 'Original') as 'Original' | 'Refill',
-        brand: product.brand ?? '',
-        Top_Note: product.Top_Note ?? '',
-        Middle_Note: product.Middle_Note ?? '',
-        Base_Note: product.Base_Note ?? '',
-        Komposisi: product.Komposisi ?? '',
-        Kemasan: product.Kemasan ?? '',
-        Tanggal_launch: product.Tanggal_launch ?? '',
-        Deskripsi: product.Deskripsi ?? '',
-        Foto: null as File | null,
-        Best_Seller: product.Best_Seller === 'yes',
-        signature: product.signature === 'yes',
-        sizes: sizesFromProduct(product) as SizeForm[],
-    });
+    const { data, setData, post, processing, errors, transform, reset, clearErrors } = useForm(blankForm());
 
-    // Sinkronkan state form dan preview jika prop `product` berubah
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+
+    const lastLoadedIdRef = useRef<number | null>(null);
+
     useEffect(() => {
+        if (!open || !product) {
+            if (!open) {
+                lastLoadedIdRef.current = null;
+            }
+            return;
+        }
+        if (lastLoadedIdRef.current === product.id) return;
+        lastLoadedIdRef.current = product.id;
+
+        const parsedGallery = parseGallery(product.Gallery);
+
         setData({
             nama: product.nama ?? '',
             kategori: product.kategori ?? '',
@@ -147,41 +197,76 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
             Tanggal_launch: product.Tanggal_launch ?? '',
             Deskripsi: product.Deskripsi ?? '',
             Foto: null,
+            Gallery: parsedGallery,
             Best_Seller: product.Best_Seller === 'yes',
             signature: product.signature === 'yes',
             sizes: sizesFromProduct(product),
         });
+        clearErrors();
+        setImagePreview(imagePreviewFromProduct(product));
+        setGalleryPreviews(parsedGallery.map((path) => {
+            if (path.startsWith('http') || path.startsWith('blob:')) return path;
+            return `/storage/${path.replace(/^\/+/, '')}`;
+        }));
 
-        setImagePreview(product.Foto ? `/storage/${product.Foto}` : null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        if (galleryInputRef.current) galleryInputRef.current.value = '';
+    }, [open, product?.id]);
 
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [product]);
+    useEffect(() => {
+        if (open) return;
+        lastLoadedIdRef.current = null;
+        reset();
+        clearErrors();
+        setImagePreview(null);
+        galleryPreviews.forEach((url) => {
+            if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+        });
+        setGalleryPreviews([]);
+    }, [open]);
+
+    if (!product) return null;
 
     const isRefill = data.original === 'Refill';
-
-    const fieldError = (key: string) => (errors as Record<string, string>)[key];
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setData('Foto', file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
+            reader.onloadend = () => setImagePreview(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
 
-    const removeImage = () => {
+    const removeImage = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setData('Foto', null);
         setImagePreview(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            setData('Gallery', [...data.Gallery, ...files]);
+            const newPreviews = files.map((file) => URL.createObjectURL(file));
+            setGalleryPreviews((prev) => [...prev, ...newPreviews]);
         }
+        if (galleryInputRef.current) galleryInputRef.current.value = '';
+    };
+
+    const removeGalleryImage = (e: React.MouseEvent, indexToRemove: number) => {
+        e.stopPropagation();
+        const newGalleryData = data.Gallery.filter((_, idx) => idx !== indexToRemove);
+        setData('Gallery', newGalleryData);
+
+        const previewUrl = galleryPreviews[indexToRemove];
+        if (previewUrl && previewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        setGalleryPreviews(galleryPreviews.filter((_, idx) => idx !== indexToRemove));
     };
 
     const selectOriginal = (val: 'Original' | 'Refill') => {
@@ -192,10 +277,7 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
         }));
     };
 
-    // --- Varian ukuran ---
-    const addSize = () => {
-        setData('sizes', [...data.sizes, emptySize()]);
-    };
+    const addSize = () => setData('sizes', [...data.sizes, emptySize()]);
 
     const removeSize = (index: number) => {
         if (data.sizes.length <= 1) return;
@@ -203,54 +285,45 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
     };
 
     const updateSize = (index: number, field: keyof SizeForm, value: string) => {
-        setData(
-            'sizes',
-            data.sizes.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
-        );
+        setData('sizes', data.sizes.map((s, i) => (i === index ? { ...s, [field]: value } : s)));
     };
 
     const submitProduct = (e: React.FormEvent) => {
         e.preventDefault();
-
-        transform((data) => ({
-            ...data,
-            _method: 'put',
-        }));
+        transform((data) => ({ ...data, _method: 'put' }));
 
         post(update(product.id).url, {
             forceFormData: true,
             onSuccess: () => {
-                setOpen(false);
+                onOpenChange(false);
                 onUpdated?.();
             },
         });
     };
 
     return (
-        <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-                {trigger ?? <Button variant="outline" className="rounded-lg">Edit</Button>}
-            </SheetTrigger>
-
+        <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
                 side="bottom"
-                onPointerDownOutside={(e) => e.preventDefault()}
                 className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
 
-                    {/* STICKY HEADER */}
                     <div className="sticky top-0 z-50 shrink-0 px-6 sm:px-12 py-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md">
                         <SheetTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                             Edit Produk: {product.nama}
                         </SheetTitle>
 
                         <div className="flex items-center gap-3">
-                            <SheetClose asChild>
-                                <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs h-9">
-                                    Batal
-                                </Button>
-                            </SheetClose>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="rounded-lg text-xs h-9"
+                                onClick={() => onOpenChange(false)}
+                            >
+                                Batal
+                            </Button>
                             <Button
                                 type="submit"
                                 disabled={processing}
@@ -268,11 +341,9 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                         </div>
                     </div>
 
-                    {/* SCROLLABLE FORM CONTENT */}
                     <div className="flex-1 min-h-0 overflow-y-auto w-full custom-scrollbar" data-lenis-prevent>
                         <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
 
-                            {/* Tipe Produk: Original / Refill */}
                             <div className="grid gap-2">
                                 <Label className="text-sm font-medium">
                                     Tipe Produk <span className="text-destructive">*</span>
@@ -296,7 +367,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 {errors.original && <span className="text-[10px] text-destructive">{errors.original}</span>}
                             </div>
 
-                            {/* Nama */}
                             <div className="grid gap-2">
                                 <Label htmlFor="nama" className="text-sm font-medium">Nama Produk <span className="text-destructive">*</span></Label>
                                 <Input
@@ -307,7 +377,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 {errors.nama && <span className="text-[10px] text-destructive">{errors.nama}</span>}
                             </div>
 
-                            {/* Brand — muncul jika Refill */}
                             {isRefill && (
                                 <div className="grid gap-2">
                                     <Label htmlFor="brand" className="text-sm font-medium">Brand Original <span className="text-destructive">*</span></Label>
@@ -320,7 +389,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 </div>
                             )}
 
-                            {/* Baris 2: Kategori & Gender */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label className="text-sm font-medium">Kategori <span className="text-destructive">*</span></Label>
@@ -355,7 +423,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 </div>
                             </div>
 
-                            {/* Notes Aroma */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label htmlFor="top_note" className="text-sm font-medium">Top Note <span className="text-destructive">*</span></Label>
@@ -386,7 +453,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 </div>
                             </div>
 
-                            {/* Komposisi & Deskripsi */}
                             <div className="grid gap-2">
                                 <Label htmlFor="komposisi" className="text-sm font-medium">Komposisi Bahan</Label>
                                 <Textarea
@@ -417,7 +483,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 />
                             </div>
 
-                            {/* Varian Ukuran — bisa lebih dari satu */}
                             <div className="grid gap-3">
                                 <div className="flex items-center justify-between">
                                     <Label className="text-sm font-medium">
@@ -475,11 +540,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                                             value={size.Ukuran}
                                                             onChange={(e) => updateSize(index, 'Ukuran', e.target.value)}
                                                         />
-                                                        {fieldError(`sizes.${index}.Ukuran`) && (
-                                                            <span className="text-[10px] text-destructive">
-                                                                {fieldError(`sizes.${index}.Ukuran`)}
-                                                            </span>
-                                                        )}
                                                     </div>
 
                                                     <div className="grid gap-2">
@@ -493,11 +553,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                                                 updateSize(index, 'Harga', parseRawNumber(e.target.value))
                                                             }
                                                         />
-                                                        {fieldError(`sizes.${index}.Harga`) && (
-                                                            <span className="text-[10px] text-destructive">
-                                                                {fieldError(`sizes.${index}.Harga`)}
-                                                            </span>
-                                                        )}
                                                     </div>
 
                                                     <div className="grid gap-2">
@@ -511,11 +566,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                                                 updateSize(index, 'Diskon', parseRawNumber(e.target.value))
                                                             }
                                                         />
-                                                        {fieldError(`sizes.${index}.Diskon`) && (
-                                                            <span className="text-[10px] text-destructive">
-                                                                {fieldError(`sizes.${index}.Diskon`)}
-                                                            </span>
-                                                        )}
                                                     </div>
 
                                                     <div className="grid gap-2">
@@ -529,11 +579,6 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                                                 updateSize(index, 'Stok', parseRawNumber(e.target.value))
                                                             }
                                                         />
-                                                        {fieldError(`sizes.${index}.Stok`) && (
-                                                            <span className="text-[10px] text-destructive">
-                                                                {fieldError(`sizes.${index}.Stok`)}
-                                                            </span>
-                                                        )}
                                                     </div>
                                                 </div>
 
@@ -549,12 +594,12 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                 </div>
                             </div>
 
-                            {/* Foto Produk */}
-                            <div className="grid gap-2">
-                                <Label className="text-sm font-medium">Foto Produk</Label>
-                                <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px]">
+                            {/* Foto Produk Utama */}
+                            <div className="grid gap-2 mt-2">
+                                <Label className="text-sm font-medium">Foto Produk Utama</Label>
+                                <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px] cursor-pointer">
                                     {imagePreview ? (
-                                        <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-md overflow-hidden border border-border bg-white">
+                                        <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-md overflow-hidden border border-border bg-white z-10">
                                             <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                                             <button
                                                 type="button"
@@ -565,9 +610,9 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="text-center py-6">
+                                        <div className="text-center py-6 pointer-events-none">
                                             <UploadCloud className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                                            <p className="text-sm font-medium">Klik untuk mengganti foto</p>
+                                            <p className="text-sm font-medium">Klik untuk mengunggah / mengganti foto</p>
                                             <p className="text-xs text-muted-foreground mt-1">Format: JPG, PNG, WebP (Maks. 2MB)</p>
                                         </div>
                                     )}
@@ -577,14 +622,48 @@ export default function EditProductSheet({ product, trigger, onUpdated }: Props)
                                         type="file"
                                         accept="image/jpeg,image/png,image/webp"
                                         onChange={handleImageChange}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                                     />
                                 </div>
                                 {errors.Foto && <span className="text-[10px] text-destructive">{errors.Foto}</span>}
                             </div>
 
-                            {/* Options: Tanggal Launching, Best Seller, Signature */}
-                            <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10">
+                            {/* Gallery Produk */}
+                            <div className="grid gap-2 border-t pt-6">
+                                <Label className="text-sm font-medium">Gallery Produk (Opsional)</Label>
+                                <p className="text-xs text-muted-foreground mb-2">Kelola foto tambahan produk. Hapus foto lama dengan menekan icon X.</p>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {galleryPreviews.map((preview, idx) => (
+                                        <div key={preview} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-white group">
+                                            <img src={preview} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => removeGalleryImage(e, idx)}
+                                                className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white p-1 rounded-full transition-all opacity-0 group-hover:opacity-100 z-10"
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    <div className="relative aspect-square rounded-lg border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center cursor-pointer">
+                                        <ImagePlus className="w-6 h-6 text-muted-foreground mb-1" />
+                                        <span className="text-[11px] font-medium text-muted-foreground">Tambah Foto</span>
+                                        <Input
+                                            ref={galleryInputRef}
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            multiple
+                                            onChange={handleGalleryChange}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+                                {errors.Gallery && <span className="text-[10px] text-destructive">{errors.Gallery}</span>}
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-6 mt-2 pb-10 border-t pt-6">
                                 <div className="grid gap-2 flex-1">
                                     <Label htmlFor="tanggal_launch" className="text-sm font-medium">Tanggal Launching</Label>
                                     <Input

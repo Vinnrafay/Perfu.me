@@ -98,6 +98,8 @@ export default function ProductsList({ products: paginated, filters }: Props) {
         'Best Seller': true,
     });
 
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
     // Client-side sorting berdasarkan nama
     const rows = useMemo(() => {
         return [...(paginated.data || [])].sort((a, b) =>
@@ -371,7 +373,6 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                             <TableCell>
                                                 {product.Best_Seller === 'yes' || product['Best Seller'] === 'yes' ? (
                                                     <Badge variant="secondary" className="gap-1 text-[11px] font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border-indigo-200/50">
-                                                        <Sparkles className="h-3 w-3 fill-indigo-500 text-indigo-500" />
                                                         Ya
                                                     </Badge>
                                                 ) : (
@@ -389,15 +390,16 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-36">
-                                                    <EditProductSheet
-                                                        product={product}
-                                                        onUpdated={refreshList}
-                                                        trigger={
-                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
-                                                                Edit
-                                                            </DropdownMenuItem>
-                                                        }
-                                                    />
+                                                    {/* Dulu <EditProductSheet /> nempel langsung di sini, di dalam
+                                                       DropdownMenuContent — itu penyebab bug-nya. Sekarang item ini
+                                                       cuma nge-set produk mana yang mau diedit; Sheet-nya sendiri
+                                                       dirender sekali di luar, lihat paling bawah komponen ini. */}
+                                                    <DropdownMenuItem
+                                                        onClick={() => setEditingProduct(product)}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Edit
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => handleDelete(product.id)}
                                                         className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
@@ -457,6 +459,22 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Satu-satunya instance EditProductSheet di halaman ini, di luar
+               DropdownMenu & table sepenuhnya. Karena posisinya di sini, dia
+               gak ikut ke-unmount lagi walau dropdown-nya nutup atau table
+               reload. */}
+            <EditProductSheet
+                product={editingProduct}
+                open={editingProduct !== null}
+                onOpenChange={(open) => {
+                    if (!open) setEditingProduct(null);
+                }}
+                onUpdated={() => {
+                    setEditingProduct(null);
+                    refreshList();
+                }}
+            />
         </div>
     );
 }
