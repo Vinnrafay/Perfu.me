@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Pesanan;
 use App\Models\Product;
 use App\Models\ProductSize;
 use App\Models\Testimoni;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -429,6 +431,192 @@ class DatabaseSeeder extends Seeder
                 'Harga' => $isOriginal ? 80000 : 70000,
                 'Diskon' => 0,
                 'Stok' => rand(5, 20),
+            ]);
+        }
+
+        // =========================
+        // PESANAN
+        // =========================
+
+        $productSizes = ProductSize::with('product')->get();
+
+        $pesananData = [
+            [
+                'nama_pembeli' => 'Rizky Ramadhan',
+                'no_wa' => '081234567801',
+                'alamat' => 'Jl. Pajajaran No. 21, Bogor Tengah, Kota Bogor',
+                'catatan' => 'Tolong dikemas dengan aman.',
+                'metode_pembayaran' => 'qris',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Nadia Safitri',
+                'no_wa' => '081234567802',
+                'alamat' => 'Jl. Raya Ciomas No. 15, Ciomas, Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'e-wallet',
+                'jumlah' => 2,
+            ],
+            [
+                'nama_pembeli' => 'Dimas Pratama',
+                'no_wa' => '081234567803',
+                'alamat' => 'Jl. Semplak Raya No. 8, Bogor Barat, Kota Bogor',
+                'catatan' => 'Boleh dikirim sore hari.',
+                'metode_pembayaran' => 'transfer',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Salsa Amalia',
+                'no_wa' => '081234567804',
+                'alamat' => 'Jl. Dramaga Raya No. 42, Dramaga, Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'qris',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Fajar Maulana',
+                'no_wa' => '081234567805',
+                'alamat' => 'Jl. Merdeka No. 17, Bogor Tengah, Kota Bogor',
+                'catatan' => 'Mohon cek kembali varian sebelum dikirim.',
+                'metode_pembayaran' => 'transfer',
+                'jumlah' => 3,
+            ],
+            [
+                'nama_pembeli' => 'Citra Lestari',
+                'no_wa' => '081234567806',
+                'alamat' => 'Jl. Sholeh Iskandar No. 29, Tanah Sareal, Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'e-wallet',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Ardiansyah',
+                'no_wa' => '081234567807',
+                'alamat' => 'Jl. Gunung Batu No. 11, Bogor Barat, Kota Bogor',
+                'catatan' => 'Tidak perlu kartu ucapan.',
+                'metode_pembayaran' => 'cod',
+                'jumlah' => 2,
+            ],
+            [
+                'nama_pembeli' => 'Keisha Ananda',
+                'no_wa' => '081234567808',
+                'alamat' => 'Jl. Cibinong Raya No. 5, Cibinong, Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'qris',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Bagas Wijaya',
+                'no_wa' => '081234567809',
+                'alamat' => 'Jl. KH Abdullah Bin Nuh No. 33, Bogor Barat, Kota Bogor',
+                'catatan' => 'Packaging dibuat seaman mungkin.',
+                'metode_pembayaran' => 'transfer',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Alya Putri',
+                'no_wa' => '081234567810',
+                'alamat' => 'Jl. Bantar Kemang No. 18, Bogor Timur, Kota Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'e-wallet',
+                'jumlah' => 2,
+            ],
+            [
+                'nama_pembeli' => 'Rafi Akbar',
+                'no_wa' => '081234567811',
+                'alamat' => 'Jl. Yasmin Raya No. 7, Bogor Barat, Kota Bogor',
+                'catatan' => 'Kalau bisa dikirim secepatnya.',
+                'metode_pembayaran' => 'qris',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Nabila Rahma',
+                'no_wa' => '081234567812',
+                'alamat' => 'Jl. Taman Cimanggu No. 12, Tanah Sareal, Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'transfer',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Ilham Fauzan',
+                'no_wa' => '081234567813',
+                'alamat' => 'Jl. Cilebut Raya No. 24, Sukaraja, Bogor',
+                'catatan' => 'Tolong hubungi sebelum paket dikirim.',
+                'metode_pembayaran' => 'cod',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Sarah Aulia',
+                'no_wa' => '081234567814',
+                'alamat' => 'Jl. Suryakencana No. 16, Bogor Tengah, Kota Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'qris',
+                'jumlah' => 2,
+            ],
+            [
+                'nama_pembeli' => 'Andika Saputra',
+                'no_wa' => '081234567815',
+                'alamat' => 'Jl. Ciomas Permai No. 9, Ciomas, Bogor',
+                'catatan' => 'Pesanan untuk hadiah.',
+                'metode_pembayaran' => 'e-wallet',
+                'jumlah' => 1,
+            ],
+            [
+                'nama_pembeli' => 'Maya Salsabila',
+                'no_wa' => '081234567816',
+                'alamat' => 'Jl. Pajajaran Indah No. 4, Bogor Timur, Kota Bogor',
+                'catatan' => null,
+                'metode_pembayaran' => 'transfer',
+                'jumlah' => 1,
+            ],
+        ];
+
+        foreach ($pesananData as $index => $data) {
+            $productSize = $productSizes->random();
+
+            $harga = $productSize->Harga - ($productSize->Diskon ?? 0);
+            $totalHarga = $harga * $data['jumlah'];
+
+            /*
+             * Tanggal dibuat antara 1-14 hari sebelum hari ini.
+             * Karena memakai Carbon::today(), tidak ada data
+             * yang masuk pada tanggal hari ini.
+             */
+            $tanggalPembelian = Carbon::today()
+                ->subDays(rand(1, 14))
+                ->setTime(rand(8, 20), rand(0, 59));
+
+            /*
+             * Dibuat bervariasi supaya dashboard admin kelihatan
+             * realistis ketika menampilkan data pesanan.
+             */
+            if ($index < 4) {
+                $verifikasi = 'pending';
+                $status = 'dikemas';
+            } elseif ($index < 9) {
+                $verifikasi = 'selesai';
+                $status = 'dikemas';
+            } elseif ($index < 13) {
+                $verifikasi = 'selesai';
+                $status = 'dikirim';
+            } else {
+                $verifikasi = 'selesai';
+                $status = 'selesai';
+            }
+
+            Pesanan::create([
+                'nama_pembeli' => $data['nama_pembeli'],
+                'no_wa' => $data['no_wa'],
+                'alamat' => $data['alamat'],
+                'catatan' => $data['catatan'],
+                'metode_pembayaran' => $data['metode_pembayaran'],
+                'product_size_id' => $productSize->id,
+                'jumlah' => $data['jumlah'],
+                'total_harga' => $totalHarga,
+                'verifikasi' => $verifikasi,
+                'status' => $status,
+                'created_at' => $tanggalPembelian,
+                'updated_at' => $tanggalPembelian,
             ]);
         }
     }
