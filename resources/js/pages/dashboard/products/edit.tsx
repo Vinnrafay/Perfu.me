@@ -27,7 +27,8 @@ import {
     Trash2,
     UploadCloud,
     X,
-    ImagePlus
+    ImagePlus,
+    ImageOff
 } from 'lucide-react';
 import { ButtonGroup } from '@/components/ui/button-group';
 
@@ -90,7 +91,6 @@ interface SizeForm {
 
 const emptySize = (): SizeForm => ({ Ukuran: '', Harga: '', Diskon: '', Stok: '' });
 
-// FIX: Parsing angka dari DB dibulatkan dulu untuk mencegah bug desimal .00 nambahin nol
 const sizesFromProduct = (product: Product): SizeForm[] => {
     if (!product.sizes || product.sizes.length === 0) return [emptySize()];
     return product.sizes.map((s) => ({
@@ -102,7 +102,6 @@ const sizesFromProduct = (product: Product): SizeForm[] => {
     }));
 };
 
-// FIX: Format number yang aman dari angka desimal
 const formatNumber = (val: string | number | null | undefined): string => {
     if (val === null || val === undefined || val === '') return '';
     const num = typeof val === 'number' ? val : parseFloat(val.toString().replace(',', '.'));
@@ -163,7 +162,13 @@ const blankForm = () => ({
 });
 
 export default function EditProductSheet({ product, open, onOpenChange, onUpdated }: Props) {
-    const imagePreviewFromProduct = (p: Product | null) => (p?.Foto ? `/storage/${p.Foto}` : null);
+    // FIX: Cegah double /storage/
+    const imagePreviewFromProduct = (p: Product | null) => {
+        if (!p?.Foto) return null;
+        if (p.Foto.startsWith('http')) return p.Foto;
+        const cleanPath = p.Foto.replace(/^(storage\/|\/)/, '');
+        return `/storage/${cleanPath}`;
+    };
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -172,6 +177,9 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+    
+    // Fallback error image tracker
+    const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
     const lastLoadedIdRef = useRef<number | null>(null);
 
@@ -206,11 +214,16 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
             signature: product.signature === 'yes',
             sizes: sizesFromProduct(product),
         });
+        
         clearErrors();
+        setImgErrors({});
         setImagePreview(imagePreviewFromProduct(product));
+        
+        // FIX: Antisipasi visual path gallery supaya gak duplicate '/storage/'
         setGalleryPreviews(parsedGallery.map((path) => {
-            if (path.startsWith('http') || path.startsWith('blob:')) return path;
-            return `/storage/${path.replace(/^\/+/, '')}`;
+            if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('/storage/')) return path;
+            const cleanPath = path.replace(/^(storage\/|\/)/, '');
+            return `/storage/${cleanPath}`;
         }));
 
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -299,6 +312,8 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
         post(update(product.id).url, {
             forceFormData: true,
             onSuccess: () => {
+                // Sheet HANYA TERTUTUP jika request berstatus sukses 
+                // Jangan panggil onOpenChange di tombol onClick!
                 onOpenChange(false);
                 onUpdated?.();
             },
@@ -309,18 +324,18 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
                 side="right"
-                className="h-screen w-screen max-w-none p-0 border-none rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
+                className="h-screen w-screen max-w-none sm:max-w-[450px] p-0 border-l border-border rounded-none flex flex-col bg-background overflow-hidden !top-0 !translate-y-0"
             >
                 <form onSubmit={submitProduct} className="flex flex-col h-full w-full overflow-hidden">
 
-                    <SheetHeader>
+                    <SheetHeader className="p-6 border-b border-border text-left">
                         <SheetTitle>
                             Edit Produk: {product.nama}
                         </SheetTitle>
                     </SheetHeader>
 
                     <div className="flex-1 min-h-0 overflow-y-auto w-full custom-scrollbar" data-lenis-prevent>
-                        <div className="max-w-3xl mx-auto w-full py-10 px-6 sm:px-8 grid gap-6">
+                        <div className="max-w-3xl mx-auto w-full py-8 px-6 grid gap-6">
 
                             <div className="grid gap-2">
                                 <Label className="text-sm font-medium">
@@ -575,8 +590,20 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                 <Label className="text-sm font-medium">Foto Produk Utama</Label>
                                 <div className="relative border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-muted/20 hover:bg-muted/40 transition-colors min-h-[200px] cursor-pointer">
                                     {imagePreview ? (
-                                        <div className="relative w-full max-w-60 aspect-4/5 rounded-md overflow-hidden border border-border bg-white z-10">
-                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                        <div className="relative w-full max-w-[200px] aspect-[4/5] rounded-md overflow-hidden border border-border bg-white z-10 flex items-center justify-center">
+                                            {imgErrors['main'] ? (
+                                                 <div className="flex flex-col items-center text-muted-foreground">
+                                                     <ImageOff className="w-8 h-8 opacity-50 mb-1" />
+                                                     <span className="text-[10px]">Gambar rusak</span>
+                                                 </div>
+                                            ) : (
+                                                <img 
+                                                    src={imagePreview} 
+                                                    alt="Preview" 
+                                                    className="w-full h-full object-contain"
+                                                    onError={() => setImgErrors(prev => ({...prev, 'main': true}))}
+                                                />
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={removeImage}
@@ -611,8 +638,21 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
 
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                     {galleryPreviews.map((preview, idx) => (
-                                        <div key={preview} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-white group">
-                                            <img src={preview} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                        <div key={`gallery-${idx}`} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-white group flex items-center justify-center">
+                                            {imgErrors[`gallery-${idx}`] ? (
+                                                <div className="flex flex-col items-center text-muted-foreground">
+                                                     <ImageOff className="w-6 h-6 opacity-50 mb-1" />
+                                                     <span className="text-[10px]">Rusak</span>
+                                                 </div>
+                                            ) : (
+                                                <img 
+                                                    src={preview} 
+                                                    alt={`Gallery ${idx + 1}`} 
+                                                    className="w-full h-full object-cover" 
+                                                    onError={() => setImgErrors(prev => ({...prev, [`gallery-${idx}`]: true}))}
+                                                />
+                                            )}
+                                            
                                             <button
                                                 type="button"
                                                 onClick={(e) => removeGalleryImage(e, idx)}
@@ -671,7 +711,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                                             <Label htmlFor="signature" className="text-sm font-medium cursor-pointer">
                                                 Signature
                                             </Label>
-                                            <p className="text-xs text-muted-foreground">Tandai sebagai racikan signature (produk juga akan muncul di halaman depan)</p>
+                                            <p className="text-xs text-muted-foreground">Tandai sebagai racikan signature (muncul di home)</p>
                                         </div>
                                         <Checkbox
                                             id="signature"
@@ -686,23 +726,23 @@ export default function EditProductSheet({ product, open, onOpenChange, onUpdate
                         </div>
                     </div>
 
-                    <SheetFooter>
+                    <SheetFooter className="p-4 border-t border-border flex flex-col gap-2 bg-background z-10">
+                        {/* FIX UTAMA: Jangan pernah ditaruh onClick={() => onOpenChange(false)} di tombol Submit */}
                         <Button
                             type="submit"
                             disabled={processing}
-                            onClick={() => onOpenChange(false)}
                             className="w-full"
                         >
                             {processing ? (
                                 <>
-                                    <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                     Menyimpan...
                                 </>
                             ) : (
                                 'Simpan Perubahan'
                             )}
                         </Button>
-                        <SheetClose>
+                        <SheetClose asChild>
                             <Button
                                 type="button"
                                 variant="outline"

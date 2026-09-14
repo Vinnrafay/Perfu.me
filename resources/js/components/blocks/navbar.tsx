@@ -22,7 +22,6 @@ const navLinks = [
 
 const formatIDR = (value: number) => `Rp ${value.toLocaleString('id-ID')}`;
 
-// Thumbnail dengan fallback icon kalau foto gak ada / gagal load
 function CartItemThumbnail({ src, alt }: { src: string | null; alt: string }) {
     const [failed, setFailed] = useState(false);
     const showFallback = !src || failed;
@@ -47,7 +46,10 @@ function CartItemThumbnail({ src, alt }: { src: string | null; alt: string }) {
 
 export default function Navbar() {
     const { url } = usePage();
+    // State untuk Mobile Menu
     const [open, setOpen] = useState(false);
+    // State BARU khusus untuk Keranjang (Sheet)
+    const [cartOpen, setCartOpen] = useState(false);
 
     const { cart, updateQuantity, removeFromCart, totalItems, totalPrice } = useCart();
 
@@ -61,12 +63,12 @@ export default function Navbar() {
     const handleCheckout = useCallback(() => {
         if (cart.length === 0) return;
 
-        // Navigasi ke halaman checkout dengan membawa banyak produk/varian dari keranjang
         router.get('/products/checkout', {
             source: 'cart'
         });
 
-        setOpen(false);
+        // Tutup keranjang setelah klik checkout
+        setCartOpen(false);
     }, [cart]);
 
     return (
@@ -103,8 +105,8 @@ export default function Navbar() {
                             </Button>
                         </div>
 
-                        {/* KERANJANG BELANJA (SHEET) */}
-                        <Sheet>
+                        {/* KERANJANG BELANJA (SHEET) - Dikontrol oleh cartOpen */}
+                        <Sheet open={cartOpen} onOpenChange={setCartOpen}>
                             <SheetTrigger asChild>
                                 <Button variant="secondary" size="icon" className="relative bg-transparent lg:bg-secondary">
                                     <ShoppingCart />
