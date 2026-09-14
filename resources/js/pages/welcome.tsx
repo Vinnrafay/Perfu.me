@@ -68,9 +68,6 @@ const ReviewCard = ({
                     <figcaption className="text-sm font-medium truncate">
                         {testimonial.nama}
                     </figcaption>
-                    <p className="text-xs font-medium text-muted-foreground truncate">
-                        {testimonial.email}
-                    </p>
                 </div>
             </div>
         </figure>
@@ -279,7 +276,7 @@ export default function Welcome({ testimonials, signatureProducts }: WelcomeProp
                     </div>
 
                     <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-                        <Marquee pauseOnHover className="[--duration:030s]">
+                        <Marquee pauseOnHover className="[--duration:75s]">
                             {testimonials.map((testimonial) => (
                                 <ReviewCard key={testimonial.id} testimonial={testimonial} />
                             ))}
