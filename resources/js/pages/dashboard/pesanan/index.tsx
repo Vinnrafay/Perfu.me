@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import AddPesananSheet from './add';
 import EditPesananSheet from './edit';
+import ConfirmDeleteDialog from '@/components/confirm-delete-dialog';
 
 export interface ProductSizeOption {
     id: number;
@@ -114,6 +115,7 @@ export default function PesananIndex({
     filters,
 }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [deleteRequest, setDeleteRequest] = useState<Pesanan | null>(null);
 
     const [visibleColumns, setVisibleColumns] = useState({
         Invoice: true,
@@ -140,7 +142,9 @@ export default function PesananIndex({
         item: Pesanan,
         status: Pesanan['status'],
     ) => {
-        if (status === item.status) return;
+        if (status === item.status) {
+            return;
+        }
 
         router.patch(
             updateStatus(item.id).url,
@@ -150,11 +154,18 @@ export default function PesananIndex({
     };
 
     const handleDelete = (item: Pesanan) => {
-        if (confirm(`Hapus pesanan dari ${item.nama_pembeli}?`)) {
-            router.delete(destroy(item.id).url, {
-                onSuccess: refreshList,
-            });
+        setDeleteRequest(item);
+    };
+
+    const confirmDelete = () => {
+        if (!deleteRequest) {
+            return;
         }
+
+        router.delete(destroy(deleteRequest.id).url, {
+            onSuccess: refreshList,
+        });
+        setDeleteRequest(null);
     };
 
     /**
@@ -797,6 +808,16 @@ export default function PesananIndex({
                     )}
                 </div>
             </div>
+            <ConfirmDeleteDialog
+                open={deleteRequest !== null}
+                description={`Apakah kamu yakin ingin menghapus pesanan dari ${deleteRequest?.nama_pembeli ?? 'pembeli ini'}? Tindakan ini tidak dapat dibatalkan.`}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setDeleteRequest(null);
+                    }
+                }}
+                onConfirm={confirmDelete}
+            />
         </div>
     );
 }

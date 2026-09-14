@@ -163,9 +163,12 @@ class PesananController extends Controller
             }
         });
 
-        return redirect()
-            ->back()
-            ->with('success', 'Pesanan kamu berhasil dikirim! Kami akan segera memverifikasi.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Pesanan kamu berhasil dikirim! Kami akan segera memverifikasi.',
+        ]);
+
+        return redirect()->back();
     }
 
     /**
@@ -178,9 +181,9 @@ class PesananController extends Controller
 
         $this->createOrderAndDeductStock($validated, verifikasi: 'selesai');
 
-        return redirect()
-            ->route('pesanan.index')
-            ->with('success', 'Pesanan berhasil ditambahkan.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Pesanan berhasil ditambahkan.']);
+
+        return redirect()->route('pesanan.index');
     }
 
     /**
@@ -191,9 +194,9 @@ class PesananController extends Controller
     {
         $pesanan->update(['verifikasi' => 'selesai']);
 
-        return redirect()
-            ->back()
-            ->with('success', 'Pesanan berhasil diverifikasi.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Pesanan berhasil diverifikasi.']);
+
+        return redirect()->back();
     }
 
     /**
@@ -208,9 +211,9 @@ class PesananController extends Controller
 
         $pesanan->update(['status' => $request->input('status')]);
 
-        return redirect()
-            ->back()
-            ->with('success', 'Status pesanan berhasil diperbarui.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Status pesanan berhasil diperbarui.']);
+
+        return redirect()->back();
     }
 
     /**
@@ -259,9 +262,9 @@ class PesananController extends Controller
             $newProductSize->decrement('Stok', $validated['jumlah']);
         });
 
-        return redirect()
-            ->route('pesanan.index')
-            ->with('success', 'Pesanan berhasil diperbarui.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Pesanan berhasil diperbarui.']);
+
+        return redirect()->route('pesanan.index');
     }
 
     /**
@@ -298,9 +301,9 @@ class PesananController extends Controller
     {
         $pesanan->delete();
 
-        return redirect()
-            ->back()
-            ->with('success', 'Pesanan berhasil dihapus.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Pesanan berhasil dihapus.']);
+
+        return redirect()->back();
     }
 
     /**

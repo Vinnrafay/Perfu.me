@@ -65,9 +65,9 @@ class TestimoniController extends Controller
 
         Testimoni::create($validated);
 
-        return redirect()
-            ->route('testimoni.index')
-            ->with('success', 'Testimoni berhasil ditambahkan.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Testimoni berhasil ditambahkan.']);
+
+        return redirect()->route('testimoni.index');
     }
 
     /**
@@ -115,9 +115,9 @@ class TestimoniController extends Controller
 
         $testimoni->update($validated);
 
-        return redirect()
-            ->route('testimoni.index')
-            ->with('success', 'Testimoni berhasil diperbarui.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Testimoni berhasil diperbarui.']);
+
+        return redirect()->route('testimoni.index');
     }
 
     /**
@@ -132,8 +132,8 @@ class TestimoniController extends Controller
 
         $testimoni->delete();
 
-        return redirect()
-            ->route('testimoni.index')
-            ->with('success', 'Testimoni berhasil dihapus.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Testimoni berhasil dihapus.']);
+
+        return redirect()->route('testimoni.index');
     }
 }

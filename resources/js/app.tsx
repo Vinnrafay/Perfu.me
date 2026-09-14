@@ -3,12 +3,19 @@ import LenisProvider from '@/components/lenis-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
+import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import GuestLayout from './layouts/guest-layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+function FlashToastListener() {
+    useFlashToast();
+
+    return null;
+}
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -31,6 +38,7 @@ createInertiaApp({
         return (
             <LenisProvider>
                 <TooltipProvider delayDuration={0}>
+                    <FlashToastListener />
                     {app}
                     <Toaster />
                 </TooltipProvider>

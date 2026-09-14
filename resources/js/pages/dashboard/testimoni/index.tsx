@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import AddTestimoniSheet from './add';
 import EditTestimoniSheet from './edit';
+import ConfirmDeleteDialog from '@/components/confirm-delete-dialog';
 
 export interface Testimoni {
     id: number;
@@ -86,6 +87,7 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
     const [search, setSearch] = useState(filters.search ?? '');
     const [selected, setSelected] = useState<number[]>([]);
     const [nameSort, setNameSort] = useState<NameSort>('none');
+    const [deleteRequest, setDeleteRequest] = useState<{ ids: number[]; label: string } | null>(null);
     const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>({
         Email: true,
         Komentar: true,
@@ -139,18 +141,24 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Yakin mau hapus testimoni ini?')) {
-            router.delete(destroy(id).url, {
-                onSuccess: () => setSelected((prev) => prev.filter((item) => item !== id)),
-            });
-        }
+        setDeleteRequest({ ids: [id], label: 'testimoni ini' });
     };
 
     const handleBulkDelete = () => {
-        if (confirm(`Yakin ingin menghapus ${selected.length} testimoni terpilih?`)) {
-            selected.forEach((id) => router.delete(destroy(id).url));
-            setSelected([]);
+        setDeleteRequest({ ids: selected, label: `${selected.length} testimoni terpilih` });
+    };
+
+    const confirmDelete = () => {
+        if (!deleteRequest) {
+            return;
         }
+
+        deleteRequest.ids.forEach((id) => {
+            router.delete(destroy(id).url, {
+                onSuccess: () => setSelected((prev) => prev.filter((item) => item !== id)),
+            });
+        });
+        setDeleteRequest(null);
     };
 
     const refreshList = () => {
@@ -450,6 +458,16 @@ export default function TestimoniList({ testimonis: paginated, filters }: Props)
                     </div>
                 </div>
             </div>
+            <ConfirmDeleteDialog
+                open={deleteRequest !== null}
+                description={`Apakah kamu yakin ingin menghapus ${deleteRequest?.label ?? 'data ini'}? Tindakan ini tidak dapat dibatalkan.`}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setDeleteRequest(null);
+                    }
+                }}
+                onConfirm={confirmDelete}
+            />
         </div>
     );
 }

@@ -112,7 +112,9 @@ class ProductsController extends Controller
             $product->sizes()->createMany($sizes);
         });
 
-        return redirect()->back()->with('success', 'Produk berhasil ditambahkan.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Produk berhasil ditambahkan.']);
+
+        return redirect()->back();
     }
 
     public function show(Product $product)
@@ -197,7 +199,9 @@ class ProductsController extends Controller
             }
         });
 
-        return redirect()->back()->with('success', 'Produk berhasil diperbarui.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Produk berhasil diperbarui.']);
+
+        return redirect()->back();
     }
 
     public function destroy(Product $product)
@@ -219,7 +223,9 @@ class ProductsController extends Controller
 
         $product->delete();
 
-        return redirect()->back()->with('success', 'Produk berhasil dihapus.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Produk berhasil dihapus.']);
+
+        return redirect()->back();
     }
 
     public function bulkDestroy(Request $request)
@@ -249,7 +255,12 @@ class ProductsController extends Controller
             $product->delete();
         }
 
-        return redirect()->back()->with('success', count($request->ids).' produk berhasil dihapus.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => count($request->ids).' produk berhasil dihapus.',
+        ]);
+
+        return redirect()->back();
     }
 
     private function normalizeToggles(Request $request): void

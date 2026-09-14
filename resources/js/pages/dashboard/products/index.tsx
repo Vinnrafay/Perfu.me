@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import AddProductSheet from './add';
 import EditProductSheet, { Product } from './edit';
+import ConfirmDeleteDialog from '@/components/confirm-delete-dialog';
 
 interface PaginatedProducts {
     data: Product[];
@@ -101,6 +102,7 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     });
 
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [deleteRequest, setDeleteRequest] = useState<{ ids: number[]; label: string } | null>(null);
 
     // Client-side sorting berdasarkan nama
     const rows = useMemo(() => {
@@ -141,18 +143,24 @@ export default function ProductsList({ products: paginated, filters }: Props) {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Yakin ingin menghapus produk ini?')) {
-            router.delete(destroy(id).url, {
-                onSuccess: () => setSelected((prev) => prev.filter((item) => item !== id)),
-            });
-        }
+        setDeleteRequest({ ids: [id], label: 'produk ini' });
     };
 
     const handleBulkDelete = () => {
-        if (confirm(`Yakin ingin menghapus ${selected.length} produk terpilih?`)) {
-            selected.forEach((id) => router.delete(destroy(id).url));
-            setSelected([]);
+        setDeleteRequest({ ids: selected, label: `${selected.length} produk terpilih` });
+    };
+
+    const confirmDelete = () => {
+        if (!deleteRequest) {
+            return;
         }
+
+        deleteRequest.ids.forEach((id) => {
+            router.delete(destroy(id).url, {
+                onSuccess: () => setSelected((prev) => prev.filter((item) => item !== id)),
+            });
+        });
+        setDeleteRequest(null);
     };
 
     const refreshList = () => {
@@ -473,12 +481,24 @@ export default function ProductsList({ products: paginated, filters }: Props) {
                 product={editingProduct}
                 open={editingProduct !== null}
                 onOpenChange={(open) => {
-                    if (!open) setEditingProduct(null);
+                    if (!open) {
+                        setEditingProduct(null);
+                    }
                 }}
                 onUpdated={() => {
                     setEditingProduct(null);
                     refreshList();
                 }}
+            />
+            <ConfirmDeleteDialog
+                open={deleteRequest !== null}
+                description={`Apakah kamu yakin ingin menghapus ${deleteRequest?.label ?? 'data ini'}? Tindakan ini tidak dapat dibatalkan.`}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setDeleteRequest(null);
+                    }
+                }}
+                onConfirm={confirmDelete}
             />
         </div>
     );
